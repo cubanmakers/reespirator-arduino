@@ -23,8 +23,8 @@ float positionSetpoint = 0;
 
 MechVentilation::MechVentilation (
     FlexyStepper stepper,
-    Sensors sensors,
-    float mlTidalVolume,
+    Sensors* sensors,
+    int mlTidalVolume,
     float secTimeoutInsufflation,
     float secTimeoutExsufflation,
     float speedInsufflation,
@@ -47,8 +47,8 @@ MechVentilation::MechVentilation (
 
 MechVentilation::MechVentilation(
     FlexyStepper stepper,
-    Sensors sensors,
-    float mlTidalVolume,
+    Sensors *sensors,
+    int mlTidalVolume,
     float secTimeoutInsufflation,
     float secTimeoutExsufflation,
     float speedInsufflation,
@@ -121,7 +121,7 @@ void MechVentilation::update(void)
     //     SensorValues_t sensorValues = _sensors.getPressure();
 
 
-    SensorValues_t values = _sensors.getPressure();
+    SensorValues_t values = _sensors->getPressure();
     if (values.state != SensorStateOK) {
         //TODO sensor failed. do something
     } else {
@@ -204,8 +204,8 @@ void MechVentilation::update(void)
 
 void MechVentilation::_init(
     FlexyStepper stepper,
-    Sensors sensors,
-    float mlTidalVolume,
+    Sensors* sensors,
+    int mlTidalVolume,
     float secTimeoutInsufflation,
     float secTimeoutExsufflation,
     float speedInsufflation,

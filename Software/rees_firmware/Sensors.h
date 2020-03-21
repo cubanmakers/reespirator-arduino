@@ -21,6 +21,7 @@ typedef struct {
 class Sensors
 {
     public:
+    Sensors ();
     Sensors (Adafruit_BME280 pres1, Adafruit_BME280 pres2);
     unsigned int begin(void);
     void readPressure();

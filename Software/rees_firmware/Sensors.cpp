@@ -37,6 +37,10 @@ Sensors::Sensors(Adafruit_BME280 pres1, Adafruit_BME280 pres2) {
     _init(pres1, pres2);
 }
 
+Sensors::Sensors() {
+    //TODO
+}
+
 void Sensors::_init (Adafruit_BME280 pres1, Adafruit_BME280 pres2) {
 
     _pres1Sensor = pres1;

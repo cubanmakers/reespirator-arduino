@@ -208,7 +208,7 @@ Encoder encoder(
   SWpin
 );
 Display display = Display();
-MechVentilation ventilation;
+
 
 Adafruit_BME280 bmp1(
   BMP_CS1,
@@ -223,7 +223,9 @@ Adafruit_BME280 bmp2(
   BMP_MISO,
   BMP_SCK
 );
-Sensors sensors;
+
+Sensors* sensors;
+MechVentilation ventilation();
 
 // =========================================================================
 // SETUP
@@ -252,31 +254,27 @@ void setup()
   pinMode(ENDSTOPpin, INPUT); // el sensor de efecto hall da un 1 cuando detecta
 
   // Sensores de presión
-  sensors = Sensors(bmp1, bmp2);
-    if (sensors.begin()) {
+  sensors = new Sensors(bmp1, bmp2);
+  int check = sensors->begin(); 
+    if (check) { 
       display.clear();
-      if(sensors == 1) {
+      if(check == 1) {
         display.writeLine(0, "bme1 not found");
         Serial.println("Could not find sensor BME280 number 1, check wiring!");
-      } else if (sensors == 2) {
+      } else if (check == 2) {
         display.writeLine(0, "bme2 not found");
         Serial.println("Could not find sensor BME280 number 2, check wiring!");
       }
       display.writeLine(1, "Check wires!");
       while(1);
-  }
-
-  // Parte motor
-  pinMode(ENpin, OUTPUT);
-  digitalWrite(ENpin, LOW);
-
+    }
 
   // Parte motor
   pinMode(ENpin, OUTPUT);
   digitalWrite(ENpin, LOW);
 
   Serial.println("Setup");
-  stepper.setAcceleration(aceleracion);
+  stepper.setAccelerationInRevolutionsPerSecondPerSecond(aceleracion); //TODO revisar adaptacion a flexy
 
   // deja la display en blanco
   delay(1000);
@@ -443,9 +441,9 @@ void setup()
 
   // configura la ventilación
   if (tieneTrigger) {
-    ventilation = MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, ventilationCyle_WaitTime, flujoTrigger);
+    ventilation = MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, ventilationCycle_WaitBeforeInsuflationTime, flujoTrigger);
   } else {
-    ventilation = MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, ventilationCyle_WaitTime);
+    ventilation = MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, ventilationCycle_WaitBeforeInsuflationTime);
   }
   ventilation.start();
   delay(500);
@@ -562,4 +560,6 @@ void loop() {
  */
 void timer1Isr () {
   display.writeLine(0, "Timer1 triggered. Update MechVent");
+  ventilation.update();
   // TODO: display.writeLine(1, "TODO Prompt ventilation status");
+}

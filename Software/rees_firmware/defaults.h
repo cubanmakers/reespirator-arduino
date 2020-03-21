@@ -49,7 +49,7 @@
 #define K_POS2VOL (1.0 / K_VOL2POS)
 
 // @fm superñapa. parametrizar desde el inicio. se usa en mechVentilation
-#define ventilationCycle_WaitBeforeInsuflationTime 800 //ms TODO parameter to mechVent
+int ventilationCycle_WaitBeforeInsuflationTime = 800; //ms TODO parameter to mechVent
 #define totalPatientVolume 0.8 // liters
 
 #endif // DEFAULTS_H

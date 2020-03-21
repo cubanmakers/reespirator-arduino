@@ -30,6 +30,7 @@
 #define DTpin 3
 #define SWpin 9
 
+#define ENpin 8
 // Stepper driver (FlexyStepper)
 #define MOTOR_STEP_PIN 6
 #define MOTOR_DIRECTION_PIN 7

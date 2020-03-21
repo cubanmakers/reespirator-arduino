@@ -44,8 +44,8 @@ public:
 	 */
 	MechVentilation(
         FlexyStepper stepper,
-        Sensors sensors,
-        float mlTidalVolume,
+        Sensors* sensors,
+        int mlTidalVolume,
         float secTimeoutInsufflation,
         float secTimeoutExsufflation,
         float speedInsufflation,
@@ -66,8 +66,8 @@ public:
 	 */
 	MechVentilation(
         FlexyStepper stepper,
-        Sensors sensors,
-        float mlTidalVolume,
+        Sensors* sensors,
+        int mlTidalVolume,
         float secTimeoutInsufflation,
         float secTimeoutExsufflation,
         float speedInsufflation,
@@ -108,8 +108,8 @@ private:
     /** Initialization. */
     void _init(
         FlexyStepper stepper,
-        Sensors sensors,
-        float mlTidalVolume,
+        Sensors* sensors,
+        int mlTidalVolume,
         float secTimeoutInsufflation,
         float secTimeoutExsufflation,
         float speedInsufflation,
@@ -123,7 +123,7 @@ private:
 
     /* Configuration parameters */
     FlexyStepper _cfgStepper;
-    Sensors _sensors;
+    Sensors* _sensors;
 
     /** Tidal volume in millilitres. */
     float _cfgmlTidalVolume;
