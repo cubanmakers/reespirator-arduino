@@ -28,6 +28,12 @@
 #define VENTILATION_CYCLE__STOP_INSUFLATION_TIME 500    //msec
 
 // PID constants
+#define PID_P 1.0
+#define PID_I 0.1 //TODO To be adjusted
+#define PID_I 0.0 //TODO To be adjusted
+#define PID_dt 1.0 //msec. I hast to match the MechVentilation.update() refresh period.
+
+#define PID_KP PID_P
 #define PID_KI (PID_I * PID_dt)
 #define PID_KD (PID_D / PID_dt)
 
