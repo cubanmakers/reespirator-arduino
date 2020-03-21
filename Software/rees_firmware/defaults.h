@@ -20,5 +20,16 @@
 #define DEFAULT_MIN_RPM 14
 #define DEFAULT_POR_INSPIRATORIO 60
 
+#define DEFAULT_PRESSURE_V_FLUX_K1 1   //Constante proporcional que relaciona presión con caudal
+
+#define FLOW__INSUFLATION_TRIGGER_LEVEL 3.0   //LPM
+
+// Ventilation cycle timing
+#define VENTILATION_CYCLE__STOP_INSUFLATION_TIME 500    //msec
+
+// PID constants
+#define PID_KI (PID_I * PID_dt)
+#define PID_KD (PID_D / PID_dt)
+
 
 #endif // DEFAULTS_H

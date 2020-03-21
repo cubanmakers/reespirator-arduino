@@ -3,12 +3,15 @@
 // =========================================================================
 
 #include "defaults.h"
-#include "utils.h"
+#include "calc.h"
 #include "pinout.h"
 #include "Display.h"
 #include "Encoder.h"
 #include "MechVentilation.h"
 #include "src/AccelStepper/AccelStepper.h"
+#include "src/TimerOne/TimerOne.h"
+#include "src/Adafruit_BME280/Adafruit_BME280.h"
+#include "Sensors.h"
 
 // =========================================================================
 // VARIABLES
@@ -28,6 +31,7 @@ bool modo = true, errorFC = false;
 int volumenTidal;
 float speedIns, speedEsp, tCiclo, tIns, tEsp;
 
+
 // pines en pinout.h
 AccelStepper stepper(
   AccelStepper::DRIVER,
@@ -41,6 +45,21 @@ Encoder encoder(
 );
 Display display = Display();
 MechVentilation ventilation;
+
+Adafruit_BME280 bmp1(
+  BMP_CS1,
+  BMP_MOSI,
+  BMP_MISO,
+  BMP_SCK
+);
+
+Adafruit_BME280 bmp2(
+  BMP_CS2,
+  BMP_MOSI,
+  BMP_MISO,
+  BMP_SCK
+);
+Sensors sensors;
 
 // =========================================================================
 // SETUP
@@ -68,6 +87,9 @@ void setup()
   // FC efecto hall
   pinMode(ENDSTOPpin, INPUT); // el sensor de efecto hall da un 1 cuando detecta
 
+  // Sensores de presión
+  sensors = Sensors(bmp1, bmp2);
+
   // Parte motor
   pinMode(ENpin, OUTPUT);
   digitalWrite(ENpin, LOW);
@@ -79,6 +101,11 @@ void setup()
   delay(1000);
   display.clear();
   delay(100);
+
+  Timer1.initialize(1000); // 1 ms
+  Timer1.stop();
+  Timer1.attachInterrupt(timer1Isr);
+  // timer1 is started later
 
 
   // INTERACCIÓN: ESTATURA
@@ -235,13 +262,14 @@ void setup()
 
   // configura la ventilación
   if (tieneTrigger) {
-    ventilation = MechVentilation(volumenTidal, tIns, tEsp, speedIns, speedEsp, flujoTrigger);
+    ventilation = MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, ventilationCyle_WaitTime, flujoTrigger);
   } else {
-    ventilation = MechVentilation(volumenTidal, tIns, tEsp, speedIns, speedEsp);
+    ventilation = MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, ventilationCyle_WaitTime);
   }
   ventilation.start();
   delay(500);
   display.clear();
+  Timer1.start();
 }
 
 // =========================================================================
@@ -249,10 +277,11 @@ void setup()
 // =========================================================================
 
 void loop() {
-  display.writeLine(0, "Operando...");
-  // TODO: display.writeLine(1, "TODO Prompt ventilation status");
-  ventilation.update();
 
+  sensors.readPressure(); //TODO timing
+  if (sensors.getPressure().state == SensorStateFailed) {
+    //TODO sensor fail. do something
+  }
 
   // TODO: si hay nueva configuración: cambiar parámetros escuchando entrada desde el encoder
 
@@ -270,6 +299,7 @@ void loop() {
   // CÓDIGO OBSOLETO DE AQUÍ PARA ABAJO
   // ======================================================================
 
+#if 0
   // Parte menu
   // display.update(encoder.read());
 
@@ -343,4 +373,12 @@ void loop() {
       stepper.move(pasosPorRevolucion / 2);
     }
   }
+  #endif
 }
+
+/**
+ * Timer 1 ISR
+ */
+void timer1Isr () {
+  display.writeLine(0, "Timer1 triggered. Update MechVent");
+  // TODO: display.writeLine(1, "TODO Prompt ventilation status");

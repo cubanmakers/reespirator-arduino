@@ -41,4 +41,11 @@
 // Sensor hall
 #define ENDSTOPpin 5
 
+// BME280 SPI al menos para Arduino Nano o Mega
+#define BMP_SCK  13
+#define BMP_MISO 12
+#define BMP_MOSI 11
+#define BMP_CS1  10 // sensor de presion 1
+#define BMP_CS2  4  // sensor de presion 2
+
 #endif // ENCODER_H

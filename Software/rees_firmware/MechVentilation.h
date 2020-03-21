@@ -9,18 +9,21 @@
 #define INC_MECHANICAL_VENTILATION_H
 
 #include <inttypes.h>
-#include "PID.h"
+#include "src/AccelStepper/AccelStepper.h"
+#include "Sensors.h"
+
 
 /** States of the mechanical ventilation. */
 enum State {
     State_Init = 0,               /**< Initializing. */
-    State_Idle = 1,               /**< Idle. */
-    State_WaitTrigger = 2,        /**< Wait for trigger. */
-    State_StartInsufflation = 3,  /**< Start insufflation. */
+//    State_Idle = 1,               /**< Idle. */
+    State_WaitBeforeInsuflation = 2,        /**< Wait for trigger. */
+//    State_StartInsufflation = 3,  /**< Start insufflation. */
     State_Insufflation = 4,       /**< Insufflating (PID control). */
-    State_StopInsufflation = 5,   /**< Stop insufflation. */
-    State_WaitExsufflation = 6,   /**< Wait for the patient to exsufflate. */
-    State_Shutdown = 7            /**< Shutdown. */
+//    State_StopInsufflation = 5,   /**< Stop insufflation. */
+    State_WaitBeforeExsufflation = 6,   /**< Wait for the patient to exsufflate. */
+//    State_Shutdown = 7            /**< Shutdown. */
+    State_Exsufflation = 8
 };
 
 /**
@@ -39,6 +42,8 @@ public:
      *
 	 */
 	MechVentilation(
+        AccelStepper stepper,
+        Sensors sensors,
         float mlTidalVolume,
         float secTimeoutInsufflation,
         float secTimeoutExsufflation,
@@ -58,6 +63,8 @@ public:
      *
 	 */
 	MechVentilation(
+        AccelStepper stepper,
+        Sensors sensors,
         float mlTidalVolume,
         float secTimeoutInsufflation,
         float secTimeoutExsufflation,
@@ -67,7 +74,8 @@ public:
     );
 
     /* Setters/getters */
-    /* Set tidal volume */
+    // TODO: Add stepper, bme1, bme2 setters
+    /** Set tidal volume */
     void setTidalVolume(float mlTidalVolume);
     /** Set insufflation timeout. */
     void setTimeoutInsufflation(float secTimeoutInsufflation);
@@ -95,6 +103,8 @@ public:
 private:
     /** Generic initialization. */
     void _init(
+        AccelStepper stepper,
+        Sensors sensors,
         float mlTidalVolume,
         float secTimeoutInsufflation,
         float secTimeoutExsufflation,
@@ -107,6 +117,9 @@ private:
     void _setState(State state);
 
     /* Configuration parameters */
+    AccelStepper    _cfgStepper;
+    Sensors _sensors;
+
     /** Tidal volume in millilitres. */
     float _cfgmlTidalVolume;
     /** Flux trigger value in litres per minute. */
@@ -128,7 +141,7 @@ private:
     /** Next state. @todo Consider removing. */
     State _nextState;
     /** Timer counter in seconds. */
-    uint8_t _secTimerCnt;
+    uint64_t _secTimerCnt;
     /**  Insufflation timeout in seconds. */
     float _secTimeoutInsufflation;
     /** Exsufflation timeout in seconds. */
@@ -137,6 +150,8 @@ private:
     float _speedInsufflation;
     /** Exsufflation speed. @todo Denote units. */
     float _speedExsufflation;
+    /** Estimated flux accross the bmes. @todo Denote units. */
+    float _flux;
 
     /* @todo PID stuff */
 

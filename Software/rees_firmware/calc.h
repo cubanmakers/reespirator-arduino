@@ -1,11 +1,11 @@
+/** Calculation functions
+ *
+ * @file calc.h
+ *
+ *
+ */
 #ifndef CALC_H
 #define CALC_H
-
-#include "defaults.h"
-
-// =========================================================================
-// FUNCIONES DE CÁLCULO
-// =========================================================================
 
 /**
  * @brief estima el volumen tidal en función de estatura y sexo, en ml.
@@ -31,8 +31,8 @@ void calcularVolumenTidal(int* volumenTidal, int estatura, int sexo) {
  *
  * Calcula a partir de las respiraciones por minuto, los tiempos de ciclo,
  * inspiratorio y espiratorio, y las velocidades uno y dos.
- * @param speedIns TODO: explicación? Velocidad de Inspiración
- * @param speedEsp TODO: explicación? Velocidad de Espiración
+ * @param speedIns TODO: explicación?
+ * @param speedEsp TODO: explicación?
  * @param tIns tiempo de inspiracion, en segundos
  * @param tEsp tiempo de espiracion, en segundos
  * @param tCiclo tiempo de ciclo, en segundos
@@ -60,58 +60,8 @@ void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
  * @param pressure2 presión a otro lado
  * @param flux caudal resultante
  */
-void getCurrentFlow(float* pressure1, float* pressure2, float* flux) {
-  *flux = (*pressure1 - *pressure2) * DEFAULT_PRESSURE_V_FLUX_K1;
-}
-
-
-/**
- * Constrains the value within the limits
- */
-float constrainFloat(float value, float lowLimit, float highLimit) {
-  if (value < lowLimit) {
-    value = lowLimit;
-  } else if (value > highLimit) {
-    value = highLimit;
-  }
-  
-  return value;
-}
-
-/**
- * PID step calculation
- */
-float proportional = 0;
-float integral = 0;
-float derivative = 0;
-float previous_feedbackInput = 0;
-
-void computePID(float* setpoint, float* feedbackInput, float* output) {
-  //dt is fixed to 1 msec by timer interrupt
-
-  float error = *setpoint - *feedbackInput;
-
-  proportional = PID_KP * error;
-  integral += PID_KI * error;
-  integral = constrainFloat(integral, PID_MIN, PID_MAX);
-  derivative = -PID_KD * (*feedbackInput - previous_feedbackInput);
-  
-  *output = constrainFloat((proportional + integral + derivative), PID_MIN, PID_MAX);
-
-  // Guardar ultimo tiempo y error
-  previous_feedbackInput = *feedbackInput;
-}
-
-/**
- * Refresca el WDT (Watch Dog Timer)
- */
-void refreshWatchDogTimer() {
-  //TODO implementar
-}
-
-float flow2Position(float flow) { //returns position
-  //TODO implementar
-  return flow;
+void calcularCaudal(float pressure1, float pressure2, float* flux) {
+  *flux = (pressure1 - pressure2) * DEFAULT_PRESSURE_V_FLUX_K1;
 }
 
 #endif // CALC_H
