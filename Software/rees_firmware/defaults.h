@@ -28,9 +28,6 @@
 #define VENTILATION_CYCLE__STOP_INSUFLATION_TIME 500    //msec
 
 // PID constants
-#define PID_dt 1        //msec
-
-#define PID_KP PID_P
 #define PID_KI (PID_I * PID_dt)
 #define PID_KD (PID_D / PID_dt)
 

@@ -23,6 +23,7 @@ enum State {
 //    State_StopInsufflation = 5,   /**< Stop insufflation. */
     State_WaitBeforeExsufflation = 6,   /**< Wait for the patient to exsufflate. */
 //    State_Shutdown = 7            /**< Shutdown. */
+    State_Exsufflation = 8
 };
 
 /**
