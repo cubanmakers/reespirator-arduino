@@ -1,0 +1,27 @@
+// Funciones PID para implementar en el loop
+
+void initPID(float Kp, float Ki, float Kd) {
+    kp = Kp;
+    ki = Ki * dt;
+    kd = Kd / dt;
+}
+
+void computePID(float input) {
+    this_time = millis();
+    time_change = this_time - previous_time;
+    if (time_change >= dt) {
+
+        // PID
+        float error = setpoint - input;
+        proportional = kp * error;
+        integral += ki * error;
+        derivative = -kd * (input - previous_input);
+        integral = constrain(integral, -v_max, v_max);
+        output = proportional + integral + derivative;
+        output = constrain(output, -v_max, v_max);
+
+        // Guardar ultimo tiempo y error
+        previous_input = input;
+        previous_time = time;
+    }
+}

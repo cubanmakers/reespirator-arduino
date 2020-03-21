@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 
-//PANTALLA
+//Display
 
 #define LCD_ROWS 2
 #define LCD_COLS 16
@@ -15,7 +15,7 @@
 
 #else
 
-// pines pantalla parallel  // parallel
+// pines Display parallel  // parallel
 #define LCD_RS A0
 #define LCD_E  A1
 #define LCD_D4 A2

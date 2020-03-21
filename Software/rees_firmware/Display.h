@@ -9,16 +9,13 @@
 
 #include "pinout.h"
 #include "defaults.h"
-#include "globals.h"
 
-class Pantalla
+class Display
 {
 public:
-  Pantalla(); //init
-  void begin();
-  void write(int p_rpm, float p_vol, int _posMenu, int caracter);
-  void update(int tecla);
-  bool editando();
+  Display();
+  void writeLine(int line, String message = "", int offsetLeft = 0);
+  void clear();
 
 private:
 #ifdef I2C
@@ -26,8 +23,6 @@ private:
 #else
   LiquidCrystal lcd = LiquidCrystal(LCD_RS, LCD_E, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 #endif
-  int _posMenu = 0;
-  bool _editandoMenu = false;
 };
 
 #endif // PANTALLA_H
