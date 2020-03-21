@@ -9,7 +9,7 @@
 #define INC_MECHANICAL_VENTILATION_H
 
 #include <inttypes.h>
-#include "src/AccelStepper/AccelStepper.h"
+//#include "src/AccelStepper/AccelStepper.h" // @fm deprecated
 #include "Sensors.h"
 
 
@@ -101,7 +101,7 @@ public:
     void update(void);
 
 private:
-    /** Generic initialization. */
+    /** Initialization. */
     void _init(
         AccelStepper stepper,
         Sensors sensors,
@@ -117,8 +117,8 @@ private:
         // connect and configure the stepper motor to its IO pins
         //
         stepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
-        stepper.setSpeedInStepsPerSecond(100);
-        stepper.setAccelerationInStepsPerSecondPerSecond(100);
+        stepper.setSpeedInStepsPerSecond(STEPPER_SPEED);
+        stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
     };
 
     /** Set state. */

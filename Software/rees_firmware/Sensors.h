@@ -10,7 +10,7 @@ enum SensorState {
     SensorStateFailed = 1
 }
 
-typedef struct SensorValues_t {
+struct SensorValues_t {
     SensorState state;
     float pressure1;
     float pressure2;

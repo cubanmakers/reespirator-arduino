@@ -9,7 +9,6 @@
 #include "Encoder.h"
 #include "MechVentilation.h"
 #include "src/FlexyStepper/FlexyStepper.h"
-//#include "src/AccelStepper/AccelStepper.h"
 #include "src/TimerOne/TimerOne.h"
 #include "src/Adafruit_BME280/Adafruit_BME280.h"
 #include "Sensors.h"
@@ -38,6 +37,161 @@ FlexyStepper stepper; // direction Digital 6 (CW), pulses Digital 7 (CLK)
 
 // pines en pinout.h
 // AccelStepper stepper(
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
 //   AccelStepper::DRIVER,
 //   DIRpin,
 //   PULpin

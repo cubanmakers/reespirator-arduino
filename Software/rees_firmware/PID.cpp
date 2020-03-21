@@ -20,6 +20,9 @@
  * THE SOFTWARE.
  */
 
+#if 0
+
+
 #ifndef _PID_SOURCE_
 #define _PID_SOURCE_
 
@@ -113,4 +116,5 @@ PIDImpl::~PIDImpl()
 {
 }
 
+#endif
 #endif

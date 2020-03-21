@@ -22,8 +22,7 @@
 #define __BME280_H__
 
 #include "Arduino.h"
-
-#include <Adafruit_Sensor.h>
+#include "../Adafruit_Sensor/Adafruit_Sensor.h" 
 #include <SPI.h>
 #include <Wire.h>
 
@@ -118,7 +117,7 @@ public:
 
 private:
   int _sensorID = 280;
-  Adafruit_BME280 *_theBME280 = NULL;
+  Adafruit_BME280 *_theBME280 = NULL; 
 };
 
 /** Adafruit Unified Sensor interface for pressure component of BME280 */

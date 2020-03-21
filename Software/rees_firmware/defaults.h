@@ -1,5 +1,6 @@
-#ifndef DEFAULTS_H
-#define DEFAULTS_H
+
+#ifndef _DEFAULTS_H
+#define _DEFAULTS_H
 
 #undef I2C // definido = Display i2c, sin definir Display parallel
 
@@ -9,7 +10,7 @@
 #define DEFAULT_MICROSTEPPER 16
 
 #define STEPPER_SPEED 100 //Steps/s
-#define STEPPER_ACCELERATION 100 //Steps/s2
+#define STEPPER_ACCELERATION 250 //Steps/s2
 
 // Valores por defecto
 #define DEFAULT_ESTATURA 170 // cm
@@ -33,12 +34,15 @@
 // PID constants
 #define PID_P 1.0
 #define PID_I 0.1 //TODO To be adjusted
-#define PID_I 0.0 //TODO To be adjusted
+#define PID_D 0.0 //TODO To be adjusted
 #define PID_dt 1.0 //msec. I hast to match the MechVentilation.update() refresh period.
 
 #define PID_KP PID_P
 #define PID_KI (PID_I * PID_dt)
 #define PID_KD (PID_D / PID_dt)
 
+//Volume to Position and viceversa constants
+#define K_VOL2POS 1.0
+#define K_POS2VOL (1.0 / K_VOL2POS)
 
 #endif // DEFAULTS_H

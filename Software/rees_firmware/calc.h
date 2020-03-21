@@ -60,8 +60,70 @@ void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
  * @param pressure2 presión a otro lado
  * @param flux caudal resultante
  */
-void calcularCaudal(float pressure1, float pressure2, float* flux) {
+void getCurrentFlow(float pressure1, float pressure2, float* flux) {
   *flux = (pressure1 - pressure2) * DEFAULT_PRESSURE_V_FLUX_K1;
+}
+
+/**
+ * @brief Constrains the value within the limits
+ */
+float constrainFloat(float value, float lowLimit, float highLimit) {
+  if (value < lowLimit) {
+    value = lowLimit;
+  } else if (value > highLimit) {
+    value = highLimit;
+  }
+  return value;
+}
+
+/**
+ * PID step calculation
+ */
+float proportional = 0;
+float integral = 0;
+float derivative = 0;
+float previous_feedbackInput = 0;
+
+void computePID(float* setpoint, float* feedbackInput, float* output) {
+  //dt is fixed to 1 msec by timer interrupt
+
+  float error = *setpoint - *feedbackInput;
+
+  proportional = PID_KP * error;
+  integral += PID_KI * error;
+  integral = constrainFloat(integral, PID_MIN, PID_MAX);
+  derivative = -PID_KD * (*feedbackInput - previous_feedbackInput);
+
+  *output = constrainFloat((proportional + integral + derivative), PID_MIN, PID_MAX);
+
+  // Guardar ultimo tiempo y error
+  previous_feedbackInput = *feedbackInput;
+}
+
+/**
+ * @brief Refresca el WDT (Watch Dog Timer)
+ */
+void refreshWatchDogTimer() {
+  //TODO implementar
+}
+
+// float flow2Position(float flow) { //returns position
+//   //TODO implementar
+//   return flow;
+// }
+
+float vol2pos(float volume) { //converts volume [litres] to position [steps]
+  //TODO improve with LUT to linearize if needed
+  float position = volume * K_VOL2POS;
+
+  return position;
+}
+
+float pos2vol(float position) { //converts volume [litres] to position [steps]
+  //TODO improve with LUT to linearize if needed
+  float volume = position * K_POS2VOL;
+
+  return volume;
 }
 
 #endif // CALC_H

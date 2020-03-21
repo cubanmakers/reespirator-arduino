@@ -8,7 +8,7 @@
 #include <float.h>
 #include "calc.h"
 #include "MechVentilation.h"
-#include "src/AccelStepper/AccelStepper.h"
+//#include "src/AccelStepper/AccelStepper.h"
 #include "src/FlexyStepper/FlexyStepper.h"
 
 /** No trigger. */
@@ -17,6 +17,7 @@
 int currentWaitTriggerTime = 0;
 int currentStopInsufflationTime = 0;
 bool running = false;
+bool _startWasTriggeredByPatient = false;
 float positionSetpoint = 0;
 
 MechVentilation::MechVentilation(
@@ -64,6 +65,14 @@ MechVentilation::MechVentilation(
           lpmFluxTriggerValue);
 }
 
+//TODO: use this method to play a beep in main loop, 1 second long for example.
+boolean MechVentilation::getStartWasTriggeredByPatient() { //returns true if last respiration cycle was started by patient trigger. It is cleared when read.
+    if (_startWasTriggeredByPatient) {
+        _startWasTriggeredByPatient = false;
+    }
+    return true;
+}
+
 void MechVentilation::setTidalVolume(float mlTidalVolume) {
     _cfgmlTidalVolume = mlTidalVolume;
 }
@@ -90,31 +99,21 @@ void MechVentilation::setVentilationCyle_WaitTime(float speedExsufflation) {
 
 void MechVentilation::start(void) {
     running = true;
-
-    // if(_cfgLpmFluxTriggerValue == LPM_FLUX_TRIGGER_VALUE_NONE) {
-    //     _setState(State_StartInsufflation);
-    // } else {
-    //     /* Triggered */
-    //     _setState(State_WaitTrigger);
-    // }
 }
 
 void MechVentilation::stop(void) {
     running = false;
-    
-    //_setState(State_Shutdown);
-}
-
-void MechVentilation::stop(void) {
-    running = false;
-    
-    //_setState(State_Shutdown);
-}
+ }
 
 /**
  * I's called from timer1Isr
  */
 void MechVentilation::update(void) {
+    //TODO: meter algo como esto en loop ppal (creo que ya está)
+    //     // Acquire sensors data
+    //     SensorValues_t sensorValues = _sensors.getPressure();
+
+
     //getCurrentFlow(*getPressure1(), *getPressure2(), *flux);
     getCurrentFlow(*getPressure1(), *pressure2, *currentFlow); //TODO Must calculate Flow using the last measured pressure couple,
                       //but the pressure reading must be done as non blocking in the main loop
@@ -122,36 +121,21 @@ void MechVentilation::update(void) {
     refreshWatchDogTimer();
 
     switch(_currentState) {
-        case State_WaitBeforeInsuflation : { //Wait Trigger or Time
-            //stepper.setSpeed(0);
+        case State_WaitBeforeInsuflation : { //Wait Trigger or Time.  Stepper is stopped in this state
             stepper.setPosition(0);
-            startTriggeredByPatient = false;
+            _startWasTriggeredByPatient = false;
             if (running && ((currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) || (currentWaitTriggerTime > ventilationCyle_WaitTime))) {
                 
                 if (currentWaitTriggerTime > ventilationCyle_WaitTime) { //The start was triggered by patient
-                    startTriggeredByPatient = true; //TODO: put beep in loop, 1 second long
+                    _startWasTriggeredByPatient = true;
                 }
 
                 /* Status update, for next time */
                 _setState(State_Insufflation);
             }
-            currentWaitTriggerTime++;
+            currentWaitInsuflationTime++;
         }
         break;
-
-        // case State_StartInsufflation : {
-        //     _secTimerCnt            = 0;
-        //     _secTimeoutInsufflation = _cfgSecTimeoutInsufflation;
-        //     _speedInsufflation      = _cfgSpeedInsufflation;
-        //     _secTimeoutExsufflation = _secTimeoutExsufflation;
-        //     _speedExsufflation      = _speedExsufflation;
-
-        //     /* @todo start PID stuff? */
-
-        //     /* Status update, for next time */
-        //     _setState(State_Insufflation);
-        // }
-        // break;
 
         case State_Insufflation : {
             float output = 0;
@@ -167,60 +151,13 @@ void MechVentilation::update(void) {
 
             /* Status update and reset timer, for next time */
             _setState(State_WaitBeforeExsufflation);
-            currentWaitTriggerTime = 0;
-
-            
-
-            // if(_secTimerCnt < _secTimeoutInsufflation) {
-            //     /* @todo Keep on the PID work */
-
-            //     // Acquire sensors data
-            //     SensorValues_t sensorValues = _sensors.getPressure();
-                
-            //     if (sensorValues.state == SensorStateOK) {
-            //         // Calculate flux from delta pressure
-            //         // TODO: Check sign of results!
-            //         calcularCaudal(sensorValues.pressure1, sensorValues.pressure2, &_flux);
-
-            //         // TODO: Control stepper velocity from flux
-            //     } else {
-            //         //TODO do something
-            //     }
-
-            // } else {
-            //     /* Insufflation timeout expired */
-            //     _secTimerCnt = 0;
-
-            //     /* Status update, for next time */
-            //     _setState(State_StopInsufflation);
-            // }
+            currentWaitExsufflationTime = 0;
         }
         break;
 
-        // case State_StopInsufflation : {
-        //     /* Steeper control (Speed) */
-        //     stepper.setSpeed(0);
-
-        //     /* Start exsufflation timer */
-        //     currentWaitTime = 0;
-
-        //     if (currentStopInsufflationTime > VENTILATION_CYCLE__STOP_INSUFLATION_TIME) {
-        //         currentStopInsufflationTime++;
-
-        //         /* Status update, for next time */
-        //         _setState(State_StartInsufflation);
-        //     }
-
-
-        //     /* Status update, for next time */
-        //     _setState(State_WaitExsufflation);
-        // }
-        // break;
-
-        case State_WaitBeforeExsufflation : {
-            //stepper.setSpeed(0);
-            stepper.setPosition(totalPatientVolume);
-            if (currentWaitTriggerTime > ventilationCyle_WaitBeforeExsufflationTime) {
+        case State_WaitBeforeExsufflation : { //Stepper is stopped in this state
+            stepper.setPosition(vol2pos(totalPatientVolume));
+            if (currentWaitExsufflationTime > VENTILATION_CYCLE__WAIT_BEFORE_EXSUFLATION_TIME) {
                 
                 /* Status update, for next time */
                 _setState(State_Exsufflation);
@@ -233,10 +170,9 @@ void MechVentilation::update(void) {
             if (steeperIsInZeroPoint) { //Hall sensor boolean 
                 
                 /* Status update and reset timer, for next time */
-                currentWaitTriggerTime = 0;
+                currentWaitInsuflationTime = 0;
                 _setState(State_WaitBeforeInsuflation);
             }
-            currentWaitTriggerTime++;
         }
  
 
