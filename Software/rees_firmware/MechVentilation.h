@@ -111,7 +111,15 @@ private:
         float speedInsufflation,
         float speedExsufflation,
         float lpmFluxTriggerValue
-    );
+    )
+    {
+        //
+        // connect and configure the stepper motor to its IO pins
+        //
+        stepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
+        stepper.setSpeedInStepsPerSecond(100);
+        stepper.setAccelerationInStepsPerSecondPerSecond(100);
+    };
 
     /** Set state. */
     void _setState(State state);
