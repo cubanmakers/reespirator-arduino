@@ -19,13 +19,13 @@ typedef struct SensorValues_t {
 class Sensors
 {
     public:
-    Sensors (Adafruit_BMP280 pres1, Adafruit_BMP280 pres2);
+    Sensors (Adafruit_BME280 pres1, Adafruit_BME280 pres2);
     void readPressure();
     SensorValues_t getPressure();
 
     private:
-    Adafruit_BMP280 _pres1Sensor;
-    Adafruit_BMP280 _pres2Sensor;
+    Adafruit_BME280 _pres1Sensor;
+    Adafruit_BME280 _pres2Sensor;
     float _pressure1;
     float _pressure2;
     SensorState _state;

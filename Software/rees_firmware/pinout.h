@@ -41,7 +41,7 @@
 // Sensor hall
 #define ENDSTOPpin 5
 
-// BMP280 SPI al menos para Arduino Nano o Mega
+// BME280 SPI al menos para Arduino Nano o Mega
 #define BMP_SCK  13
 #define BMP_MISO 12
 #define BMP_MOSI 11

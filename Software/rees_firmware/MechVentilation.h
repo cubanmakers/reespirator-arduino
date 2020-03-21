@@ -73,7 +73,7 @@ public:
     );
 
     /* Setters/getters */
-    // TODO: Add stepper, bmp1, bmp2 setters
+    // TODO: Add stepper, bme1, bme2 setters
     /** Set tidal volume */
     void setTidalVolume(float mlTidalVolume);
     /** Set insufflation timeout. */
@@ -149,7 +149,7 @@ private:
     float _speedInsufflation;
     /** Exsufflation speed. @todo Denote units. */
     float _speedExsufflation;
-    /** Estimated flux accross the bmps. @todo Denote units. */
+    /** Estimated flux accross the bmes. @todo Denote units. */
     float _flux;
 
     /* @todo PID stuff */

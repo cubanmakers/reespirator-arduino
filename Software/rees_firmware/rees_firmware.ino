@@ -10,7 +10,7 @@
 #include "MechVentilation.h"
 #include "src/AccelStepper/AccelStepper.h"
 #include "src/TimerOne/TimerOne.h"
-#include "src/Adafruit_BMP280/Adafruit_BMP280.h"
+#include "src/Adafruit_BME280/Adafruit_BME280.h"
 #include "Sensors.h"
 
 // =========================================================================
@@ -46,14 +46,14 @@ Encoder encoder(
 Display display = Display();
 MechVentilation ventilation;
 
-Adafruit_BMP280 bmp1(
+Adafruit_BME280 bmp1(
   BMP_CS1,
   BMP_MOSI,
   BMP_MISO,
   BMP_SCK
 );
 
-Adafruit_BMP280 bmp2(
+Adafruit_BME280 bmp2(
   BMP_CS2,
   BMP_MOSI,
   BMP_MISO,
@@ -87,6 +87,7 @@ void setup()
   // FC efecto hall
   pinMode(ENDSTOPpin, INPUT); // el sensor de efecto hall da un 1 cuando detecta
 
+  // Sensores de presión
   sensors = Sensors(bmp1, bmp2);
 
   // Parte motor

@@ -109,4 +109,9 @@ void refreshWatchDogTimer() {
   //TODO implementar
 }
 
+float flow2Position(float flow) { //returns position
+  //TODO implementar
+  return flow;
+}
+
 #endif // CALC_H
