@@ -16,13 +16,13 @@
 /** States of the mechanical ventilation. */
 enum State {
     State_Init = 0,               /**< Initializing. */
-    State_Idle = 1,               /**< Idle. */
-    State_WaitTrigger = 2,        /**< Wait for trigger. */
-    State_StartInsufflation = 3,  /**< Start insufflation. */
+//    State_Idle = 1,               /**< Idle. */
+    State_WaitBeforeInsuflation = 2,        /**< Wait for trigger. */
+//    State_StartInsufflation = 3,  /**< Start insufflation. */
     State_Insufflation = 4,       /**< Insufflating (PID control). */
-    State_StopInsufflation = 5,   /**< Stop insufflation. */
-    State_WaitExsufflation = 6,   /**< Wait for the patient to exsufflate. */
-    State_Shutdown = 7            /**< Shutdown. */
+//    State_StopInsufflation = 5,   /**< Stop insufflation. */
+    State_WaitBeforeExsufflation = 6,   /**< Wait for the patient to exsufflate. */
+//    State_Shutdown = 7            /**< Shutdown. */
 };
 
 /**

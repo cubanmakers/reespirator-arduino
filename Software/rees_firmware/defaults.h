@@ -27,13 +27,7 @@
 // Ventilation cycle timing
 #define VENTILATION_CYCLE__STOP_INSUFLATION_TIME 500    //msec
 
-// PID limits and constants
-#define PID_MIN 0
-#define PID_MAX 0
-
-#define PID_P 1.0
-#define PID_I 1.0
-#define PID_D 1.0
+// PID constants
 #define PID_dt 1        //msec
 
 #define PID_KP PID_P

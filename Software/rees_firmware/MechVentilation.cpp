@@ -121,12 +121,12 @@ void MechVentilation::update(void) {
     refreshWatchDogTimer();
 
     switch(_currentState) {
-        case State_WaitBeforeInsuflati : { //Wait Trigger or Time
+        case State_WaitBeforeInsuflation : { //Wait Trigger or Time
             stepper.setSpeed(0);
             if (running && ((currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) || (currentWaitTriggerTime > ventilationCyle_WaitTime))) {
                 
                 /* Status update, for next time */
-                _setState(State_StartInsufflation);
+                _setState(State_Insufflation);
             }
             currentWaitTriggerTime++;
         }
