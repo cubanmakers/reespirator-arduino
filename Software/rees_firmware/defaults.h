@@ -8,6 +8,9 @@
 #define DEFAULT_ACELERACION 6000
 #define DEFAULT_MICROSTEPPER 16
 
+#define STEPPER_SPEED 100 //Steps/s
+#define STEPPER_ACCELERATION 100 //Steps/s2
+
 // Valores por defecto
 #define DEFAULT_ESTATURA 170 // cm
 #define DEFAULT_SEXO 0 // 0: varón, 1: mujer
