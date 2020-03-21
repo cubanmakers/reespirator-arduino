@@ -8,7 +8,8 @@
 #define CALC_H
 
 #include "defaults.h"
-#include <math.h>// o <cmath>
+#include "Arduino.h"
+//#include <math.h>// o <cmath>
 
 /**
  * @brief estima el volumen tidal en función de estatura y sexo, en ml.
@@ -17,18 +18,7 @@
  * @param sexo 0: varón, 1: mujer, sexo del paciente
  * @return *volumenTidal volumen tidal estimado, en mililitros
  */
-void calcularVolumenTidal(int* volumenTidal, int estatura, int sexo) {
-  float peso0, pesoIdeal, volumenEstimado;
-  if (sexo == 0) { // Varón
-    peso0 = 50.0;
-  } else if (sexo == 1) { // Mujer
-    peso0 = 45.5;
-  }
-  pesoIdeal = peso0 + 0.91 * (estatura - 152.4); // en kg
-
-  *volumenTidal = int(round(pesoIdeal * DEFAULT_ML_POR_KG_DE_PESO_IDEAL));
-}
-
+int calcularVolumenTidal(int estatura, int sexo);
 /**
  * @brief calcula los tiempos de ciclo, inspiratorio y espiratorio, en seg.
  *
@@ -47,14 +37,7 @@ void calcularVolumenTidal(int* volumenTidal, int estatura, int sexo) {
 void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
                                float* tIns, float* tEsp, float* tCiclo,
                                int pasosPorRevolucion, int microStepper,
-                               int porcentajeInspiratorio, int rpm) {
-  *tCiclo = 60 / rpm; // Tiempo de ciclo en segundos
-  *tIns = *tCiclo * porcentajeInspiratorio/100;
-  *tEsp = *tCiclo - *tIns;
-
-  *speedIns = (pasosPorRevolucion * microStepper / 2) / *tIns; // TODO: unidades?
-  *speedEsp = (pasosPorRevolucion * microStepper / 2) / *tEsp; // TODO: unidades?
-}
+                               int porcentajeInspiratorio, int rpm);
 
 /**
  * @brief estima el caudal a partir de la diferencia de presión
@@ -63,72 +46,20 @@ void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
  * @param pressure2 presión a otro lado
  * @param flux caudal resultante
  */
-float getCurrentFlow(float pressure1, float pressure2) {
-  float flow = (pressure1 - pressure2) * DEFAULT_PRESSURE_V_FLUX_K1;
-  return flow;
-}
+float getCurrentFlow(float pressure1, float pressure2);
 
 /**
  * @brief Constrains the value within the limits
  */
-float constrainFloat(float value, float lowLimit, float highLimit) {
-  if (value < lowLimit) {
-    value = lowLimit;
-  } else if (value > highLimit) {
-    value = highLimit;
-  }
-  return value;
-}
+float constrainFloat(float value, float lowLimit, float highLimit);
 
-/**
- * PID step calculation
- */
-float proportional = 0;
-float integral = 0;
-float derivative = 0;
-float previous_feedbackInput = 0;
-
-float computePID(float setpoint, float feedbackInput) {
-  //dt is fixed to 1 msec by timer interrupt
-
-  float error = setpoint - feedbackInput;
-
-  proportional = PID_KP * error;
-  integral += PID_KI * error;
-  integral = constrainFloat(integral, PID_MIN, PID_MAX);
-  derivative = -PID_KD * (feedbackInput - previous_feedbackInput);
-
-  float output = constrainFloat((proportional + integral + derivative), PID_MIN, PID_MAX);
-
-  // Guardar ultimo tiempo y error
-  previous_feedbackInput = feedbackInput;
-  return output;
-}
-
+float computePID(float setpoint, float feedbackInput);
 /**
  * @brief Refresca el WDT (Watch Dog Timer)
  */
-void refreshWatchDogTimer() {
-  //TODO implementar
-}
+void refreshWatchDogTimer();
 
-// float flow2Position(float flow) { //returns position
-//   //TODO implementar
-//   return flow;
-// }
-
-float vol2pos(float volume) { //converts volume [litres] to position [steps]
-  //TODO improve with LUT to linearize if needed
-  float position = volume * K_VOL2POS;
-
-  return position;
-}
-
-float pos2vol(float position) { //converts volume [litres] to position [steps]
-  //TODO improve with LUT to linearize if needed
-  float volume = position * K_POS2VOL;
-
-  return volume;
-}
+float vol2pos(float volume);
+float pos2vol(float position);
 
 #endif // CALC_H

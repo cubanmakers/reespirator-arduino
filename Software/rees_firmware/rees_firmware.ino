@@ -225,7 +225,7 @@ Adafruit_BME280 bmp2(
 );
 
 Sensors* sensors;
-MechVentilation ventilation();
+MechVentilation* ventilation;
 
 // =========================================================================
 // SETUP
@@ -327,7 +327,7 @@ void setup()
   // =========================================================================
   display.writeLine(0, "Volumen tidal");
   // TODO: calcular volumen tidal estimado en función de la estatura
-  calcularVolumenTidal(&volumenTidal, estatura, sexo);
+  volumenTidal = calcularVolumenTidal(estatura, sexo);
   display.writeLine(1, String(volumenTidal) + " ml");
   Serial.println("Volumen tidal estimado (ml): " + String(volumenTidal));
   delay(2000);
@@ -441,11 +441,11 @@ void setup()
 
   // configura la ventilación
   if (tieneTrigger) {
-    ventilation = MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, ventilationCycle_WaitBeforeInsuflationTime, flujoTrigger);
+    ventilation = new MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, ventilationCycle_WaitBeforeInsuflationTime, flujoTrigger);
   } else {
-    ventilation = MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, ventilationCycle_WaitBeforeInsuflationTime);
+    ventilation = new MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, ventilationCycle_WaitBeforeInsuflationTime);
   }
-  ventilation.start();
+  ventilation->start();
   delay(500);
   display.clear();
   Timer1.start();
@@ -457,8 +457,8 @@ void setup()
 
 void loop() {
 
-  sensors.readPressure(); //TODO timing
-  if (sensors.getPressure().state == SensorStateFailed) {
+  sensors->readPressure(); //TODO timing
+  if (sensors->getPressure().state == SensorStateFailed) {
     //TODO sensor fail. do something
   }
 
@@ -474,85 +474,6 @@ void loop() {
   // Si está en espiración: soltar balón (mover leva hacia arriba sin controlar) y esperar
 
 
-  // ======================================================================
-  // CÓDIGO OBSOLETO DE AQUÍ PARA ABAJO
-  // ======================================================================
-
-#if 0
-  // Parte menu
-  // display.update(encoder.read());
-
-  // Parte stepper
-  stepper.run();
-
-  //recalcular valores por si han cambiado en el menu
-  // TODO: sustituir por nueva funcion: calcularConstantes();
-
-  // Primera mitad del ciclo
-  if (!stepper.isRunning() && modo && !errorFC) {
-    Serial.println("Modo 1");
-    stepper.setMaxSpeed(speedIns * microStepper);
-
-    stepper.move(pasosPorRevolucion * microStepper / 2);
-    modo = !modo;
-  }
-
-  // Segunda mitad del ciclo
-  if (!stepper.isRunning() && !modo && !errorFC) {
-    Serial.println("Modo 2");
-
-    //se ha llegado al final de carrera en el momento que toca pensar que esta defino como pullup
-    if (digitalRead(ENDSTOPpin)) {
-      Serial.println("Final de carrera OK");
-      stepper.setMaxSpeed(speedEsp * microStepper);
-      stepper.move(pasosPorRevolucion * microStepper / 2);
-      modo = !modo;
-    }
-    // si acabada la segunda parte del movimiento no se ha llegado al SENSOR HALL entonces da un paso y vuelve a hacer la comprovocacion
-    else {
-      Serial.println("Final de carrera NO DETECTADO: Buscando FC");
-      errorFC = true;
-      digitalWrite(BUZZpin, true); //activa el zumbador
-      stepper.move(1 * microStepper);
-    }
-  }
-
-  //si estamos en error y ha hecho los pasos extra en busca del Final de Carrera
-  if (!stepper.isRunning() && errorFC) {
-    // no se ha llegado al final suena el BUZZ y ordena dar 3 pasos en busca del FC
-    if (!digitalRead(ENDSTOPpin)) {
-      Serial.println("--Buscando FC");
-      errorFC = true;
-      stepper.move(1);
-    }
-    // cuando lo ha localizado ordena seguir con velocidad 2
-    else {
-      Serial.println("Detectado FC: restableciendo el origen");
-      errorFC = false;
-      digitalWrite(BUZZpin, false); //apaga el zumbador
-      stepper.setMaxSpeed(speedEsp * microStepper);
-      stepper.move(pasosPorRevolucion * microStepper / 2);
-      modo = !modo; //cambiamos de velocidad
-    }
-  }
-  // si hay un error pero ha hecho los 100 pasos extra en busca del Final de Carrera
-  else if (!stepper.isRunning() && errorFC) {
-    // no se ha llegado al final suena el BUZZ y ordena dar 3 pasos en busca del FC
-    if (digitalRead(ENDSTOPpin)) {
-      errorFC = true;
-      stepper.move(1);
-      digitalWrite(BUZZpin, true);
-      Serial.println("ZUMBA");
-    }
-    // cuando lo ha localizado ordena seguir con velocidad 2
-    else {
-      errorFC = false;
-      digitalWrite(BUZZpin, false);
-      stepper.setMaxSpeed(speedEsp);
-      stepper.move(pasosPorRevolucion / 2);
-    }
-  }
-  #endif
 }
 
 /**
@@ -560,6 +481,6 @@ void loop() {
  */
 void timer1Isr () {
   display.writeLine(0, "Timer1 triggered. Update MechVent");
-  ventilation.update();
+  ventilation->update();
   // TODO: display.writeLine(1, "TODO Prompt ventilation status");
 }
