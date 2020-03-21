@@ -9,6 +9,7 @@
 #include "calc.h"
 #include "MechVentilation.h"
 #include "src/AccelStepper/AccelStepper.h"
+#include "src/FlexyStepper/FlexyStepper.h"
 
 /** No trigger. */
 #define LPM_FLUX_TRIGGER_VALUE_NONE     FLT_MAX
@@ -128,9 +129,8 @@ void MechVentilation::update(void) {
             if (running && ((currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) || (currentWaitTriggerTime > ventilationCyle_WaitTime))) {
                 
                 if (currentWaitTriggerTime > ventilationCyle_WaitTime) { //The start was triggered by patient
-                    startTriggeredByPatient = true;
+                    startTriggeredByPatient = true; //TODO: put beep in loop, 1 second long
                 }
-                //TODO: 
 
                 /* Status update, for next time */
                 _setState(State_Insufflation);
@@ -218,8 +218,9 @@ void MechVentilation::update(void) {
         // break;
 
         case State_WaitBeforeExsufflation : {
-            stepper.setSpeed(0);
-            if (currentWaitTriggerTime > ventilationCyle_WaitTime) {
+            //stepper.setSpeed(0);
+            stepper.setPosition(totalPatientVolume);
+            if (currentWaitTriggerTime > ventilationCyle_WaitBeforeExsufflationTime) {
                 
                 /* Status update, for next time */
                 _setState(State_Exsufflation);
@@ -229,11 +230,11 @@ void MechVentilation::update(void) {
 
         case State_Exsufflation : {
             stepper.setSpeed(0);
-            if (currentWaitTriggerTime > ventilationCyle_WaitTime) {
+            if (steeperIsInZeroPoint) { //Hall sensor boolean 
                 
                 /* Status update and reset timer, for next time */
                 currentWaitTriggerTime = 0;
-                _setState(State_Insufflation);
+                _setState(State_WaitBeforeInsuflation);
             }
             currentWaitTriggerTime++;
         }
