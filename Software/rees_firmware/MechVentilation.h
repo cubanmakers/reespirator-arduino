@@ -9,14 +9,15 @@
 #define INC_MECHANICAL_VENTILATION_H
 
 #include <inttypes.h>
-//#include "src/AccelStepper/AccelStepper.h" // @fm deprecated
+#include "src/FlexyStepper/FlexyStepper.h"
 #include "Sensors.h"
-
+#include "pinout.h"
+#include "defaults.h"
 
 /** States of the mechanical ventilation. */
 enum State {
     State_Init = 0,               /**< Initializing. */
-//    State_Idle = 1,               /**< Idle. */
+    State_Idle = 1,               /**< Idle. */
     State_WaitBeforeInsuflation = 2,        /**< Wait for trigger. */
 //    State_StartInsufflation = 3,  /**< Start insufflation. */
     State_Insufflation = 4,       /**< Insufflating (PID control). */
@@ -42,13 +43,14 @@ public:
      *
 	 */
 	MechVentilation(
-        AccelStepper stepper,
+        FlexyStepper stepper,
         Sensors sensors,
         float mlTidalVolume,
         float secTimeoutInsufflation,
         float secTimeoutExsufflation,
         float speedInsufflation,
-        float speedExsufflation
+        float speedExsufflation,
+        int ventilationCyle_WaitTime
     );
 
     /**
@@ -63,15 +65,16 @@ public:
      *
 	 */
 	MechVentilation(
-        AccelStepper stepper,
+        FlexyStepper stepper,
         Sensors sensors,
         float mlTidalVolume,
         float secTimeoutInsufflation,
         float secTimeoutExsufflation,
         float speedInsufflation,
         float speedExsufflation,
+        int ventilationCyle_WaitTime,
         float lpmFluxTriggerValue
-    );
+    ); 
 
     /* Setters/getters */
     // TODO: Add stepper, bme1, bme2 setters
@@ -84,8 +87,9 @@ public:
     /** Set insufflation speed. */
     void setSpeedInsufflation(float speedInsufflation);
     /** Set exsufflation speed. */
-    void setSpeedExsufflation(float speedExsufflation);
-
+void setSpeedExsufflation(float speedExsufflation);
+boolean getStartWasTriggeredByPatient();
+void setVentilationCyle_WaitTime(float speedExsufflation);
     /** Start mechanical ventilation. */
     void start(void);
     /** Stop mechanical ventilation. */
@@ -103,29 +107,22 @@ public:
 private:
     /** Initialization. */
     void _init(
-        AccelStepper stepper,
+        FlexyStepper stepper,
         Sensors sensors,
         float mlTidalVolume,
         float secTimeoutInsufflation,
         float secTimeoutExsufflation,
         float speedInsufflation,
         float speedExsufflation,
+        int ventilationCyle_WaitTime,
         float lpmFluxTriggerValue
-    )
-    {
-        //
-        // connect and configure the stepper motor to its IO pins
-        //
-        stepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
-        stepper.setSpeedInStepsPerSecond(STEPPER_SPEED);
-        stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
-    };
+    );
 
     /** Set state. */
     void _setState(State state);
 
     /* Configuration parameters */
-    AccelStepper    _cfgStepper;
+    FlexyStepper _cfgStepper;
     Sensors _sensors;
 
     /** Tidal volume in millilitres. */
@@ -159,7 +156,7 @@ private:
     /** Exsufflation speed. @todo Denote units. */
     float _speedExsufflation;
     /** Estimated flux accross the bmes. @todo Denote units. */
-    float _flux;
+    //float _flux;
 
     /* @todo PID stuff */
 

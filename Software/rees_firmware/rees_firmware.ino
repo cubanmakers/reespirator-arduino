@@ -197,6 +197,11 @@ FlexyStepper stepper; // direction Digital 6 (CW), pulses Digital 7 (CLK)
 //   PULpin
 // ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
 
+//   AccelStepper::DRIVER,
+//   DIRpin,
+//   PULpin
+// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
 Encoder encoder(
   DTpin,
   CLKpin,
@@ -248,6 +253,23 @@ void setup()
 
   // Sensores de presión
   sensors = Sensors(bmp1, bmp2);
+    if (sensors.begin()) {
+      display.clear();
+      if(sensors == 1) {
+        display.writeLine(0, "bme1 not found");
+        Serial.println("Could not find sensor BME280 number 1, check wiring!");
+      } else if (sensors == 2) {
+        display.writeLine(0, "bme2 not found");
+        Serial.println("Could not find sensor BME280 number 2, check wiring!");
+      }
+      display.writeLine(1, "Check wires!");
+      while(1);
+  }
+
+  // Parte motor
+  pinMode(ENpin, OUTPUT);
+  digitalWrite(ENpin, LOW);
+
 
   // Parte motor
   pinMode(ENpin, OUTPUT);

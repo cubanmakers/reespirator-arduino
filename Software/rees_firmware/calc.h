@@ -7,6 +7,9 @@
 #ifndef CALC_H
 #define CALC_H
 
+#include "defaults.h"
+#include <math.h>// o <cmath>
+
 /**
  * @brief estima el volumen tidal en función de estatura y sexo, en ml.
  *
@@ -60,8 +63,9 @@ void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
  * @param pressure2 presión a otro lado
  * @param flux caudal resultante
  */
-void getCurrentFlow(float pressure1, float pressure2, float* flux) {
-  *flux = (pressure1 - pressure2) * DEFAULT_PRESSURE_V_FLUX_K1;
+float getCurrentFlow(float pressure1, float pressure2) {
+  float flow = (pressure1 - pressure2) * DEFAULT_PRESSURE_V_FLUX_K1;
+  return flow;
 }
 
 /**
@@ -84,20 +88,21 @@ float integral = 0;
 float derivative = 0;
 float previous_feedbackInput = 0;
 
-void computePID(float* setpoint, float* feedbackInput, float* output) {
+float computePID(float setpoint, float feedbackInput) {
   //dt is fixed to 1 msec by timer interrupt
 
-  float error = *setpoint - *feedbackInput;
+  float error = setpoint - feedbackInput;
 
   proportional = PID_KP * error;
   integral += PID_KI * error;
   integral = constrainFloat(integral, PID_MIN, PID_MAX);
-  derivative = -PID_KD * (*feedbackInput - previous_feedbackInput);
+  derivative = -PID_KD * (feedbackInput - previous_feedbackInput);
 
-  *output = constrainFloat((proportional + integral + derivative), PID_MIN, PID_MAX);
+  float output = constrainFloat((proportional + integral + derivative), PID_MIN, PID_MAX);
 
   // Guardar ultimo tiempo y error
-  previous_feedbackInput = *feedbackInput;
+  previous_feedbackInput = feedbackInput;
+  return output;
 }
 
 /**

@@ -31,13 +31,8 @@
 #define SWpin 9
 
 // Stepper driver (FlexyStepper)
-#define MOTOR_STEP_PIN = 6;
-#define MOTOR_DIRECTION_PIN = 7;
-
-// Stepper driver (AccelStepper)
-// #define PULpin 6
-// #define DIRpin 7
-// #define ENpin 8
+#define MOTOR_STEP_PIN 6
+#define MOTOR_DIRECTION_PIN 7
 
 // Buzzer
 #define BUZZpin 11

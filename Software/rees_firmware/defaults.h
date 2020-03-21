@@ -29,9 +29,12 @@
 #define FLOW__INSUFLATION_TRIGGER_LEVEL 3.0   //LPM
 
 // Ventilation cycle timing
-#define VENTILATION_CYCLE__STOP_INSUFLATION_TIME 500    //msec
+#define VENTILATION_CYCLE__WAIT_BEFORE_EXSUFLATION_TIME 500    //msec
 
 // PID constants
+#define PID_MIN 0
+#define PID_MAX 100
+
 #define PID_P 1.0
 #define PID_I 0.1 //TODO To be adjusted
 #define PID_D 0.0 //TODO To be adjusted
@@ -44,5 +47,9 @@
 //Volume to Position and viceversa constants
 #define K_VOL2POS 1.0
 #define K_POS2VOL (1.0 / K_VOL2POS)
+
+// @fm superñapa. parametrizar desde el inicio. se usa en mechVentilation
+#define ventilationCycle_WaitBeforeInsuflationTime 800 //ms TODO parameter to mechVent
+#define totalPatientVolume 0.8 // liters
 
 #endif // DEFAULTS_H
