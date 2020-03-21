@@ -60,8 +60,8 @@ void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
  * @param pressure2 presión a otro lado
  * @param flux caudal resultante
  */
-void calcularCaudal(float* pressure1, float* pressure2, float* flux) {
-  *flux = (*pressure1 - *pressure2) * DEFAULT_PRESSURE_V_FLUX_K1;
+void calcularCaudal(float pressure1, float pressure2, float* flux) {
+  *flux = (pressure1 - pressure2) * DEFAULT_PRESSURE_V_FLUX_K1;
 }
 
 #endif // CALC_H

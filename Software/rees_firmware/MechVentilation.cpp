@@ -8,56 +8,57 @@
 #include <float.h>
 #include "calc.h"
 #include "MechVentilation.h"
-#include "PID.h"
 #include "src/AccelStepper/AccelStepper.h"
 
 /** No trigger. */
 #define LPM_FLUX_TRIGGER_VALUE_NONE     FLT_MAX
 
-MechVentilation::MechVentilation(
-    PID pid,    //TODO Check????
-    AccelStepper stepper,
-    Adafruit_BMP280 bmp1,
-    Adafruit_BMP280 bmp2,
-    float mlTidalVolume,
-    float secTimeoutInsufflation,
-    float secTimeoutExsufflation,
-    float speedInsufflation,
-    float speedExsufflation
-)
-{
-    _init(stepper,
-          bmp1,
-          bmp2,
-          mlTidalVolume,
-          secTimeoutInsufflation,
-          secTimeoutExsufflation,
-          speedInsufflation,
-          speedExsufflation,
-          LPM_FLUX_TRIGGER_VALUE_NONE);
-}
+int currentWaitTriggerTime = 0;
+int currentStopInsufflationTime = 0;
+bool running = false;
 
 MechVentilation::MechVentilation(
-    PID pid,    //TODO Check????
     AccelStepper stepper,
-    Adafruit_BMP280 bmp1,
-    Adafruit_BMP280 bmp2,
+    Sensors sensors, 
     float mlTidalVolume,
     float secTimeoutInsufflation,
     float secTimeoutExsufflation,
     float speedInsufflation,
     float speedExsufflation,
-    float lpmFluxTriggerValue
+    int ventilationCyle_WaitTime
 )
 {
     _init(stepper,
-          bmp1,
-          bmp2,
+          sensors,
           mlTidalVolume,
           secTimeoutInsufflation,
           secTimeoutExsufflation,
           speedInsufflation,
           speedExsufflation,
+          ventilationCyle_WaitTime,
+          LPM_FLUX_TRIGGER_VALUE_NONE);
+}
+
+MechVentilation::MechVentilation(
+    AccelStepper stepper,
+    Sensors sensors,
+    float mlTidalVolume,
+    float secTimeoutInsufflation,
+    float secTimeoutExsufflation,
+    float speedInsufflation,
+    float speedExsufflation,
+    int ventilationCyle_WaitTime,
+    float lpmFluxTriggerValue
+)
+{
+    _init(stepper,
+          sensors,
+          mlTidalVolume,
+          secTimeoutInsufflation,
+          secTimeoutExsufflation,
+          speedInsufflation,
+          speedExsufflation,
+          ventilationCyle_WaitTime,
           lpmFluxTriggerValue);
 }
 
@@ -81,144 +82,177 @@ void MechVentilation::setSpeedExsufflation(float speedExsufflation) {
     _speedExsufflation = _cfgSpeedExsufflation;
 }
 
+void MechVentilation::setVentilationCyle_WaitTime(float speedExsufflation) {
+    //TODO _speedExsufflation = _cfgSpeedExsufflation;
+}
+
 void MechVentilation::start(void) {
-    if(_cfgLpmFluxTriggerValue == LPM_FLUX_TRIGGER_VALUE_NONE) {
-        _setState(State_StartInsufflation);
-    } else {
-        /* Triggered */
-        _setState(State_WaitTrigger);
-    }
+    running = true;
+
+    // if(_cfgLpmFluxTriggerValue == LPM_FLUX_TRIGGER_VALUE_NONE) {
+    //     _setState(State_StartInsufflation);
+    // } else {
+    //     /* Triggered */
+    //     _setState(State_WaitTrigger);
+    // }
 }
 
 void MechVentilation::stop(void) {
-    _setState(State_Shutdown);
+    running = false;
+    
+    //_setState(State_Shutdown);
 }
 
-void MechVentilation::update(void) {
-    bool bContinue = false;
+void MechVentilation::stop(void) {
+    running = false;
+    
+    //_setState(State_Shutdown);
+}
 
-    do {
-        bContinue = false;
+/**
+ * I's called from timer1Isr
+ */
+void MechVentilation::update(void) { 
+    getCurrentFlow(); //TODO Must calculate Flow using the last measured pressure couple,
+                      //but the pressure reading must be done as non blocking in the main loop
 
-        switch(_currentState) {
-            case State_WaitTrigger : {
-                /* @todo Uncomment on trigger condition */
-#if 0
+    refreshWatchDogTimer();
+
+    switch(_currentState) {
+        case State_WaitTrigger : { //Wait Trigger or Time
+            stepper.setSpeed(0);
+            if ((currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) || (currentWaitTriggerTime > ventilationCyle_WaitTime)) {
+                currentWaitTriggerTime++;
+
+                /* Status update, for next time */
                 _setState(State_StartInsufflation);
-                /* Step directly into next case */
-                bContinue = true;
-#endif
             }
-            break;
+        }
+        break;
 
-            case State_StartInsufflation : {
-                _secTimerCnt            = 0;
-                _secTimeoutInsufflation = _cfgSecTimeoutInsufflation;
-                _speedInsufflation      = _cfgSpeedInsufflation;
-                _secTimeoutExsufflation = _secTimeoutExsufflation;
-                _speedExsufflation      = _speedExsufflation;
+        case State_StartInsufflation : {
+            _secTimerCnt            = 0;
+            _secTimeoutInsufflation = _cfgSecTimeoutInsufflation;
+            _speedInsufflation      = _cfgSpeedInsufflation;
+            _secTimeoutExsufflation = _secTimeoutExsufflation;
+            _speedExsufflation      = _speedExsufflation;
 
-                /* @todo start PID stuff? */
-                _setState(State_Insufflation);
-                /* Step directly into next case */
-                bContinue = true;
-            }
-            break;
+            /* @todo start PID stuff? */
 
-            case State_Insufflation : {
-                if(_secTimerCnt < _secTimeoutInsufflation) {
-                    /* @todo Keep on the PID work */
+            /* Status update, for next time */
+            _setState(State_Insufflation);
+        }
+        break;
 
-                    // Acquire sensors data
-                    _cfgBmp1_pressure->getEvent(&_pressure1Event);
-                    _cfgBmp2_pressure->getEvent(&_pressure2Event);
-                    _pressure1 = _pressure1Event.pressure;
-                    _pressure2 = _pressure2Event.pressure;
+        case State_Insufflation : {
+            if(_secTimerCnt < _secTimeoutInsufflation) {
+                /* @todo Keep on the PID work */
 
+                // Acquire sensors data
+                SensorValues_t sensorValues = _sensors.getPressure();
+                
+                if (sensorValues.state == SensorStateOK) {
                     // Calculate flux from delta pressure
                     // TODO: Check sign of results!
-                    calcularCaudal(&_pressure1, &_pressure2, &_flux);
+                    calcularCaudal(sensorValues.pressure1, sensorValues.pressure2, &_flux);
 
                     // TODO: Control stepper velocity from flux
-
                 } else {
-                    /* Insufflation timeout expired */
-                    _secTimerCnt = 0;
-                    _setState(State_StopInsufflation);
-                    /* Step directly into next case */
-                    bContinue = true;
+                    //TODO do something
                 }
-            }
-            break;
 
-            case State_StopInsufflation : {
-                /* @todo Stop PID stuff? */
-                /* @todo Start exsufflation timer */
-                _setState(State_WaitExsufflation);
-                /* Step directly into next case */
-                bContinue = true;
-            }
-            break;
+            } else {
+                /* Insufflation timeout expired */
+                _secTimerCnt = 0;
 
-            case State_WaitExsufflation : {
-                if(_secTimerCnt < _secTimeoutExsufflation) {
-                    /* @todo Mover leva hacia arriba sin controlar y/o esperar */
-                } else {
-                    /* Exsufflation timeout expired */
-                    if(_cfgLpmFluxTriggerValue == LPM_FLUX_TRIGGER_VALUE_NONE) {
-                        _setState(State_StartInsufflation);
-                    } else {
-                        /* Triggered */
-                        _setState(State_WaitTrigger);
-                    }
-                    bContinue = true;
-                }
+                /* Status update, for next time */
+                _setState(State_StopInsufflation);
             }
-            break;
-
-            case State_Shutdown : {
-                /* @todo Shutdown in a safe way!!! */
-
-                _init(_cfgStepper,
-                      _cfgBmp1,
-                      _cfgBmp2,
-                      _cfgmlTidalVolume,
-                      _cfgSecTimeoutInsufflation,
-                      _cfgSecTimeoutExsufflation,
-                      _cfgSpeedInsufflation,
-                      _cfgSpeedExsufflation,
-                      _cfgLpmFluxTriggerValue);
-            }
-
-            default :{
-                /* State_Init
-                * State_Idle
-                *
-                * Do nothing.
-                */
-            }
-            break;
         }
-    } while (bContinue = true);
+        break;
+
+        case State_StopInsufflation : {
+            /* Calculate position/flow PID */
+            //TODO: use this: computePID(float* setpoint, float* feedbackInput, float* output);
+
+            /* Steeper control */
+            stepper.setSpeed(0);
+
+            /* Start exsufflation timer */
+            currentWaitTime = 0;
+
+            if (currentStopInsufflationTime > VENTILATION_CYCLE__STOP_INSUFLATION_TIME) {
+                currentStopInsufflationTime++;
+
+                /* Status update, for next time */
+                _setState(State_StartInsufflation);
+            }
+
+
+            /* Status update, for next time */
+            _setState(State_WaitExsufflation);
+        }
+        break;
+
+        case State_WaitExsufflation : {
+            if(_secTimerCnt < _secTimeoutExsufflation) {
+                /* @todo Mover leva hacia arriba sin controlar y/o esperar */
+            } else {
+                /* Exsufflation timeout expired */
+                if(_cfgLpmFluxTriggerValue == LPM_FLUX_TRIGGER_VALUE_NONE) {
+
+                    /* Status update, for next time */
+                    _setState(State_StartInsufflation);
+                } else {
+
+                    /* Status update, for next time */
+                    _setState(State_WaitTrigger);
+                }
+            }
+        }
+        break;
+
+        case State_Shutdown : {
+            /* @todo Shutdown in a safe way!!! */
+
+            //TODO @fm init????
+            _init(_cfgStepper,
+                    _sensors,
+                    _cfgmlTidalVolume,
+                    _cfgSecTimeoutInsufflation,
+                    _cfgSecTimeoutExsufflation,
+                    _cfgSpeedInsufflation,
+                    _cfgSpeedExsufflation,
+                    _cfgLpmFluxTriggerValue);
+        }
+
+        default :{
+            /* State_Init
+            * State_Idle
+            *
+            * Do nothing.
+            */
+        }
+        break;
+    }
 
 }
 
 void MechVentilation::_init(
     AccelStepper stepper,
-    Adafruit_BMP280 bmp1,
-    Adafruit_BMP280 bmp2,
+    Sensors sensors,
     float mlTidalVolume,
     float secTimeoutInsufflation,
     float secTimeoutExsufflation,
     float speedInsufflation,
     float speedExsufflation,
+    int ventilationCyle_WaitTime,
     float lpmFluxTriggerValue
 )
 {
     /* Set configuration parameters */
     _cfgStepper                 = stepper;
-    _cfgBmp1                    = bmp1;
-    _cfgBmp2                    = bmp2;
+    _sensors                    = sensors;
     _cfgmlTidalVolume           = mlTidalVolume;
     _cfgSecTimeoutInsufflation  = secTimeoutInsufflation;
     _cfgSecTimeoutExsufflation  = secTimeoutExsufflation;

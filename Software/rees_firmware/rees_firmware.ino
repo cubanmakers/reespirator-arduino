@@ -9,6 +9,9 @@
 #include "Encoder.h"
 #include "MechVentilation.h"
 #include "src/AccelStepper/AccelStepper.h"
+#include "src/TimerOne/TimerOne.h"
+#include "src/Adafruit_BMP280/Adafruit_BMP280.h"
+#include "Sensors.h"
 
 // =========================================================================
 // VARIABLES
@@ -27,6 +30,7 @@ bool tieneTrigger;
 bool modo = true, errorFC = false;
 int volumenTidal;
 float speedIns, speedEsp, tCiclo, tIns, tEsp;
+
 
 // pines en pinout.h
 AccelStepper stepper(
@@ -55,6 +59,7 @@ Adafruit_BMP280 bmp2(
   BMP_MISO,
   BMP_SCK
 );
+Sensors sensors;
 
 // =========================================================================
 // SETUP
@@ -82,30 +87,7 @@ void setup()
   // FC efecto hall
   pinMode(ENDSTOPpin, INPUT); // el sensor de efecto hall da un 1 cuando detecta
 
-  // Arrancar sensores de presion 1 y 2
-  if (!bmp1.begin() || !bmp2.begin()) {
-    display.clear();
-    if(!bmp1.begin()) {
-      display.writeLine(0, "bmp1 not found");
-      Serial.println("Could not find sensor BMP280 number 1, check wiring!");
-    } else {
-      display.writeLine(0, "bmp2 not found");
-      Serial.println("Could not find sensor BMP280 number 2, check wiring!");
-    }
-    display.writeLine(1, "Check wires!");
-    while (1);
-  }
-  /* Default settings from datasheet. */
-  bmp1.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
-                   Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
-                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                   Adafruit_BMP280::FILTER_X16,      /* Filtering. */
-                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
-  bmp2.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
-                   Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
-                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                   Adafruit_BMP280::FILTER_X16,      /* Filtering. */
-                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+  sensors = Sensors(bmp1, bmp2);
 
   // Parte motor
   pinMode(ENpin, OUTPUT);
@@ -118,6 +100,11 @@ void setup()
   delay(1000);
   display.clear();
   delay(100);
+
+  Timer1.initialize(1000); // 1 ms
+  Timer1.stop();
+  Timer1.attachInterrupt(timer1Isr);
+  // timer1 is started later
 
 
   // INTERACCIÓN: ESTATURA
@@ -274,13 +261,14 @@ void setup()
 
   // configura la ventilación
   if (tieneTrigger) {
-    ventilation = MechVentilation(stepper, bmp1, bmp2, volumenTidal, tIns, tEsp, speedIns, speedEsp, flujoTrigger);
+    ventilation = MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, ventilationCyle_WaitTime, flujoTrigger);
   } else {
-    ventilation = MechVentilation(stepper, bmp1, bmp2, volumenTidal, tIns, tEsp, speedIns, speedEsp);
+    ventilation = MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, ventilationCyle_WaitTime);
   }
   ventilation.start();
   delay(500);
   display.clear();
+  Timer1.start();
 }
 
 // =========================================================================
@@ -288,10 +276,11 @@ void setup()
 // =========================================================================
 
 void loop() {
-  display.writeLine(0, "Operando...");
-  // TODO: display.writeLine(1, "TODO Prompt ventilation status");
-  ventilation.update();
 
+  sensors.readPressure(); //TODO timing
+  if (sensors.getPressure().state == SensorStateFailed) {
+    //TODO sensor fail. do something
+  }
 
   // TODO: si hay nueva configuración: cambiar parámetros escuchando entrada desde el encoder
 
@@ -309,6 +298,7 @@ void loop() {
   // CÓDIGO OBSOLETO DE AQUÍ PARA ABAJO
   // ======================================================================
 
+#if 0
   // Parte menu
   // display.update(encoder.read());
 
@@ -382,4 +372,14 @@ void loop() {
       stepper.move(pasosPorRevolucion / 2);
     }
   }
+  #endif
+}
+
+/**
+ * Timer 1 ISR
+ */
+void timer1Isr () {
+  display.writeLine(0, "Timer1 triggered. Update MechVent");
+  // TODO: display.writeLine(1, "TODO Prompt ventilation status");
+  ventilation.update();
 }

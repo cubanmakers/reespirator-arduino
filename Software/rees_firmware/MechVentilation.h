@@ -10,7 +10,7 @@
 
 #include <inttypes.h>
 #include "src/AccelStepper/AccelStepper.h"
-#include "src/Adafruit_BMP280/Adafruit_BMP280.h"
+#include "Sensors.h"
 
 
 /** States of the mechanical ventilation. */
@@ -42,8 +42,7 @@ public:
 	 */
 	MechVentilation(
         AccelStepper stepper,
-        Adafruit_BMP280 bmp1,
-        Adafruit_BMP280 bmp2,
+        Sensors sensors,
         float mlTidalVolume,
         float secTimeoutInsufflation,
         float secTimeoutExsufflation,
@@ -64,8 +63,7 @@ public:
 	 */
 	MechVentilation(
         AccelStepper stepper,
-        Adafruit_BMP280 bmp1,
-        Adafruit_BMP280 bmp2,
+        Sensors sensors,
         float mlTidalVolume,
         float secTimeoutInsufflation,
         float secTimeoutExsufflation,
@@ -105,8 +103,7 @@ private:
     /** Generic initialization. */
     void _init(
         AccelStepper stepper,
-        Adafruit_BMP280 bmp1,
-        Adafruit_BMP280 bmp2,
+        Sensors sensors,
         float mlTidalVolume,
         float secTimeoutInsufflation,
         float secTimeoutExsufflation,
@@ -120,8 +117,7 @@ private:
 
     /* Configuration parameters */
     AccelStepper    _cfgStepper;
-    Adafruit_BMP280 _cfgBmp1;
-    Adafruit_BMP280 _cfgBmp2;
+    Sensors _sensors;
 
     /** Tidal volume in millilitres. */
     float _cfgmlTidalVolume;
@@ -153,10 +149,6 @@ private:
     float _speedInsufflation;
     /** Exsufflation speed. @todo Denote units. */
     float _speedExsufflation;
-    /** Sensors pressure events. */
-    sensors_event_t _pressure1Event, _pressure2Event;
-    /** Sensors pressure in hPa. */
-    float _pressure1, _pressure2;
     /** Estimated flux accross the bmps. @todo Denote units. */
     float _flux;
 
