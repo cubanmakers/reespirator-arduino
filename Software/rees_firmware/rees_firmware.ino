@@ -302,6 +302,8 @@ void setup()
 // LOOP
 // =========================================================================
 
+int updateCounter = 0;
+
 void loop() {
 
     #if 0
@@ -320,6 +322,10 @@ void loop() {
         display.clear();
         display.writeLine(0, "Valor guardado");
 
+    } else {
+        char tmp[16];
+        snprintf(tmp, 16, "Cnt:%d", updateCounter);
+        display.writeLine(0, "Counter");
     }
 
     // TODO: si hay nueva configuración: cambiar parámetros escuchando entrada desde
@@ -336,4 +342,5 @@ void loop() {
  */
 void timer1Isr () {
   ventilation->update();
+  updateCounter++;
 }
