@@ -1,0 +1,11 @@
+---
+
+image: registry.gitlab.com/tinproject/reespirator-ci-images:20200322T184002Z_697116e
+
+stages:
+  - build
+
+build:
+  stage: build
+  script:
+    - make
