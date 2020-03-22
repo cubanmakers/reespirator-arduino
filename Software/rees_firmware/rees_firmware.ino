@@ -327,7 +327,5 @@ void loop() {
  * Timer 1 ISR
  */
 void timer1Isr () {
-  display.writeLine(0, "Timer1 triggered. Update MechVent");
   ventilation->update();
-  // TODO: display.writeLine(1, "TODO Prompt ventilation status");
 }

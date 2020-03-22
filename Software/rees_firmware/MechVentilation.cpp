@@ -291,15 +291,20 @@ void MechVentilation::update(void) {
                 //                                              [1000msec/1sec]
 
                 /* Status update and reset timer, for next time */
-                _setState(State_Exsufflation);
+               _setState(State_Exsufflation);
                 currentTime = 0;
-            }
+           }
             //break;  MUST BE COMMENTED
         case State_Exsufflation:
             {
+                /* Stepper control: homming */
+                //bool moveToHomeInMillimeters(long directionTowardHome,
+                //  float speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters,
+                //  int homeLimitSwitchPin)
                 _cfgStepper.setAccelerationInStepsPerSecondPerSecond(EXSUFFLATION_ACCEL); //TODO
-                _cfgStepper.setSpeedInStepsPerSecond(EXSUFFLATION_SPEED); //TODO
-                _cfgStepper.setTargetPositionInSteps(0);
+                _cfgStepper.moveToHomeInSteps(1, EXSUFFLATION_SPEED, (105 * DEFAULT_MICROSTEPPER), ENDSTOPpin);
+//                _cfgStepper.setSpeedInStepsPerSecond(EXSUFFLATION_SPEED); //TODO
+//                _cfgStepper.setTargetPositionInSteps(0);
 
                 //TODO @fm read hall sensor
                 
@@ -366,7 +371,7 @@ void MechVentilation::_init(
 
     /* Initialize internal state */
     //_previousState = Init_WaitBeforeInsuflation;
-    _currentState = Init_WaitBeforeInsuflation;
+    _currentState = Init_Exsufflation;
     //_nextState = Init_WaitBeforeInsuflation;
     _secTimerCnt = 0;
     _secTimeoutInsufflation = 0;
