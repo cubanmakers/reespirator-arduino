@@ -23,7 +23,7 @@ int calcularVolumenTidal(int estatura, int sexo) {
  * @brief calcula los tiempos de ciclo, inspiratorio y espiratorio, en seg.
  *
  * Calcula a partir de las respiraciones por minuto, los tiempos de ciclo,
- * inspiratorio y espiratorio, y las velocidades uno y dos.
+ * inspiratorio y espiratorio, y las velocidades uno y dos.x
  * @param speedIns step/sec
  * @param speedEsp step/sec
  * @param tIns tiempo de inspiracion, en segundos

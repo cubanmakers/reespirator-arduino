@@ -98,7 +98,7 @@ void setup()
   int check = sensors->begin();
     if (check) {
       display.clear();
-      if(check == 1) {
+      if (check == 1) {
         display.writeLine(0, "bme1 not found");
         Serial.println("Could not find sensor BME280 number 1, check wiring!");
       } else if (check == 2) {
@@ -121,11 +121,12 @@ void setup()
   display.clear();
   delay(100);
 
+/*
   Timer1.initialize(1000); // 1 ms
   Timer1.stop();
   Timer1.attachInterrupt(timer1Isr);
   // timer1 is started later
-
+*/
 
   // INTERACCIÓN: ESTATURA
   // =========================================================================
@@ -295,7 +296,7 @@ void setup()
   ventilation->start();
   delay(1000);
   display.clear();
-  Timer1.start();
+  //Timer1.start();
 }
 
 // =========================================================================
@@ -303,6 +304,15 @@ void setup()
 // =========================================================================
 
 void loop() {
+
+unsigned long static time = millis();
+const int deltaUpdate = 5;
+unsigned long static lastLaunch = time;
+
+if (time > lastLaunch + deltaUpdate) {
+    lastLaunch = time;
+    ventilation -> update();
+}
 
   sensors->readPressure(); //TODO timing
   if (sensors->getPressure().state == SensorStateFailed) {

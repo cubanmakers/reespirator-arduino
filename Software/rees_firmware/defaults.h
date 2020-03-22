@@ -4,6 +4,9 @@
 
 #undef I2C // definido = Display i2c, sin definir Display parallel
 
+// Base de tiempos
+#define TIME_BASE 5 //msec
+
 // Valores motor
 #define DEFAULT_PASOS_POR_REVOLUCION (200 * DEFAULT_MICROSTEPPER) // Suponiendo un motor de 200 pasos/rev
 #define DEFAULT_ACELERACION 6000
@@ -42,7 +45,7 @@
 #define PID_P 1.0
 #define PID_I 0.1 //TODO To be adjusted
 #define PID_D 0.0 //TODO To be adjusted
-#define PID_dt 1.0 //msec. I hast to match the MechVentilation.update() refresh period.
+#define PID_dt TIME_BASE //msec. I hast to match the MechVentilation.update() refresh period.
 
 #define PID_KP PID_P
 #define PID_KI (PID_I * PID_dt)
