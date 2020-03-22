@@ -85,8 +85,9 @@ void Encoder::tick(void) {
  * @param valor valor a actualizar
  */
 void Encoder::swapValue(int* valor) {
+  int reading = read();
   // Giramos horario o antihorario
-  if (read() == 2 || read() == 8) {
+  if (reading == 2 || reading == 8) {
     if (*valor == 0) {
       *valor = 1;
     } else if (*valor == 1) {
@@ -96,8 +97,9 @@ void Encoder::swapValue(int* valor) {
 }
 
 void Encoder::swapValue(bool* valor) {
+  int reading = read();
   // Giramos horario o antihorario
-  if (read() == 2 || read() == 8) {
+  if (reading == 2 || reading == 8) {
     *valor = !(*valor);
   }
 }
@@ -112,21 +114,23 @@ void Encoder::swapValue(bool* valor) {
  * @param delta incremento, por defecto: 1
  */
 void Encoder::updateValue(int* valor, int delta) {
-  // Giramos horario (Subimos en el menu)
-  if (read() == 2) {
+  int reading = read();
+  // Giramos horario (incremento)
+  if (reading == 8) {
     *valor = *valor - delta;
-  // Giramos antihorario (Subimos en el menu)
-  } else if (read() == 8) {
+  // Giramos antihorario (decremento)
+  } else if (reading == 2) {
     *valor = *valor + delta;
   }
 }
 
 void Encoder::updateValue(float* valor, float delta) {
-  // Giramos horario (Subimos en el menu)
-  if (read() == 2) {
+  int reading = read();
+  // Giramos horario (incremento)
+  if (reading == 8) {
     *valor = *valor - delta;
-  // Giramos antihorario (Subimos en el menu)
-  } else if (read() == 8) {
+  // Giramos antihorario (decremento)
+  } else if (reading == 2) {
     *valor = *valor + delta;
   }
 }
