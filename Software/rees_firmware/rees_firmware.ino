@@ -325,7 +325,7 @@ void loop() {
     } else {
         char tmp[16];
         snprintf(tmp, 16, "Cnt:%d", updateCounter);
-        display.writeLine(0, "Counter");
+        display.writeLine(0, tmp);
     }
 
     // TODO: si hay nueva configuración: cambiar parámetros escuchando entrada desde
