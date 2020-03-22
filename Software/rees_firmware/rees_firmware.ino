@@ -362,19 +362,4 @@ void timer1Isr () {
   ventilation->update();
   updateCounter++;
 }
-    // TODO: si hay nueva configuración: cambiar parámetros escuchando entrada desde
-    // el encoder
 
-    // TODO: chequear trigger si hay trigger, esperar al flujo umbral para actuar,
-    // si no, actuar en cada bucle Si está en inspiración: controlar con PID el
-    // volumen tidal (el que se insufla) Si está en espiración: soltar balón (mover
-    // leva hacia arriba sin controlar) y esperar
-
-}
-/**
- * Timer 1 ISR
- */
-void timer1Isr () {
-  ventilation->update();
-  updateCounter++;
-}
