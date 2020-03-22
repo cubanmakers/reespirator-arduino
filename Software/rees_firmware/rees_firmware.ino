@@ -84,7 +84,7 @@ void setup()
   digitalWrite(BUZZpin, LOW);
 
   // FC efecto hall
-  pinMode(ENDSTOPpin, INPUT); // el sensor de efecto hall da un 1 cuando detecta
+  pinMode(ENDSTOPpin, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
 
   // Sensores de presión
   sensors = new Sensors(bmp1, bmp2);
@@ -303,6 +303,11 @@ void setup()
   Timer1.attachInterrupt(timer1Isr);
   Timer1.start();
   #endif
+
+    stepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
+    stepper.setSpeedInStepsPerSecond(STEPPER_SPEED);
+    stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
+    stepper.setStepsPerRevolution(STEPPER_PER_REVOLUTION);
 }
 
 // =========================================================================
@@ -313,6 +318,16 @@ int updateCounter = 0;
 
 void loop() {
 
+
+  display.writeLine(0, "Steps");
+  while(!encoder.readButton()) {
+    encoder.updateValue(&estatura);
+    display.writeLine(0, "Steps: " + String(estatura) + " cm");
+  }
+  stepper.moveToPositionInSteps(estatura);
+  display.writeLine(1, "Pos=" + String(stepper.getCurrentPositionInSteps()));
+
+#if 0
     unsigned long static time;
     time = millis();
     const int deltaUpdate = 5;
@@ -345,7 +360,7 @@ void loop() {
     // si no, actuar en cada bucle Si está en inspiración: controlar con PID el
     // volumen tidal (el que se insufla) Si está en espiración: soltar balón (mover
     // leva hacia arriba sin controlar) y esperar
-
+#endif
 }
 /**
  * Timer 1 ISR
@@ -354,6 +369,7 @@ void timer1Isr () {
   ventilation->update();
   updateCounter++;
 }
+
 
 
 

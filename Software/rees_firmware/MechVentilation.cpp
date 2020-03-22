@@ -221,7 +221,7 @@ void MechVentilation::update(void) {
                 while (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
                 }
-                                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
+                Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
                 Serial.println("Motor:targetPos" + String(_cfgmlTidalVolume));
 
                 /* Status update, reset timer, for next time, and reset PID integrator to zero */
