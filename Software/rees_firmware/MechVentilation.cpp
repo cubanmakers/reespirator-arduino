@@ -182,7 +182,7 @@ void MechVentilation::update(void) {
                     /* Stepper control*/
                     if (!_cfgStepper.motionComplete()) {
                         _cfgStepper.processMovement();
-                        Serial.println("Motor:Process movement");
+                        Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInMillimeters()));
                     }
 
                     if (currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) { //The start was triggered by patient
@@ -250,8 +250,7 @@ void MechVentilation::update(void) {
                 _cfgStepper.setSpeedInStepsPerSecond(stepperSpeed);
                 if (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
-                                            Serial.println("Motor:Process movement");
-
+                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInMillimeters()));
                 }
 
                 if ((_currentVolume >= _cfgmlTidalVolume) || (currentTime > insuflationTime)) {
@@ -277,7 +276,12 @@ void MechVentilation::update(void) {
             //break;  MUST BE COMMENTED
         case State_WaitBeforeExsufflation:
             { //Stepper is stopped in this state
+                /* Stepper control*/
                 _cfgStepper.setTargetPositionInSteps(vol2pos(_cfgmlTidalVolume));
+                if (!_cfgStepper.motionComplete()) {
+                    _cfgStepper.processMovement();
+                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInMillimeters()));
+                }
 
                 if (currentTime > WAIT_BEFORE_EXSUFLATION_TIME) {
 
@@ -395,6 +399,8 @@ void MechVentilation::_init(
     stepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
     stepper.setSpeedInStepsPerSecond(STEPPER_SPEED);
     stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
+    //stepper.setAccelerationInRevolutionsPerSecondPerSecond(aceleracion); //TODO revisar adaptacion a flexy
+
 
     _sensor_error_detected = false;
 }

@@ -22,7 +22,7 @@ int porcentajeInspiratorio = DEFAULT_POR_INSPIRATORIO;
 int estatura               = DEFAULT_ESTATURA;
 int sexo                   = DEFAULT_SEXO;
 int microStepper           = DEFAULT_MICROSTEPPER;
-int aceleracion            = DEFAULT_ACELERACION * microStepper;
+//int aceleracion            = DEFAULT_ACELERACION * microStepper;
 int pasosPorRevolucion     = DEFAULT_PASOS_POR_REVOLUCION;
 float flujoTrigger         = DEFAULT_FLUJO_TRIGGER;
 
@@ -34,13 +34,6 @@ float speedIns, speedEsp, tCiclo, tIns, tEsp;
 
 // pines en pinout.h
 FlexyStepper stepper; // direction Digital 6 (CW), pulses Digital 7 (CLK)
-
-// pines en pinout.h
-// AccelStepper stepper(
-//   AccelStepper::DRIVER,
-//   DIRpin,
-//   PULpin
-// ); // direction Digital 6 (CW), pulses Digital 7 (CLK)
 
 Encoder encoder(
   DTpin,
@@ -114,7 +107,6 @@ void setup()
   digitalWrite(ENpin, HIGH);
 
   Serial.println("Setup");
-  stepper.setAccelerationInRevolutionsPerSecondPerSecond(aceleracion); //TODO revisar adaptacion a flexy
 
   // deja la display en blanco
   delay(3000);
@@ -362,6 +354,10 @@ void timer1Isr () {
   ventilation->update();
   updateCounter++;
 }
+
+
+
+
 
 
 
