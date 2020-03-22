@@ -95,8 +95,8 @@ void setup()
 
   // Sensores de presión
   sensors = new Sensors(bmp1, bmp2);
-  int check = sensors->begin(); 
-    if (check) { 
+  int check = sensors->begin();
+    if (check) {
       display.clear();
       if(check == 1) {
         display.writeLine(0, "bme1 not found");
@@ -117,7 +117,7 @@ void setup()
   stepper.setAccelerationInRevolutionsPerSecondPerSecond(aceleracion); //TODO revisar adaptacion a flexy
 
   // deja la display en blanco
-  delay(1000);
+  delay(2000);
   display.clear();
   delay(100);
 
@@ -129,15 +129,16 @@ void setup()
 
   // INTERACCIÓN: ESTATURA
   // =========================================================================
-  display.writeLine(0, "Introduce estatura");
+  display.writeLine(0, "Introduce altura");
   while(!encoder.readButton()) {
     encoder.updateValue(&estatura);
     display.writeLine(1, "Altura: " + String(estatura) + " cm");
   }
+  display.clear();
   display.writeLine(0, "Valor guardado");
   display.writeLine(1, "Altura: " + String(estatura) + " cm");
   Serial.println("Altura (cm): " + String(estatura));
-  delay(1000);
+  delay(2000);
   display.clear();
 
 
@@ -152,14 +153,15 @@ void setup()
       display.writeLine(1, "Sexo: mujer");
     }
   }
-  display.writeLine(0, "Sexo seleccionado");
+  display.clear();
+  display.writeLine(0, "Valor guardado");
   if (sexo == 0) {
     display.writeLine(1, "Sexo: varon");
   } else if (sexo == 1) {
     display.writeLine(1, "Sexo: mujer");
   }
   Serial.println("Sexo (0:V, 1:M): " + String(sexo));
-  delay(1000);
+  delay(2000);
   display.clear();
 
 
@@ -182,10 +184,11 @@ void setup()
     volumenTidal = constrain(volumenTidal, DEFAULT_MIN_VOLUMEN_TIDAL, DEFAULT_MAX_VOLUMEN_TIDAL);
     display.writeLine(1, String(volumenTidal) + " ml");
   }
+  display.clear();
   display.writeLine(0, "Valor guardado");
   display.writeLine(1, String(volumenTidal) + " ml");
   Serial.println("Volumen tidal configurado (ml): " + String(volumenTidal));
-  delay(1000);
+  delay(2000);
   display.clear();
 
 
@@ -200,6 +203,7 @@ void setup()
       display.writeLine(1, "No");
     }
   }
+  display.clear();
   display.writeLine(0, "Valor guardado");
   if (tieneTrigger) {
     display.writeLine(1, "Trigger: Si");
@@ -207,7 +211,7 @@ void setup()
     display.writeLine(1, "Trigger: No");
   }
   Serial.println("Trigger (0:No, 1:Si): " + String(tieneTrigger));
-  delay(1000);
+  delay(2000);
   display.clear();
 
 
@@ -219,10 +223,11 @@ void setup()
       encoder.updateValue(&flujoTrigger, 0.1);
       display.writeLine(1, "Flujo: " + String(flujoTrigger) + " LPM");
     }
+    display.clear();
     display.writeLine(0, "Valor guardado");
     display.writeLine(1, "Flujo: " + String(flujoTrigger) + " LPM");
     Serial.println("Flujo trigger (LPM): " + String(flujoTrigger));
-    delay(1000);
+    delay(2000);
     display.clear();
   }
 
@@ -235,26 +240,27 @@ void setup()
     rpm = constrain(rpm, DEFAULT_MIN_RPM, DEFAULT_MAX_RPM);
     display.writeLine(1, String(rpm) + " rpm");
   }
+  display.clear();
   display.writeLine(0, "Valor guardado");
   display.writeLine(1, String(rpm) + " rpm");
   Serial.println("Frecuencia respiratoria (rpm): " + String(rpm));
-  delay(1000);
+  delay(2000);
   display.clear();
 
 
   // CÁLCULO: CONSTANTES DE TIEMPO INSPIRACION/ESPIRACION
   // =========================================================================
-  display.writeLine(0, "Tins | Tesp (seg)");
+  display.writeLine(0, "Tins | Tesp");
   calcularCicloInspiratorio(&speedIns, &speedEsp, &tIns, &tEsp,
                             &tCiclo, pasosPorRevolucion, microStepper,
                             porcentajeInspiratorio, rpm);
-  display.writeLine(1, String(tIns) + " s" + String(tEsp) + " s");
+  display.writeLine(1, String(tIns) + " s | " + String(tEsp) + " s");
   Serial.println("Tiempo del ciclo (seg):" + String(tCiclo));
   Serial.println("Tiempo inspiratorio (seg):" + String(tIns));
   Serial.println("Tiempo espiratorio (seg):" + String(tEsp));
   Serial.println("Velocidad 1 calculada:" + String(speedIns));
   Serial.println("Velocidad 2 calculada:" + String(speedEsp));
-  delay(2000);
+  delay(4000);
   display.clear();
 
   // INFORMACIÓN: PARÁMETROS
@@ -265,7 +271,8 @@ void setup()
   } else {
     display.writeLine(1, "No trigger");
   }
-  delay(2000);
+  delay(4000);
+  display.clear();
 
 
   // INTERACCIÓN: ARRANQUE
@@ -286,7 +293,7 @@ void setup()
     ventilation = new MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, ventilationCycle_WaitBeforeInsuflationTime);
   }
   ventilation->start();
-  delay(500);
+  delay(1000);
   display.clear();
   Timer1.start();
 }
