@@ -304,10 +304,13 @@ void setup()
   Timer1.start();
   #endif
 
+    #if 0
     stepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
     stepper.setSpeedInStepsPerSecond(STEPPER_SPEED);
     stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
     stepper.setStepsPerRevolution(STEPPER_PER_REVOLUTION);
+    stepper.moveToHomeInSteps( -1, HOMMING_SPEED, (105 * DEFAULT_MICROSTEPPER), ENDSTOPpin)
+    #endif
 }
 
 // =========================================================================
@@ -318,7 +321,8 @@ int updateCounter = 0;
 
 void loop() {
 
-
+#if 0
+  // calculate real zero stepper
   display.writeLine(0, "Steps");
   while(!encoder.readButton()) {
     encoder.updateValue(&estatura);
@@ -326,8 +330,7 @@ void loop() {
   }
   stepper.moveToPositionInSteps(estatura);
   display.writeLine(1, "Pos=" + String(stepper.getCurrentPositionInSteps()));
-
-#if 0
+  #else
     unsigned long static time;
     time = millis();
     const int deltaUpdate = 5;
@@ -360,8 +363,9 @@ void loop() {
     // si no, actuar en cada bucle Si está en inspiración: controlar con PID el
     // volumen tidal (el que se insufla) Si está en espiración: soltar balón (mover
     // leva hacia arriba sin controlar) y esperar
-#endif
+    #endif
 }
+
 /**
  * Timer 1 ISR
  */
@@ -369,6 +373,27 @@ void timer1Isr () {
   ventilation->update();
   updateCounter++;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
