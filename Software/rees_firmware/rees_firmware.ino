@@ -291,11 +291,12 @@ void setup()
   ventilation->start();
   delay(1000);
   display.clear();
-
+    #if 0
   Timer1.initialize(5000); // 5 ms
   Timer1.stop();
   Timer1.attachInterrupt(timer1Isr);
   Timer1.start();
+  #endif
 }
 
 // =========================================================================
@@ -306,7 +307,6 @@ int updateCounter = 0;
 
 void loop() {
 
-    #if 0
     unsigned long static time = millis();
     const int deltaUpdate = 5;
     unsigned long static lastLaunch = time;
@@ -314,8 +314,9 @@ void loop() {
     if (time > lastLaunch + deltaUpdate) {
         lastLaunch = time;
         ventilation - >update();
+        updateCounter++;
     }
-    #endif
+
     sensors -> readPressure(); //TODO timing
     if (sensors -> getPressure().state == SensorStateFailed) {
         //TODO sensor fail. do something
