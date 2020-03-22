@@ -83,7 +83,7 @@ void resetPID() {
 }
 
 float computePID(float setpoint, float feedbackInput) {
-  //dt is fixed to 1 msec by timer interrupt
+  //dt is set to TIME_BASE msec by timer interrupt
 
   float error = setpoint - feedbackInput;
 
@@ -132,10 +132,10 @@ float pos2vol(float position) { //converts position [steps] to volume [ml]
 
 
 void integratorFlowToVolume(float* currentVolume, float currentFlow) {
-  //We add to currentVolume the ml that flowed in 1msec;
-  *currentVolume += currentFlow * 60;
-  //currentVolume += currentFlow * (1000/1) * (60/1) * (1/1000);
-}                 //  [l/m]       [l]/[ml]  [min]/[s]  [s]/[msec]
+  //We add to currentVolume the ml that flowed in TIME_BASE msec;
+  *currentVolume += currentFlow * 60 * TIME_BASE;
+  //currentVolume += currentFlow * (1000/1) * (60/1) * (1/1000)   * TIME_BASE;
+}                 //  [l/m]       [l]/[ml]  [min]/[s]  [s]/[msec]   [msec]
 
 
 #if 0

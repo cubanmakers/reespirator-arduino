@@ -121,13 +121,6 @@ void setup()
   display.clear();
   delay(100);
 
-/*
-  Timer1.initialize(1000); // 1 ms
-  Timer1.stop();
-  Timer1.attachInterrupt(timer1Isr);
-  // timer1 is started later
-*/
-
   // INTERACCIÓN: ESTATURA
   // =========================================================================
   display.writeLine(0, "Introduce altura");
@@ -296,7 +289,11 @@ void setup()
   ventilation->start();
   delay(1000);
   display.clear();
-  //Timer1.start();
+
+  Timer1.initialize(1000); // 1 ms
+  Timer1.stop();
+  Timer1.attachInterrupt(timer1Isr);
+  Timer1.start();
 }
 
 // =========================================================================
@@ -305,6 +302,7 @@ void setup()
 
 void loop() {
 
+#if 0
 unsigned long static time = millis();
 const int deltaUpdate = 5;
 unsigned long static lastLaunch = time;
@@ -313,10 +311,13 @@ if (time > lastLaunch + deltaUpdate) {
     lastLaunch = time;
     ventilation -> update();
 }
-
+#endif
   sensors->readPressure(); //TODO timing
   if (sensors->getPressure().state == SensorStateFailed) {
     //TODO sensor fail. do something
+      display.clear();
+      display.writeLine(0, "Valor guardado");
+
   }
 
   // TODO: si hay nueva configuración: cambiar parámetros escuchando entrada desde el encoder
