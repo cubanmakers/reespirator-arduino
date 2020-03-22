@@ -277,7 +277,7 @@ void MechVentilation::update(void) {
             {
                 totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
-
+                Serial.println("totalCyclesInThisState" + String(totalCyclesInThisState));
                 /* Status update and reset timer, for next time */
                 _setState(State_WaitBeforeExsufflation);
                 currentTime = 0;
@@ -286,12 +286,12 @@ void MechVentilation::update(void) {
         case State_WaitBeforeExsufflation:
             { //Stepper is stopped in this state
                 /* Stepper control*/
-                _cfgStepper.setTargetPositionInSteps(vol2pos(_cfgmlTidalVolume));
-                while (!_cfgStepper.motionComplete()) {
-                    _cfgStepper.processMovement();
+                // _cfgStepper.setTargetPositionInSteps(vol2pos(_cfgmlTidalVolume));
+                // while (!_cfgStepper.motionComplete()) {
+                //     _cfgStepper.processMovement();
                     
-                }
-                Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
+                // }
+//                Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
 
                 if (currentTime > WAIT_BEFORE_EXSUFLATION_TIME) {
 
@@ -323,6 +323,7 @@ void MechVentilation::update(void) {
                 //  float speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters,
                 //  int homeLimitSwitchPin)
                 _cfgStepper.setAccelerationInStepsPerSecondPerSecond(EXSUFFLATION_ACCEL); //TODO
+                Serial.println("**********  START_HOMMING  **********");
                 _cfgStepper.moveToHomeInSteps(1, EXSUFFLATION_SPEED, (105 * DEFAULT_MICROSTEPPER), ENDSTOPpin);
 //                _cfgStepper.setSpeedInStepsPerSecond(EXSUFFLATION_SPEED); //TODO
 //                _cfgStepper.setTargetPositionInSteps(0);
@@ -349,7 +350,7 @@ void MechVentilation::update(void) {
                                             Serial.println("Motor:Process movement");
 
                 } else {
-
+                    Serial.println("**********  END_HOMMING  **********");
                     /* Status update and reset timer, for next time */
                     currentWaitInsuflationTime = 0;
                     if (_sensor_error_detected) {
@@ -410,8 +411,6 @@ void MechVentilation::_init(
     _cfgStepper.setSpeedInStepsPerSecond(STEPPER_SPEED);
     _cfgStepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
     _cfgStepper.setStepsPerRevolution(STEPPER_PER_REVOLUTION);
-    //stepper.setAccelerationInRevolutionsPerSecondPerSecond(aceleracion); //TODO revisar adaptacion a flexy
-
 
     _sensor_error_detected = false;
 }
