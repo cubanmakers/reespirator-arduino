@@ -3,9 +3,9 @@
 image: registry.gitlab.com/tinproject/reespirator-ci-images:20200322T184002Z_697116e
 
 stages:
-  - build
+  - build_rees_firmware
 
 build:
-  stage: build
+  stage: build_rees_firmware
   script:
-    - make
+    - cd Software/rees_firmware && make
