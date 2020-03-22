@@ -16,10 +16,14 @@
 
 /** States of the mechanical ventilation. */
 enum State {
-    State_WaitBeforeInsuflation = 0,    /**< Wait for trigger or timer, if running is true. */
-    State_Insufflation = 1,             /**< Insufflating (PID control). */
-    State_WaitBeforeExsufflation = 2,   /**< Wait for timer. */
-    State_Exsufflation = 3              /**< Return to position 0 and wait for the patient to exsufflate. */
+    Init_WaitBeforeInsuflation = 0,
+    State_WaitBeforeInsuflation = 1,    /**< Wait for trigger or timer, if running is true. */
+    Init_Insufflation = 2,
+    State_Insufflation = 3,             /**< Insufflating (PID control). */
+    Init_WaitBeforeExsufflation = 4,
+    State_WaitBeforeExsufflation = 5,   /**< Wait for timer. */
+    Init_Exsufflation = 6,
+    State_Exsufflation = 7              /**< Return to position 0 and wait for the patient to exsufflate. */
 };
 
 /**
@@ -98,6 +102,7 @@ public:
      * @note This method must be called on the main loop.
      */
     void update(void);
+    bool getSensorErrorDetecte();
 
 private:
     /** Initialization. */
@@ -150,6 +155,13 @@ private:
     float _speedInsufflation;
     /** Exsufflation speed. @todo Denote units. */
     float _speedExsufflation;
+    bool _running = false;
+    bool _sensor_error_detected;
+    bool _startWasTriggeredByPatient = false;
+    float _currentVolume = 0;
+
+
+
     /** Estimated flux accross the bmes. @todo Denote units. */
     //float _flux;
 

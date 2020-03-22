@@ -58,14 +58,6 @@ float getCurrentFlow(float pressure1, float pressure2) {
   return flow;
 }
 
-float getCurrentPressure1() {
-  return pressure1;
-}
-
-float getCurrentPressure2() {
-  return pressure2;
-}
-
 /**
  * @brief Constrains the value within the limits
  */
@@ -138,9 +130,10 @@ float pos2vol(float position) { //converts position [steps] to volume [ml]
   return volume;
 }
 
-int integratorFlowToVolumen(float currentFlow) {
+
+void integratorFlowToVolume(float* currentVolume, float currentFlow) {
   //We add to currentVolume the ml that flowed in 1msec;
-  currentVolume += currentFlow * 60;
+  *currentVolume += currentFlow * 60;
   //currentVolume += currentFlow * (1000/1) * (60/1) * (1/1000);
 }                 //  [l/m]       [l]/[ml]  [min]/[s]  [s]/[msec]
 
@@ -152,7 +145,7 @@ int integratorFlowToVolumen(float currentFlow) {
  * @param lpfArray array con muestras anteriores
  * @return float filtered value
  */
-float computeLPF(int parameter, int lpfArray)
+float computeLPF(int parameter, int lpfArray[])
 {
   int samples = sizeof(lpfArray);
   int k = samples - 1;           // tamano de la matriz

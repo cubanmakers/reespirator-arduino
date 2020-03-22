@@ -57,6 +57,6 @@
 
 // @fm superñapa. parametrizar desde el inicio. se usa en mechVentilation
 #define ventilationCycle_WaitBeforeInsuflationTime  800 //ms TODO parameter to mechVent
-#define totalPatientVolume 0.8 // liters
+//#define totalPatientVolume 0.8 // liters
 
 #endif // DEFAULTS_H
