@@ -150,7 +150,6 @@ void MechVentilation::update(void) {
     integratorFlowToVolume(&_currentVolume, currentFlow);
 
     refreshWatchDogTimer();
-    Serial.println("At Switch");
     switch (_currentState) {
 
         case Init_WaitBeforeInsuflation:
@@ -158,17 +157,18 @@ void MechVentilation::update(void) {
 
                 totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
-
+                Serial.println("totalCyclesInThisState: " + String(totalCyclesInThisState));
                 /* Calculate wait time */
                 waitBeforeInsuflationTime = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
                 //                                              [1000msec/1sec] / TIME_BASE
-
+                Serial.println("waitBeforeInsuflationTime: " + String(waitBeforeInsuflationTime));
                 /* Status update and reset timer, for next time */
                 _setState(State_WaitBeforeInsuflation);
                 //currentTime = 0;  MUST BE COMMENTED
 
                 /* Stepper control*/
                 _cfgStepper.setTargetPositionInSteps(0);
+                Serial.println("Set target pos 0");
                 _startWasTriggeredByPatient = false;
 
             }
@@ -181,11 +181,12 @@ void MechVentilation::update(void) {
                     /* Stepper control*/
                     if (!_cfgStepper.motionComplete()) {
                         _cfgStepper.processMovement();
+                        Serial.println("Motor:Process movement");
                     }
 
                     if (currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) { //The start was triggered by patient
                         _startWasTriggeredByPatient = true;
-
+                        Serial.println("!!!! Trigered by patient");
                         /* Status update, for next time */
                         _setState(Init_Insufflation);
 
@@ -214,6 +215,7 @@ void MechVentilation::update(void) {
                 /* Stepper control: set acceleration and end-position */
                 _cfgStepper.setAccelerationInStepsPerSecondPerSecond(INSUFFLATION_ACCEL);
                 _cfgStepper.setTargetPositionInSteps(vol2pos(_cfgmlTidalVolume));
+                Serial.println("Motor:targetPos" + String(_cfgmlTidalVolume));
 
                 /* Status update, reset timer, for next time, and reset PID integrator to zero */
                 _setState(State_Insufflation);
@@ -243,9 +245,12 @@ void MechVentilation::update(void) {
             stepperSpeed = flow2speed(pidOutput_FlowSetpoint);
 
             /* Stepper control: set end position */
+                  Serial.println("Motor:speed=" + String(stepperSpeed));
                 _cfgStepper.setSpeedInStepsPerSecond(stepperSpeed);
                 if (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
+                                            Serial.println("Motor:Process movement");
+
                 }
 
                 if ((_currentVolume >= _cfgmlTidalVolume) || (currentTime > insuflationTime)) {
@@ -326,6 +331,8 @@ void MechVentilation::update(void) {
                 /* Stepper control*/
                 if (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
+                                            Serial.println("Motor:Process movement");
+
                 } else {
 
                     /* Status update and reset timer, for next time */
