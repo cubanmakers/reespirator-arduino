@@ -307,13 +307,14 @@ int updateCounter = 0;
 
 void loop() {
 
-    unsigned long static time = millis();
+    unsigned long static time;
+    time = millis();
     const int deltaUpdate = 5;
     unsigned long static lastLaunch = time;
 
     if (time > lastLaunch + deltaUpdate) {
         lastLaunch = time;
-        ventilation - >update();
+        ventilation->update();
         updateCounter++;
     }
 
