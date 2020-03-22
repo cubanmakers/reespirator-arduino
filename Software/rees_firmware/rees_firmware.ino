@@ -82,7 +82,9 @@ void setup()
   Serial.println("Inicio");
 
   // Display de inicio
-  display.writeLine(0, "REESPIRATOR");
+  display.writeLine(0, "REESPIRATOR-From");
+  display.writeLine(1, "People 2 people");
+
 
   // Zumbador
   pinMode(BUZZpin, OUTPUT);
@@ -290,7 +292,7 @@ void setup()
   delay(1000);
   display.clear();
 
-  Timer1.initialize(1000); // 1 ms
+  Timer1.initialize(5000); // 1 ms
   Timer1.stop();
   Timer1.attachInterrupt(timer1Isr);
   Timer1.start();
@@ -302,38 +304,33 @@ void setup()
 
 void loop() {
 
-#if 0
-unsigned long static time = millis();
-const int deltaUpdate = 5;
-unsigned long static lastLaunch = time;
+    #if 0
+    unsigned long static time = millis();
+    const int deltaUpdate = 5;
+    unsigned long static lastLaunch = time;
 
-if (time > lastLaunch + deltaUpdate) {
-    lastLaunch = time;
-    ventilation -> update();
-}
-#endif
-  sensors->readPressure(); //TODO timing
-  if (sensors->getPressure().state == SensorStateFailed) {
-    //TODO sensor fail. do something
-      display.clear();
-      display.writeLine(0, "Valor guardado");
+    if (time > lastLaunch + deltaUpdate) {
+        lastLaunch = time;
+        ventilation - >update();
+    }
+    #endif
+    sensors -> readPressure(); //TODO timing
+    if (sensors -> getPressure().state == SensorStateFailed) {
+        //TODO sensor fail. do something
+        display.clear();
+        display.writeLine(0, "Valor guardado");
 
-  }
+    }
 
-  // TODO: si hay nueva configuración: cambiar parámetros escuchando entrada desde el encoder
+    // TODO: si hay nueva configuración: cambiar parámetros escuchando entrada desde
+    // el encoder
 
-
-  // TODO: chequear trigger
-  // si hay trigger, esperar al flujo umbral para actuar, si no, actuar en cada bucle
-
-
-  // Si está en inspiración: controlar con PID el volumen tidal (el que se insufla)
-
-  // Si está en espiración: soltar balón (mover leva hacia arriba sin controlar) y esperar
-
+    // TODO: chequear trigger si hay trigger, esperar al flujo umbral para actuar,
+    // si no, actuar en cada bucle Si está en inspiración: controlar con PID el
+    // volumen tidal (el que se insufla) Si está en espiración: soltar balón (mover
+    // leva hacia arriba sin controlar) y esperar
 
 }
-
 /**
  * Timer 1 ISR
  */

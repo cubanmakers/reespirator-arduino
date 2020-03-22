@@ -260,8 +260,8 @@ void MechVentilation::update(void) {
 
         case Init_WaitBeforeExsufflation:
             {
-                totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000;
-                //											[1000msec/1sec]*[1sec/1cycle]
+                totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
+                //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
 
                 /* Status update and reset timer, for next time */
                 _setState(State_WaitBeforeExsufflation);
@@ -283,12 +283,12 @@ void MechVentilation::update(void) {
 
         case Init_Exsufflation:
             {
-                totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000;
-                //											[1000msec/1sec]*[1sec/1cycle]
+                totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
+                //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
 
                 /* Calculate wait time */
-                //exsuflationTime = _cfgSecTimeoutExsufflation * 1000;
-                //                                              [1000msec/1sec]
+                //exsuflationTime = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
+                //                                              [1000msec/1sec] / TIME_BASE
 
                 /* Status update and reset timer, for next time */
                _setState(State_Exsufflation);
