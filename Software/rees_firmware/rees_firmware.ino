@@ -338,7 +338,7 @@ void loop() {
 
     if (time > lastLaunch + deltaUpdate) {
         lastLaunch = time;
-        sensors -> readPressure(); //TODO timing
+        sensors->readPressure(); //TODO timing
         ventilation->update();
         updateCounter++;
     }
@@ -373,6 +373,27 @@ void timer1Isr () {
   ventilation->update();
   updateCounter++;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
