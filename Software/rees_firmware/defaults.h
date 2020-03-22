@@ -5,9 +5,9 @@
 #undef I2C // definido = Display i2c, sin definir Display parallel
 
 // Valores motor
-#define DEFAULT_PASOS_POR_REVOLUCION 200 // Suponiendo un motor de 200 pasos/rev sin microstepper
+#define DEFAULT_PASOS_POR_REVOLUCION (200 * DEFAULT_MICROSTEPPER) // Suponiendo un motor de 200 pasos/rev
 #define DEFAULT_ACELERACION 6000
-#define DEFAULT_MICROSTEPPER 16
+#define DEFAULT_MICROSTEPPER 8
 
 #define STEPPER_SPEED (100) //Steps/s
 #define STEPPER_ACCELERATION 250 //Steps/s2
@@ -28,7 +28,7 @@
 #define DEFAULT_MIN_RPM 3
 #define DEFAULT_POR_INSPIRATORIO 33  // %
 
-#define DEFAULT_PRESSURE_V_FLOW_K1 1   //Constante proporcional que relaciona presión con caudal
+#define DEFAULT_PRESSURE_V_FLOW_K1 0.1   //Constante proporcional que relaciona presión con caudal
 
 #define FLOW__INSUFLATION_TRIGGER_LEVEL 3.0   //LPM
 
