@@ -17,11 +17,12 @@
 
 // pines Display parallel  // parallel
 #define LCD_RS A0
-#define LCD_E  A1
-#define LCD_D4 A2
-#define LCD_D5 A3
-#define LCD_D6 A4
-#define LCD_D7 A5
+#define LCD_RW A1
+#define LCD_E  A2
+#define LCD_D4 A3
+#define LCD_D5 A4
+#define LCD_D6 A5
+#define LCD_D7 A6
 
 #endif // I2C
 
@@ -32,8 +33,8 @@
 
 #define ENpin 8
 // Stepper driver (FlexyStepper)
-#define MOTOR_STEP_PIN 6
-#define MOTOR_DIRECTION_PIN 7
+#define MOTOR_STEP_PIN 7
+#define MOTOR_DIRECTION_PIN 6
 
 // Buzzer
 #define BUZZpin 11
@@ -41,11 +42,18 @@
 // Sensor hall
 #define ENDSTOPpin 5
 
-// BME280 SPI al menos para Arduino Nano o Mega
-#define BMP_SCK  13
-#define BMP_MISO 12
-#define BMP_MOSI 11
-#define BMP_CS1  10 // sensor de presion 1
-#define BMP_CS2  4  // sensor de presion 2
+// BME280 SPI al menos para Arduino Nano o Mega 128
+// #define BMP_SCK  13
+// #define BMP_MISO 12
+// #define BMP_MOSI 11
+// #define BMP_CS1  10 // sensor de presion 1
+// #define BMP_CS2  4  // sensor de presion 2
+
+// BME280 SPI para Arduino Mega 256
+#define BMP_SCK  52
+#define BMP_MISO 50
+#define BMP_MOSI 51
+#define BMP_CS1  53 // sensor de presion 1
+#define BMP_CS2  49 // sensor de presion 2
 
 #endif // ENCODER_H
