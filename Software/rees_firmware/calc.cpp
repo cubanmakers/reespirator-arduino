@@ -138,6 +138,7 @@ void integratorFlowToVolume(float* currentVolume, float currentFlow) {
 }                 //  [l/m]       [l]/[ml]  [min]/[s]  [s]/[msec]
 
 
+#if 0
 /**
  * @brief Filtro de media móvil, de low-pass filter, para la diferencia de presiones
  *
@@ -160,6 +161,7 @@ float computeLPF(int parameter, int lpfArray[])
   float result = cumParameter / samples;
   return result;
 }
+#endif
 
 //float curveInterpolator(int[] curve, float min, float max, float currentProgressFactor);
 //float curveInterpolator(float maxValue, float currentProgressFactor);
@@ -177,6 +179,7 @@ float curveInterpolator(float inValue, float currentProgressFactor) {
 	return outValue;
 }
 
+#if 0
 float flow2speed(float flow) { //converts flow [LPM] to speed [steps/sec]
   //float speed  = flow *  (1/60) * (1000/1) * (1/800)                 * (100/1);
   //     [steps/s]  [l/m]  [min/sec] [ml/l]    [fully_pressed_ambu/ml]   [steps/fully_pressed_ambu]
@@ -188,3 +191,4 @@ float flow2speed(float flow) { //converts flow [LPM] to speed [steps/sec]
 
   return position;
 }
+#endif

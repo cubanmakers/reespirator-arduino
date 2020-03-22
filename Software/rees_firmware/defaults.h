@@ -33,7 +33,7 @@
 #define FLOW__INSUFLATION_TRIGGER_LEVEL 3.0   //LPM
 
 // Ventilation cycle timing
-#define VENTILATION_CYCLE__WAIT_BEFORE_EXSUFLATION_TIME 500    //msec
+#define WAIT_BEFORE_EXSUFLATION_TIME 500    //msec
 
 // PID constants
 #define PID_MIN 0

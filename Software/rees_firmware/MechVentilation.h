@@ -140,11 +140,11 @@ private:
 
     /* Internal state */
     /** Previous state. @todo Consider removing. */
-    State _previousState;
+    //State _previousState;
     /** Current state. */
     State _currentState;
     /** Next state. @todo Consider removing. */
-    State _nextState;
+    //State _nextState;
     /** Timer counter in seconds. */
     uint64_t _secTimerCnt;
     /**  Insufflation timeout in seconds. */

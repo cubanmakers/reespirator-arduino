@@ -61,7 +61,7 @@ void refreshWatchDogTimer();
 
 float vol2pos(float volume);
 float pos2vol(float position);
-float flow2speed(float flow);
+//float flow2speed(float flow);
 int integratorFlowToVolume(float currentFlow);
 void integratorFlowToVolume(float* currentVolume, float currentFlow);
 void resetPID();

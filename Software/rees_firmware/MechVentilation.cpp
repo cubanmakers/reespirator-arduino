@@ -132,10 +132,6 @@ void MechVentilation::update(void) {
     static int insuflationTime = 0;
     static int flowSetpoint = 0;
 
-    if (!_running) {
-        return;
-    }
-
     // TODO: meter algo como esto en loop ppal (creo que ya está)      Acquire
     // sensors data     SensorValues_t sensorValues = _sensors.getPressure();
 
@@ -267,10 +263,6 @@ void MechVentilation::update(void) {
                 totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000;
                 //											[1000msec/1sec]*[1sec/1cycle]
 
-                /* Calculate wait time */
-                exsuflationTime = _cfgSecTimeoutExsufflation * 1000;
-                //                                              [1000msec/1sec]
-
                 /* Status update and reset timer, for next time */
                 _setState(State_WaitBeforeExsufflation);
                 currentTime = 0;
@@ -295,7 +287,7 @@ void MechVentilation::update(void) {
                 //											[1000msec/1sec]*[1sec/1cycle]
 
                 /* Calculate wait time */
-                exsuflationTime = _cfgSecTimeoutExsufflation * 1000;
+                //exsuflationTime = _cfgSecTimeoutExsufflation * 1000;
                 //                                              [1000msec/1sec]
 
                 /* Status update and reset timer, for next time */
@@ -311,7 +303,24 @@ void MechVentilation::update(void) {
 
                 //TODO @fm read hall sensor
                 
-                if (stepperIsInZeroPoint) { //Hall sensor boolean
+                
+                // if (stepperIsInZeroPoint) { //Hall sensor boolean
+
+                //     /* Status update and reset timer, for next time */
+                //     currentWaitInsuflationTime = 0;
+                //     if (_sensor_error_detected) {
+                //         // error sensor reading
+                //         _running = false;
+                //         //TODO buzzer & display
+                //     } else {
+                //         _setState(State_WaitBeforeInsuflation);
+                //     }
+                // }
+                
+                /* Stepper control*/
+                if (!_cfgStepper.motionComplete()) {
+                    _cfgStepper.processMovement();
+                } else {
 
                     /* Status update and reset timer, for next time */
                     currentWaitInsuflationTime = 0;
@@ -320,10 +329,10 @@ void MechVentilation::update(void) {
                         _running = false;
                         //TODO buzzer & display
                     } else {
-                        _setState(State_WaitBeforeInsuflation);
+                        _setState(Init_WaitBeforeInsuflation);
                     }
                 }
-                
+
                 currentTime++;
             }
             break;
@@ -356,9 +365,9 @@ void MechVentilation::_init(
     _cfgLpmFluxTriggerValue = lpmFluxTriggerValue;
 
     /* Initialize internal state */
-    _previousState = State_Init;
-    _currentState = State_Idle;
-    _nextState = State_Idle;
+    //_previousState = Init_WaitBeforeInsuflation;
+    _currentState = Init_WaitBeforeInsuflation;
+    //_nextState = Init_WaitBeforeInsuflation;
     _secTimerCnt = 0;
     _secTimeoutInsufflation = 0;
     _secTimeoutExsufflation = 0;
@@ -371,12 +380,12 @@ void MechVentilation::_init(
     //;
     stepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
     stepper.setSpeedInStepsPerSecond(STEPPER_SPEED);
-    stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION)
+    stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
 
     _sensor_error_detected = false;
 }
 
 void MechVentilation::_setState(State state) {
-    _previousState = _currentState;
+    //_previousState = _currentState;
     _currentState = state;
 }
