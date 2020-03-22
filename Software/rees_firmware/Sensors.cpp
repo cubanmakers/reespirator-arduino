@@ -30,7 +30,7 @@ unsigned int Sensors::begin(void) {
                       Adafruit_BME280::FILTER_X16,      /* Filtering. */
                       Adafruit_BME280::STANDBY_MS_500); /* Standby time. */
 
-
+    return 0;
 }
 
 Sensors::Sensors(Adafruit_BME280 pres1, Adafruit_BME280 pres2) {
