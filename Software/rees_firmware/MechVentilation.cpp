@@ -19,7 +19,8 @@ int currentWaitTriggerTime = 0;
 int currentStopInsufflationTime = 0;
 bool running = false;
 bool _startWasTriggeredByPatient = false;
-float positionSetpoint = 0;
+float currentFlow = 0;
+float currentVolume = 0;
 
 MechVentilation::MechVentilation (
     FlexyStepper stepper,
@@ -71,9 +72,21 @@ MechVentilation::MechVentilation(
 //TODO: use this method to play a beep in main loop, 1 second long for example.
 boolean MechVentilation::getStartWasTriggeredByPatient() { //returns true if last respiration cycle was started by patient trigger. It is cleared when read.
     if (_startWasTriggeredByPatient) {
-        _startWasTriggeredByPatient = false;
-    }
-    return true;
+        _startWasTriggeredByPatient = false; //clear flag
+        return true;
+    } else {
+        return false;
+    }    
+}
+
+//TODO: use this method to play a beep in main loop, 2 second long for example.
+boolean MechVentilation::getSensorErrorDetecte() { //returns true if there was an sensor error detected. It is cleared when read.
+    if (_sensor_error_detected) {
+        _sensor_error_detected = false; //clear flag
+        return true;
+    } else {
+        return false;
+    }    
 }
 
 void MechVentilation::setTidalVolume(float mlTidalVolume) {
@@ -114,125 +127,85 @@ void MechVentilation::stop(void) {
 void MechVentilation::update(void)
 {
     static int currentWaitInsuflationTime = 0; //TODO static function in cpp. check
+    static int currentInsuflationTime = 0; //TODO static function in cpp. check
     static int currentWaitExsufflationTime = 0; //TODO static function in cpp. check
+    static int currentExsufflationTime = 0; //TODO static function in cpp. check
  
     //TODO: meter algo como esto en loop ppal (creo que ya está)
     //     // Acquire sensors data
     //     SensorValues_t sensorValues = _sensors.getPressure();
 
-
     SensorValues_t values = _sensors->getPressure();
-    if (values.state != SensorStateOK) {
-        //TODO sensor failed. do something
-    } else {
+ 
+    if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
 
-        float currentFlow = getCurrentFlow(values.pressure1, values.pressure2); //TODO Must calculate Flow using the last measured pressure couple,
-            //but the pressure reading must be done as non blocking in the main loop
+        _sensor_error_detected = true; //An error was detected in sensors
+       /* Status update, for this time */
+        _setState(State_Exsufflation);
+    }
 
-        refreshWatchDogTimer();
+    currentFlow = getCurrentFlow(values.pressure1, values.pressure2); //TODO Must calculate Flow using the last measured pressure couple,
+        //but the pressure reading must be done as non blocking in the main loop
+    currentVolume = integratorFlowToVolumen(currentFlow);
 
-        switch(_currentState) {
-            case State_WaitBeforeInsuflation : { //Wait Trigger or Time.  Stepper is stopped in this state
-                _cfgStepper.setTargetPositionInSteps(0);
-                _startWasTriggeredByPatient = false;
-                if (running && ((currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) || (currentWaitTriggerTime > ventilationCycle_WaitBeforeInsuflationTime))) {
+    refreshWatchDogTimer();
 
-                    if (currentWaitTriggerTime > ventilationCycle_WaitBeforeInsuflationTime) { //The start was triggered by patient
-                        _startWasTriggeredByPatient = true;
-                    }
+    switch(_currentState) {
 
-                    /* Status update, for next time */
-                    _setState(State_Insufflation);
+        case State_WaitBeforeInsuflation : { //Wait Trigger or Time.  Stepper is stopped in this state
+            _cfgStepper.setTargetPositionInSteps(0);
+            _startWasTriggeredByPatient = false;
+            if (running && ((currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) || (currentWaitTriggerTime > ventilationCycle_WaitBeforeInsuflationTime))) {
+
+                if (currentWaitTriggerTime > ventilationCycle_WaitBeforeInsuflationTime) { //The start was triggered by patient
+                    _startWasTriggeredByPatient = true;
                 }
-                currentWaitInsuflationTime++;
+
+                /* Status update, for next time, and reset PID integrator to zero */
+                _setState(State_Insufflation);
+                resetPID();
+                currentInsuflationTime = 0;
             }
-            break;
+            currentWaitInsuflationTime++;
+        }
+        break;
 
-            case State_Insufflation : {
-                float output = 0;
-                float pidOutput_PositionSetpoint = 0;
-                float feedbackInput = 0; // TODO feedbackInput
+        case State_Insufflation : {
+            float pidOutput_VolumeSetpoint = 0;
+            float pidOutput_PositionSetpoint = 0;
 
-                /* Calculate position/flow PID */
-                output = computePID(positionSetpoint, feedbackInput);
 
-                pidOutput_PositionSetpoint = 0; //flow2Position(output); //TODO
+            // float curveInterpolator(int[] curve, float min, float max, float currentProgressPercent);
 
-                /* Steeper control (Position)*/
-                _cfgStepper.setTargetPositionInSteps(pidOutput_PositionSetpoint);
+            /* Calculate VolumeSetpoint */
+            volumeSetpoint = curveInterpolator(insufflationCurve, 0, _cfgmlTidalVolume, currentProgress);
 
-                /* Status update and reset timer, for next time */
-                _setState(State_WaitBeforeExsufflation);
+            /* Calculate position/flow PID */
+            //pidOutput_PositionSetpoint = computePID(_cfgmlTidalVolume, currentVolume);
+            pidOutput_VolumeSetpoint = computePID(volumeSetpoint, currentVolume);
+
+            pidOutput_PositionSetpoint = vol2pos(pidOutput_VolumeSetpoint);
+
+            /* Steeper control (Position)*/
+            _cfgStepper.setTargetPositionInSteps(pidOutput_PositionSetpoint);
+
+            /* Status update and reset timer, for next time */
+            _setState(State_WaitBeforeExsufflation);
+            
+            if (currentVolume >= mlTidalVolume) {
                 currentWaitExsufflationTime = 0;
             }
-            break;
-
-            case State_WaitBeforeExsufflation : { //Stepper is stopped in this state
-                _cfgStepper.setTargetPositionInSteps(vol2pos(totalPatientVolume));
-
-                if (currentWaitExsufflationTime > VENTILATION_CYCLE__WAIT_BEFORE_EXSUFLATION_TIME) {
-
-                    /* Status update, for next time */
-                    _setState(State_Exsufflation);
-                }
-                currentWaitTriggerTime++;
+                _setState(State_WaitBeforeInsuflation);
             }
-            break;
-
-            case State_Exsufflation : {
-                _cfgStepper.setSpeedInStepsPerSecond(0); //TODO
-                //_cfgStepper.setTargetPositionInSteps(XXX);
-                
-                //TODO @fm read hall sensor
-                #if 0
-                if (steeperIsInZeroPoint) { //Hall sensor boolean
-
-                    /* Status update and reset timer, for next time */
-                    currentWaitInsuflationTime = 0;
-                    _setState(State_WaitBeforeInsuflation);
-                }
-                #endif
-            }
-            break;
-
-            default : {
-            }
-            break;
+            currentInsuflationTime++;
         }
+        break;
+
+        default : {
+        }
+        break;
     }
 }
-
-void MechVentilation::_init(
-    FlexyStepper stepper,
-    Sensors* sensors,
-    int mlTidalVolume,
-    float secTimeoutInsufflation,
-    float secTimeoutExsufflation,
-    float speedInsufflation,
-    float speedExsufflation,
-    int ventilationCyle_WaitTime,
-    float lpmFluxTriggerValue
-)
-{
-    /* Set configuration parameters */
-    _cfgStepper                 = stepper;
-    _sensors                    = sensors;
-    _cfgmlTidalVolume           = mlTidalVolume;
-    _cfgSecTimeoutInsufflation  = secTimeoutInsufflation;
-    _cfgSecTimeoutExsufflation  = secTimeoutExsufflation;
-    _cfgSpeedInsufflation       = speedInsufflation;
-    _cfgSpeedExsufflation       = speedExsufflation;
-    _cfgLpmFluxTriggerValue     = lpmFluxTriggerValue;
-
-    /* Initialize internal state */
-    _previousState          = State_Init;
-    _currentState           = State_Idle;
-    _nextState              = State_Idle;
-    _secTimerCnt            = 0;
-    _secTimeoutInsufflation = 0;
-    _secTimeoutExsufflation = 0;
-    _speedInsufflation      = 0;
-    _speedExsufflation      = 0;
 
     //
     // connect and configure the stepper motor to its IO pins

@@ -24,12 +24,12 @@ int calcularVolumenTidal(int estatura, int sexo) {
  *
  * Calcula a partir de las respiraciones por minuto, los tiempos de ciclo,
  * inspiratorio y espiratorio, y las velocidades uno y dos.
- * @param speedIns TODO: explicación?
- * @param speedEsp TODO: explicación?
+ * @param speedIns step/sec
+ * @param speedEsp step/sec
  * @param tIns tiempo de inspiracion, en segundos
  * @param tEsp tiempo de espiracion, en segundos
  * @param tCiclo tiempo de ciclo, en segundos
- * @param pasosPorRevolucion TODO: explicación?
+ * @param pasosPorRevolucion pasos en una revolución completa del stepper
  * @param microStepper TODO: explicación?
  * @param porcentajeInspiratorio fraccion del ciclo en la que se inspira, tIns/tCiclo*100
  * @param rpm respiraciones por minuto
@@ -42,8 +42,8 @@ void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
   *tIns = *tCiclo * porcentajeInspiratorio/100;
   *tEsp = *tCiclo - *tIns;
 
-  *speedIns = (pasosPorRevolucion * microStepper / 2) / *tIns; // TODO: unidades?
-  *speedEsp = (pasosPorRevolucion * microStepper / 2) / *tEsp; // TODO: unidades?
+  *speedIns = STEPS_FOR_TOTALLY_PRESSED_AMBU / *tIns; // step/sec
+  *speedEsp = STEPS_FOR_TOTALLY_PRESSED_AMBU / *tEsp; // step/sec
 }
 
 /**
@@ -51,11 +51,19 @@ void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
  *
  * @param pressure1 presión a un lado
  * @param pressure2 presión a otro lado
- * @param flux caudal resultante
+ * @param flow caudal resultante
  */
 float getCurrentFlow(float pressure1, float pressure2) {
-  float flow = (pressure1 - pressure2) * DEFAULT_PRESSURE_V_FLUX_K1;
+  float flow = (pressure1 - pressure2) * DEFAULT_PRESSURE_V_FLOW_K1;
   return flow;
+}
+
+float getCurrentPressure1() {
+  return pressure1;
+}
+
+float getCurrentPressure2() {
+  return pressure2;
 }
 
 /**
@@ -74,9 +82,13 @@ float constrainFloat(float value, float lowLimit, float highLimit) {
  * PID step calculation
  */
 float proportional = 0;
-float integral = 0;
+static float integral = 0;
 float derivative = 0;
 float previous_feedbackInput = 0;
+
+void resetPID() {
+  integral = 0;
+}
 
 float computePID(float setpoint, float feedbackInput) {
   //dt is fixed to 1 msec by timer interrupt
@@ -107,19 +119,51 @@ void refreshWatchDogTimer() {
 //   return flow;
 // }
 
-float vol2pos(float volume) { //converts volume [litres] to position [steps]
+float vol2pos(float volume) { //converts volume [ml] to position [steps]
   //TODO improve with LUT to linearize if needed
+  //float position  = volume * (1/800)                 * (100/1);
+  //      [steps]      [ml]  [fully_pressed_ambu/ml]   [steps/fully_pressed_ambu]
+  //float position  = volume * (1/8);
+  //  #define K_VOL2POS (STEPS_FOR_TOTALLY_PRESSED_AMBU / VOLUME_FOR_TOTALLY_PRESSED_AMBU)
+  //  K_VOL2POS = (1/8);
+  
   float position = volume * K_VOL2POS;
 
   return position;
 }
 
-float pos2vol(float position) { //converts volume [litres] to position [steps]
-  //TODO improve with LUT to linearize if needed
+float pos2vol(float position) { //converts position [steps] to volume [ml]
   float volume = position * K_POS2VOL;
 
   return volume;
 }
 
+int integratorFlowToVolumen(float currentFlow) {
+  //We add to currentVolume the ml that flowed in 1msec;
+  currentVolume += currentFlow * 60;
+  //currentVolume += currentFlow * (1000/1) * (60/1) * (1/1000);
+}                 //  [l/m]       [l]/[ml]  [min]/[s]  [s]/[msec]
 
 
+/**
+ * @brief Filtro de media móvil, de low-pass filter, para la diferencia de presiones
+ *
+ * @param parameter variable a filtrar
+ * @param lpfArray array con muestras anteriores
+ * @return float filtered value
+ */
+float computeLPF(int parameter, int lpfArray)
+{
+  int samples = sizeof(lpfArray);
+  int k = samples - 1;           // tamano de la matriz
+  int cumParameter = parameter; // el acumulador suma ya el param
+  lpfArray[0] = parameter;
+  while (k > 0)
+  {
+    lpfArray[k] = lpfArray[k - 1];   // desplaza el valor una posicion
+    cumParameter += lpfArray[k];     // acumula valor para calcular la media
+    k--;
+  }
+  float result = cumParameter / samples;
+  return result;
+}

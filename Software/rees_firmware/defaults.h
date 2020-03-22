@@ -9,7 +9,7 @@
 #define DEFAULT_ACELERACION 6000
 #define DEFAULT_MICROSTEPPER 16
 
-#define STEPPER_SPEED 100 //Steps/s
+#define STEPPER_SPEED (100) //Steps/s
 #define STEPPER_ACCELERATION 250 //Steps/s2
 
 // Valores por defecto
@@ -21,10 +21,10 @@
 #define DEFAULT_FLUJO_TRIGGER 3
 #define DEFAULT_RPM 15
 #define DEFAULT_MAX_RPM 24
-#define DEFAULT_MIN_RPM 14
-#define DEFAULT_POR_INSPIRATORIO 60
+#define DEFAULT_MIN_RPM 3
+#define DEFAULT_POR_INSPIRATORIO 33  // %
 
-#define DEFAULT_PRESSURE_V_FLUX_K1 1   //Constante proporcional que relaciona presión con caudal
+#define DEFAULT_PRESSURE_V_FLOW_K1 1   //Constante proporcional que relaciona presión con caudal
 
 #define FLOW__INSUFLATION_TRIGGER_LEVEL 3.0   //LPM
 
@@ -45,8 +45,10 @@
 #define PID_KD (PID_D / PID_dt)
 
 //Volume to Position and viceversa constants
-#define K_VOL2POS 1.0
-#define K_POS2VOL (1.0 / K_VOL2POS)
+#define STEPS_FOR_TOTALLY_PRESSED_AMBU (DEFAULT_PASOS_POR_REVOLUCION / 2) //steps
+#define VOLUME_FOR_TOTALLY_PRESSED_AMBU 800 //ml
+#define K_VOL2POS (STEPS_FOR_TOTALLY_PRESSED_AMBU / VOLUME_FOR_TOTALLY_PRESSED_AMBU)
+#define K_POS2VOL (VOLUME_FOR_TOTALLY_PRESSED_AMBU / STEPS_FOR_TOTALLY_PRESSED_AMBU)
 
 // @fm superñapa. parametrizar desde el inicio. se usa en mechVentilation
 #define ventilationCycle_WaitBeforeInsuflationTime  800 //ms TODO parameter to mechVent

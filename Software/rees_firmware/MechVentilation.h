@@ -16,15 +16,10 @@
 
 /** States of the mechanical ventilation. */
 enum State {
-    State_Init = 0,               /**< Initializing. */
-    State_Idle = 1,               /**< Idle. */
-    State_WaitBeforeInsuflation = 2,        /**< Wait for trigger. */
-//    State_StartInsufflation = 3,  /**< Start insufflation. */
-    State_Insufflation = 4,       /**< Insufflating (PID control). */
-//    State_StopInsufflation = 5,   /**< Stop insufflation. */
-    State_WaitBeforeExsufflation = 6,   /**< Wait for the patient to exsufflate. */
-//    State_Shutdown = 7            /**< Shutdown. */
-    State_Exsufflation = 8
+    State_WaitBeforeInsuflation = 0,    /**< Wait for trigger or timer, if running is true. */
+    State_Insufflation = 1,             /**< Insufflating (PID control). */
+    State_WaitBeforeExsufflation = 2,   /**< Wait for timer. */
+    State_Exsufflation = 3              /**< Return to position 0 and wait for the patient to exsufflate. */
 };
 
 /**
@@ -87,9 +82,9 @@ public:
     /** Set insufflation speed. */
     void setSpeedInsufflation(float speedInsufflation);
     /** Set exsufflation speed. */
-void setSpeedExsufflation(float speedExsufflation);
-boolean getStartWasTriggeredByPatient();
-void setVentilationCyle_WaitTime(float speedExsufflation);
+    void setSpeedExsufflation(float speedExsufflation);
+    boolean getStartWasTriggeredByPatient();
+    void setVentilationCyle_WaitTime(float speedExsufflation);
     /** Start mechanical ventilation. */
     void start(void);
     /** Stop mechanical ventilation. */
