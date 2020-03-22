@@ -250,7 +250,7 @@ void MechVentilation::update(void) {
                 _cfgStepper.setSpeedInStepsPerSecond(stepperSpeed);
                 if (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
-                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInMillimeters()));
+                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
                 }
 
                 if ((_currentVolume >= _cfgmlTidalVolume) || (currentTime > insuflationTime)) {
@@ -280,7 +280,7 @@ void MechVentilation::update(void) {
                 _cfgStepper.setTargetPositionInSteps(vol2pos(_cfgmlTidalVolume));
                 if (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
-                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInMillimeters()));
+                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
                 }
 
                 if (currentTime > WAIT_BEFORE_EXSUFLATION_TIME) {
