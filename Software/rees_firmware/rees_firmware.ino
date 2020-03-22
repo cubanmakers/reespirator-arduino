@@ -113,7 +113,7 @@ void setup()
 
   // Parte motor
   pinMode(ENpin, OUTPUT);
-  digitalWrite(ENpin, LOW);
+  digitalWrite(ENpin, HIGH);
 
   Serial.println("Setup");
   stepper.setAccelerationInRevolutionsPerSecondPerSecond(aceleracion); //TODO revisar adaptacion a flexy
@@ -280,7 +280,7 @@ void setup()
   display.writeLine(1, "Iniciando...");
 
   // Habilita el motor
-  digitalWrite(ENpin, HIGH);
+  digitalWrite(ENpin, LOW);
 
   // configura la ventilación
   if (tieneTrigger) {
@@ -292,7 +292,7 @@ void setup()
   delay(1000);
   display.clear();
 
-  Timer1.initialize(5000); // 1 ms
+  Timer1.initialize(5000); // 5 ms
   Timer1.stop();
   Timer1.attachInterrupt(timer1Isr);
   Timer1.start();
