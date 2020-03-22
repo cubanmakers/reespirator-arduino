@@ -169,6 +169,10 @@ void MechVentilation::update(void) {
 
                 /* Stepper control*/
                 _cfgStepper.setTargetPositionInSteps(0);
+                                while (!_cfgStepper.motionComplete()) {
+                    _cfgStepper.processMovement();
+                }
+                                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
                 Serial.println("Set target pos 0");
                 _startWasTriggeredByPatient = false;
 
@@ -216,6 +220,10 @@ void MechVentilation::update(void) {
                 /* Stepper control: set acceleration and end-position */
                 _cfgStepper.setAccelerationInStepsPerSecondPerSecond(INSUFFLATION_ACCEL);
                 _cfgStepper.setTargetPositionInSteps(vol2pos(_cfgmlTidalVolume));
+                while (!_cfgStepper.motionComplete()) {
+                    _cfgStepper.processMovement();
+                }
+                                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
                 Serial.println("Motor:targetPos" + String(_cfgmlTidalVolume));
 
                 /* Status update, reset timer, for next time, and reset PID integrator to zero */
@@ -248,10 +256,11 @@ void MechVentilation::update(void) {
             /* Stepper control: set end position */
                   Serial.println("Motor:speed=" + String(stepperSpeed));
                 _cfgStepper.setSpeedInStepsPerSecond(stepperSpeed);
-                if (!_cfgStepper.motionComplete()) {
+                while (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
-                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
                 }
+                                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
+
 
                 if ((_currentVolume >= _cfgmlTidalVolume) || (currentTime > insuflationTime)) {
 
@@ -278,10 +287,11 @@ void MechVentilation::update(void) {
             { //Stepper is stopped in this state
                 /* Stepper control*/
                 _cfgStepper.setTargetPositionInSteps(vol2pos(_cfgmlTidalVolume));
-                if (!_cfgStepper.motionComplete()) {
+                while (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
-                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
+                    
                 }
+                Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
 
                 if (currentTime > WAIT_BEFORE_EXSUFLATION_TIME) {
 
@@ -399,6 +409,7 @@ void MechVentilation::_init(
     stepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
     stepper.setSpeedInStepsPerSecond(STEPPER_SPEED);
     stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
+    stepper.setStepsPerRevolution(STEPPER_PER_REVOLUTION);
     //stepper.setAccelerationInRevolutionsPerSecondPerSecond(aceleracion); //TODO revisar adaptacion a flexy
 
 
