@@ -155,7 +155,6 @@ void MechVentilation::update(void) {
 
         case Init_WaitBeforeInsuflation:
             {
-
                 totalCyclesInThisState = (int)(_cfgSecTimeoutExsufflation * 1000 / TIME_BASE);
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
                 Serial.println("totalCyclesInThisState: " + String(totalCyclesInThisState));
@@ -175,7 +174,6 @@ void MechVentilation::update(void) {
                 Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
                 Serial.println("Set target pos 0");
                 _startWasTriggeredByPatient = false;
-
             }
             //break;  MUST BE COMMENTED
         case State_WaitBeforeInsuflation:
@@ -251,15 +249,15 @@ void MechVentilation::update(void) {
                 pidOutput_FlowSetpoint = computePID(curveOutput_FlowSetpoint, currentFlow);
 
                 /* Conver Flow to stepper speed */
-            stepperSpeed = flow2speed(pidOutput_FlowSetpoint);
+                stepperSpeed = flow2speed(pidOutput_FlowSetpoint);
 
-            /* Stepper control: set end position */
-                  Serial.println("Motor:speed=" + String(stepperSpeed));
+                /* Stepper control: set end position */
+                Serial.println("Motor:speed=" + String(stepperSpeed));
                 _cfgStepper.setSpeedInStepsPerSecond(stepperSpeed);
                 while (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
                 }
-                                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
+                Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
 
 
                 if ((_currentVolume >= _cfgmlTidalVolume) || (currentTime > insuflationTime)) {
@@ -293,7 +291,7 @@ void MechVentilation::update(void) {
                 // }
 //                Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
 
-                if (currentTime > WAIT_BEFORE_EXSUFLATION_TIME) {
+                if (currentTime > WAIT_BEFORE_EXSUFLATION_TIME / TIME_BASE) {
 
                     /* Status update, for next time */
                     _setState(Init_Exsufflation);
@@ -318,51 +316,45 @@ void MechVentilation::update(void) {
             //break;  MUST BE COMMENTED
         case State_Exsufflation:
             {
-                /* Stepper control: homming */
-                //bool moveToHomeInMillimeters(long directionTowardHome,
-                //  float speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters,
-                //  int homeLimitSwitchPin)
-                _cfgStepper.setAccelerationInStepsPerSecondPerSecond(EXSUFFLATION_ACCEL); //TODO
-                Serial.println("**********  START_HOMMING  **********");
-                _cfgStepper.moveToHomeInSteps(1, EXSUFFLATION_SPEED, (105 * DEFAULT_MICROSTEPPER), ENDSTOPpin);
-//                _cfgStepper.setSpeedInStepsPerSecond(EXSUFFLATION_SPEED); //TODO
-//                _cfgStepper.setTargetPositionInSteps(0);
-
-                //TODO @fm read hall sensor
-                
-                
-                // if (stepperIsInZeroPoint) { //Hall sensor boolean
-
-                //     /* Status update and reset timer, for next time */
-                //     currentWaitInsuflationTime = 0;
-                //     if (_sensor_error_detected) {
-                //         // error sensor reading
-                //         _running = false;
-                //         //TODO buzzer & display
-                //     } else {
-                //         _setState(State_WaitBeforeInsuflation);
-                //     }
-                // }
-                
                 /* Stepper control*/
-                if (!_cfgStepper.motionComplete()) {
+                _cfgStepper.setAccelerationInStepsPerSecondPerSecond(EXSUFFLATION_ACCEL);
+                _cfgStepper.setSpeedInStepsPerSecond(EXSUFFLATION_SPEED);
+                _cfgStepper.setTargetPositionInSteps(0);
+                               
+                while (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
-                                            Serial.println("Motor:Process movement");
-
-                } else {
-                    Serial.println("**********  END_HOMMING  **********");
+                } 
+                //else {
                     /* Status update and reset timer, for next time */
-                    currentWaitInsuflationTime = 0;
-                    if (_sensor_error_detected) {
-                        // error sensor reading
-                        _running = false;
-                        //TODO buzzer & display
-                    } else {
-                        _setState(Init_WaitBeforeInsuflation);
-                    }
+                    //currentTime = 0;
+                    _setState(State_Homming);
+                //}
+                //currentTime++;
+            }
+            break;
+
+        case State_Homming:
+            {
+                if (_sensor_error_detected) {
+                    // error sensor reading
+                    _running = false;
+                    Serial.println("Sensor: FAILED");
+                }
+                    
+                if (!digitalRead(ENDSTOPpin)) { //If not in HOME, do Homming
+                
+                    /* Stepper control: homming */
+                    //bool moveToHomeInMillimeters(long directionTowardHome,
+                    //  float speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters,
+                    //  int homeLimitSwitchPin)
+                    Serial.println("**********  HOMMING  **********");
+
+                    while(!_cfgStepper.moveToHomeInSteps( -1, HOMMING_SPEED, (105 * DEFAULT_MICROSTEPPER), ENDSTOPpin));
                 }
 
-                currentTime++;
+                /* Status update and reset timer, for next time */
+                currentTime = 0;
+                _setState(Init_WaitBeforeInsuflation);
             }
             break;
 

@@ -19,6 +19,7 @@
 #define INSUFFLATION_ACCEL 450
 #define EXSUFFLATION_SPEED 500
 #define EXSUFFLATION_ACCEL 1000
+#define HOMMING_SPEED 250
 
 // Valores por defecto
 #define DEFAULT_ESTATURA 170 // cm

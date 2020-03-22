@@ -23,7 +23,8 @@ enum State {
     Init_WaitBeforeExsufflation = 4,
     State_WaitBeforeExsufflation = 5,   /**< Wait for timer. */
     Init_Exsufflation = 6,
-    State_Exsufflation = 7              /**< Return to position 0 and wait for the patient to exsufflate. */
+    State_Exsufflation = 7,              /**< Return to position 0 and wait for the patient to exsufflate. */
+    State_Homming = 8
 };
 
 /**
