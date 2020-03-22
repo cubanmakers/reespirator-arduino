@@ -10,7 +10,9 @@ ARDUINO_SKETCHBOOK = ./
 ARDUINO_DIR       ?= /opt/arduino
 ARDUINO_LIBS      = LiquidCrystal LiquidCrystal_I2C Wire AccelStepper
 
-PROJECT_DIR       = /app/Software/rees_firmware
+# This get the project dict from CI_PROJECT_DIR env var, or the value if not set.
+CI_PROJECT_DIR   ?= /app
+PROJECT_DIR       = $(CI_PROJECT_DIR)/Software/rees_firmware
 USER_LIB_PATH     = $(PROJECT_DIR)/src
 ARDUINO_LIB_PATH  = $(ARDUINO_DIR)/hardware/arduino/avr/libraries/
 ARCHITECTURE      = avr
