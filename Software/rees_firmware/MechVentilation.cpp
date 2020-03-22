@@ -167,7 +167,7 @@ void MechVentilation::update(void) {
                 //currentTime = 0;  MUST BE COMMENTED
 
                 /* Stepper control*/
-                _cfgStepper.setTargetPositionInSteps(0);
+                _cfgStepper.setTargetPositionInSteps(STEPPER_HOMMING_OFFSET);
                 while (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
                 }
@@ -217,7 +217,7 @@ void MechVentilation::update(void) {
 
                 /* Stepper control: set acceleration and end-position */
                 _cfgStepper.setAccelerationInStepsPerSecondPerSecond(INSUFFLATION_ACCEL);
-                _cfgStepper.setTargetPositionInSteps(vol2pos(_cfgmlTidalVolume));
+                _cfgStepper.setTargetPositionInSteps(vol2pos(_cfgmlTidalVolume) + STEPPER_HOMMING_OFFSET);
                 while (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
                 }
@@ -319,17 +319,14 @@ void MechVentilation::update(void) {
                 /* Stepper control*/
                 _cfgStepper.setAccelerationInStepsPerSecondPerSecond(EXSUFFLATION_ACCEL);
                 _cfgStepper.setSpeedInStepsPerSecond(EXSUFFLATION_SPEED);
-                _cfgStepper.setTargetPositionInSteps(0);
+                _cfgStepper.setTargetPositionInSteps(STEPPER_HOMMING_OFFSET);
                                
                 while (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
                 } 
-                //else {
-                    /* Status update and reset timer, for next time */
-                    //currentTime = 0;
-                    _setState(State_Homming);
-                //}
-                //currentTime++;
+                /* Status update and reset timer, for next time */
+                currentTime = 0;
+                _setState(Init_WaitBeforeInsuflation);
             }
             break;
 
@@ -386,9 +383,7 @@ void MechVentilation::_init(
     _cfgLpmFluxTriggerValue = lpmFluxTriggerValue;
 
     /* Initialize internal state */
-    //_previousState = Init_WaitBeforeInsuflation;
-    _currentState = Init_Exsufflation;
-    //_nextState = Init_WaitBeforeInsuflation;
+    _currentState = State_Homming;
     _secTimerCnt = 0;
     _secTimeoutInsufflation = 0;
     _secTimeoutExsufflation = 0;
