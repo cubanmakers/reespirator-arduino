@@ -82,9 +82,7 @@ void setup()
   Serial.println("Inicio");
 
   // Display de inicio
-  display.writeLine(0, "REESPIRATOR-From");
-  display.writeLine(1, "People 2 people");
-
+  display.writeLine(0, " REESPIRATOR 23 ");
 
   // Zumbador
   pinMode(BUZZpin, OUTPUT);
@@ -119,12 +117,17 @@ void setup()
   stepper.setAccelerationInRevolutionsPerSecondPerSecond(aceleracion); //TODO revisar adaptacion a flexy
 
   // deja la display en blanco
-  delay(2000);
+  delay(3000);
+  display.clear();
+  display.writeLine(0, "De personas");
+  display.writeLine(1, "   para personas");
+  delay(3000);
   display.clear();
   delay(100);
 
   // INTERACCIÓN: ESTATURA
   // =========================================================================
+  /*
   display.writeLine(0, "Introduce altura");
   while(!encoder.readButton()) {
     encoder.updateValue(&estatura);
@@ -136,10 +139,12 @@ void setup()
   Serial.println("Altura (cm): " + String(estatura));
   delay(2000);
   display.clear();
-
+  */
+  estatura = 170;
 
   // INTERACCIÓN: SEXO
   // =========================================================================
+  /*
   display.writeLine(0, "Introduce sexo");
   while(!encoder.readButton()) {
     encoder.swapValue(&sexo);
@@ -159,7 +164,8 @@ void setup()
   Serial.println("Sexo (0:V, 1:M): " + String(sexo));
   delay(2000);
   display.clear();
-
+  */
+  sexo = 0;
 
   // ESTIMACIÓN: VOLUMEN TIDAL
   // =========================================================================
@@ -174,6 +180,7 @@ void setup()
 
   // INTERACCIÓN: VOLUMEN TIDAL
   // =========================================================================
+  /*
   display.writeLine(0, "Modifica volumen");
   while(!encoder.readButton()) {
     encoder.updateValue(&volumenTidal, 10);
@@ -186,10 +193,12 @@ void setup()
   Serial.println("Volumen tidal configurado (ml): " + String(volumenTidal));
   delay(2000);
   display.clear();
+  */
 
 
   // INTERACCIÓN: TRIGGER SI/NO
   // =========================================================================
+  /*
   display.writeLine(0, "Trigger?");
   while(!encoder.readButton()) {
     encoder.swapValue(&tieneTrigger);
@@ -209,6 +218,8 @@ void setup()
   Serial.println("Trigger (0:No, 1:Si): " + String(tieneTrigger));
   delay(2000);
   display.clear();
+  */
+  tieneTrigger = false;
 
 
   // INTERACCIÓN: VALOR DEL TRIGGER
@@ -230,6 +241,7 @@ void setup()
 
   // INTERACCIÓN: FRECUENCIA RESPIRATORIA
   // =========================================================================
+  /*
   display.writeLine(0, "Frecuencia resp.");
   while(!encoder.readButton()) {
     encoder.updateValue(&rpm);
@@ -242,11 +254,13 @@ void setup()
   Serial.println("Frecuencia respiratoria (rpm): " + String(rpm));
   delay(2000);
   display.clear();
+  */
+  rpm = 14;
 
 
   // CÁLCULO: CONSTANTES DE TIEMPO INSPIRACION/ESPIRACION
   // =========================================================================
-  display.writeLine(0, "Tins | Tesp");
+  display.writeLine(0, "Tins  | Tesp");
   calcularCicloInspiratorio(&speedIns, &speedEsp, &tIns, &tEsp,
                             &tCiclo, pasosPorRevolucion, microStepper,
                             porcentajeInspiratorio, rpm);
@@ -313,7 +327,7 @@ void loop() {
 
     if (time > lastLaunch + deltaUpdate) {
         lastLaunch = time;
-        ventilation - >update();
+        ventilation->update();
         updateCounter++;
     }
 
