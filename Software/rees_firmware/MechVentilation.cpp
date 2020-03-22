@@ -134,7 +134,7 @@ void MechVentilation::update(void) {
 
     // TODO: meter algo como esto en loop ppal (creo que ya está)      Acquire
     // sensors data     SensorValues_t sensorValues = _sensors.getPressure();
-    Serial.println("Starting update state %d", _currentState);
+    Serial.println("Starting update state: " + String(_currentState));
 
     SensorValues_t values = _sensors->getPressure();
     if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
