@@ -12,6 +12,10 @@
 #define STEPPER_SPEED (100) //Steps/s
 #define STEPPER_ACCELERATION 250 //Steps/s2
 
+#define INSUFFLATION_ACCEL 450
+#define EXSUFFLATION_SPEED 500
+#define EXSUFFLATION_ACCEL 1000
+
 // Valores por defecto
 #define DEFAULT_ESTATURA 170 // cm
 #define DEFAULT_SEXO 0 // 0: varón, 1: mujer
@@ -49,6 +53,7 @@
 #define VOLUME_FOR_TOTALLY_PRESSED_AMBU 800 //ml
 #define K_VOL2POS (STEPS_FOR_TOTALLY_PRESSED_AMBU / VOLUME_FOR_TOTALLY_PRESSED_AMBU)
 #define K_POS2VOL (VOLUME_FOR_TOTALLY_PRESSED_AMBU / STEPS_FOR_TOTALLY_PRESSED_AMBU)
+#define K_FLOW2SPEED (25/12)
 
 // @fm superñapa. parametrizar desde el inicio. se usa en mechVentilation
 #define ventilationCycle_WaitBeforeInsuflationTime  800 //ms TODO parameter to mechVent
