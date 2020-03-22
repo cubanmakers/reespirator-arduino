@@ -186,7 +186,7 @@ void MechVentilation::update(void) {
                         Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInMillimeters()));
                     }
 
-                    if (currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) { //The start was triggered by patient
+                    if (false /*currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL*/) { //The start was triggered by patient
                         _startWasTriggeredByPatient = true;
                         Serial.println("!!!! Trigered by patient");
                         /* Status update, for next time */
@@ -221,7 +221,7 @@ void MechVentilation::update(void) {
                     _cfgStepper.processMovement();
                 }
                 Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
-                Serial.println("Motor:targetPos" + String(_cfgmlTidalVolume));
+                Serial.println("Motor:targetPos (tidalVol)" + String(_cfgmlTidalVolume));
 
                 /* Status update, reset timer, for next time, and reset PID integrator to zero */
                 _setState(State_Insufflation);

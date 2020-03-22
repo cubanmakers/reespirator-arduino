@@ -5,7 +5,7 @@
 #undef I2C // definido = Display i2c, sin definir Display parallel
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
-#define TIME_BASE 5 //msec
+#define TIME_BASE 20 //msec
 
 // Valores motor
 #define DEFAULT_PASOS_POR_REVOLUCION (200 * DEFAULT_MICROSTEPPER) // Suponiendo un motor de 200 pasos/rev
@@ -15,7 +15,8 @@
 #define STEPPER_SPEED (100) //Steps/s
 #define STEPPER_ACCELERATION 250 //Steps/s2
 #define STEPPER_PER_REVOLUTION 800
-#define STEPPER_HOMMING_OFFSET (-200)
+//#define STEPPER_HOMMING_OFFSET (333)
+int STEPPER_HOMMING_OFFSET = 333;
 #define STEPPER_DIR (-1)
 
 #define INSUFFLATION_ACCEL 450

@@ -318,8 +318,14 @@ void setup()
 // =========================================================================
 
 int updateCounter = 0;
+int incomingByte = 0; // for incoming serial data
 
 void loop() {
+
+  if (Serial.available() > 0) {
+    // read the incoming byte:
+    STEPPER_HOMMING_OFFSET = Serial.read();
+  }
 
 #if 0
   // calculate real zero stepper
@@ -333,15 +339,20 @@ void loop() {
   #else
     unsigned long static time;
     time = millis();
-    const int deltaUpdate = 5;
+    const int deltaUpdate = 20;
     unsigned long static lastLaunch = time;
+    unsigned long static lastReadSensor = time;
 
     if (time > lastLaunch + deltaUpdate) {
         lastLaunch = time;
-        sensors->readPressure(); //TODO timing
         ventilation->update();
         updateCounter++;
     }
+    if (time > lastReadSensor + 10) {
+            sensors->readPressure(); //TODO timing
+            lastReadSensor = time;
+    }
+
 
     if (sensors -> getPressure().state == SensorStateFailed) {
         //TODO sensor fail. do something
@@ -373,6 +384,55 @@ void timer1Isr () {
   ventilation->update();
   updateCounter++;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
