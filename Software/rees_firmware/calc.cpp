@@ -179,7 +179,6 @@ float curveInterpolator(float inValue, float currentProgressFactor) {
 	return outValue;
 }
 
-#if 0
 float flow2speed(float flow) { //converts flow [LPM] to speed [steps/sec]
   //float speed  = flow *  (1/60) * (1000/1) * (1/800)                 * (100/1);
   //     [steps/s]  [l/m]  [min/sec] [ml/l]    [fully_pressed_ambu/ml]   [steps/fully_pressed_ambu]
@@ -187,8 +186,7 @@ float flow2speed(float flow) { //converts flow [LPM] to speed [steps/sec]
   //  #define K_VOL2POS (STEPS_FOR_TOTALLY_PRESSED_AMBU / VOLUME_FOR_TOTALLY_PRESSED_AMBU)
   //  K_FLOW2SPEED = (25/12);
   
-  float position = volume * K_VOL2POS;
+  float speed = flow * K_FLOW2SPEED;
 
-  return position;
+  return speed;
 }
-#endif

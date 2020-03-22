@@ -137,6 +137,7 @@ void MechVentilation::update(void) {
     Serial.println("Starting update state: " + String(_currentState));
 
     SensorValues_t values = _sensors->getPressure();
+    Serial.println("Sensors state=" + String(values.state) + ",pres1=" + String(values.pressure1) + ",pres2=" + String(values.pressure2));
     if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
 
         _sensor_error_detected = true; //An error was detected in sensors
@@ -155,7 +156,7 @@ void MechVentilation::update(void) {
         case Init_WaitBeforeInsuflation:
             {
 
-                totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
+                totalCyclesInThisState = (int)(_cfgSecTimeoutExsufflation * 1000 / TIME_BASE);
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
                 Serial.println("totalCyclesInThisState: " + String(totalCyclesInThisState));
                 /* Calculate wait time */
@@ -241,7 +242,7 @@ void MechVentilation::update(void) {
                 /* Calculate Flow PID */
                 pidOutput_FlowSetpoint = computePID(curveOutput_FlowSetpoint, currentFlow);
 
-                /* Conver Flow to stepper speed
+                /* Conver Flow to stepper speed */
             stepperSpeed = flow2speed(pidOutput_FlowSetpoint);
 
             /* Stepper control: set end position */
