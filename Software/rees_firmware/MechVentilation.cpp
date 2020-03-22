@@ -137,7 +137,7 @@ void MechVentilation::update(void) {
     Serial.println("Starting update state: " + String(_currentState));
 
     SensorValues_t values = _sensors->getPressure();
-    Serial.println("Sensors state=" + String(values.state) + ",pres1=" + String(values.pressure1) + ",pres2=" + String(values.pressure2));
+    //Serial.println("Sensors state=" + String(values.state) + ",pres1=" + String(values.pressure1) + ",pres2=" + String(values.pressure2));
     if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
 
         _sensor_error_detected = true; //An error was detected in sensors
@@ -167,12 +167,11 @@ void MechVentilation::update(void) {
                 //currentTime = 0;  MUST BE COMMENTED
 
                 /* Stepper control*/
-                _cfgStepper.setTargetPositionInSteps(STEPPER_HOMMING_OFFSET);
+                _cfgStepper.setTargetPositionInSteps(STEPPER_DIR * STEPPER_HOMMING_OFFSET);
                 while (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
                 }
                 Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
-                Serial.println("Set target pos 0");
                 _startWasTriggeredByPatient = false;
             }
             //break;  MUST BE COMMENTED
@@ -217,7 +216,7 @@ void MechVentilation::update(void) {
 
                 /* Stepper control: set acceleration and end-position */
                 _cfgStepper.setAccelerationInStepsPerSecondPerSecond(INSUFFLATION_ACCEL);
-                _cfgStepper.setTargetPositionInSteps(vol2pos(_cfgmlTidalVolume) + STEPPER_HOMMING_OFFSET);
+                _cfgStepper.setTargetPositionInSteps(STEPPER_DIR * (vol2pos(_cfgmlTidalVolume) + STEPPER_HOMMING_OFFSET));
                 while (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
                 }
@@ -284,7 +283,7 @@ void MechVentilation::update(void) {
         case State_WaitBeforeExsufflation:
             { //Stepper is stopped in this state
                 /* Stepper control*/
-                // _cfgStepper.setTargetPositionInSteps(vol2pos(_cfgmlTidalVolume));
+                // _cfgStepper.setTargetPositionInSteps(STEPPER_DIR * vol2pos(_cfgmlTidalVolume));
                 // while (!_cfgStepper.motionComplete()) {
                 //     _cfgStepper.processMovement();
                     
@@ -319,7 +318,7 @@ void MechVentilation::update(void) {
                 /* Stepper control*/
                 _cfgStepper.setAccelerationInStepsPerSecondPerSecond(EXSUFFLATION_ACCEL);
                 _cfgStepper.setSpeedInStepsPerSecond(EXSUFFLATION_SPEED);
-                _cfgStepper.setTargetPositionInSteps(STEPPER_HOMMING_OFFSET);
+                _cfgStepper.setTargetPositionInSteps(STEPPER_DIR * STEPPER_HOMMING_OFFSET);
                                
                 while (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
@@ -346,7 +345,7 @@ void MechVentilation::update(void) {
                     //  int homeLimitSwitchPin)
                     Serial.println("**********  HOMMING  **********");
 
-                    while(!_cfgStepper.moveToHomeInSteps( -1, HOMMING_SPEED, (105 * DEFAULT_MICROSTEPPER), ENDSTOPpin));
+                    while(!_cfgStepper.moveToHomeInSteps( 1, HOMMING_SPEED, (105 * DEFAULT_MICROSTEPPER), ENDSTOPpin));
                 }
 
                 /* Status update and reset timer, for next time */
