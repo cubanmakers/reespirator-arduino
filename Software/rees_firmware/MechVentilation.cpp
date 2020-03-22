@@ -169,10 +169,10 @@ void MechVentilation::update(void) {
 
                 /* Stepper control*/
                 _cfgStepper.setTargetPositionInSteps(0);
-                                while (!_cfgStepper.motionComplete()) {
+                while (!_cfgStepper.motionComplete()) {
                     _cfgStepper.processMovement();
                 }
-                                    Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
+                Serial.println("Motor:Process movement position=" + String(_cfgStepper.getCurrentPositionInSteps()));
                 Serial.println("Set target pos 0");
                 _startWasTriggeredByPatient = false;
 
@@ -406,10 +406,10 @@ void MechVentilation::_init(
     // connect and configure the stepper motor to its IO pins
     //
     //;
-    stepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
-    stepper.setSpeedInStepsPerSecond(STEPPER_SPEED);
-    stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
-    stepper.setStepsPerRevolution(STEPPER_PER_REVOLUTION);
+    _cfgStepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
+    _cfgStepper.setSpeedInStepsPerSecond(STEPPER_SPEED);
+    _cfgStepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
+    _cfgStepper.setStepsPerRevolution(STEPPER_PER_REVOLUTION);
     //stepper.setAccelerationInRevolutionsPerSecondPerSecond(aceleracion); //TODO revisar adaptacion a flexy
 
 
