@@ -1,7 +1,7 @@
 
 //      ******************************************************************
 //      *                                                                *
-//      *                 Header file for FlexyStepper.c                 *
+//      *                 Header file for Flexystepper->c                 *
 //      *                                                                *
 //      *               Copyright (c) S. Reifel & Co, 2014               *
 //      *                                                                *

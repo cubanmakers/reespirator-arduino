@@ -65,7 +65,7 @@
 //
 // Usage:
 //    Near the top of the program, add:
-//        include "FlexyStepper.h"
+//        include "Flexystepper->h"
 //
 //    For each stepper, declare a global object outside of all functions as 
 //    follows:
