@@ -322,10 +322,10 @@ int incomingByte = 0; // for incoming serial data
 
 void loop() {
 
-  if (Serial.available() > 0) {
-    // read the incoming byte:
-    STEPPER_HOMMING_OFFSET = Serial.read();
-  }
+  // if (Serial.available() > 0) {
+  //   // read the incoming byte:
+  //   STEPPER_HOMMING_OFFSET = Serial.read();
+  // }
 
 #if 0
   // calculate real zero stepper
