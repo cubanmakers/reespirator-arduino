@@ -135,10 +135,14 @@ void MechVentilation::update(void) {
 
     // TODO: meter algo como esto en loop ppal (creo que ya está)      Acquire
     // sensors data     SensorValues_t sensorValues = _sensors.getPressure();
-    Serial.println("Starting update state: " + String(_currentState));
 
+#if DEBUG_UPDATE
+    Serial.println("Starting update state: " + String(_currentState));
+#endif
     SensorValues_t values = _sensors->getPressure();
+#if DEBUG_UPDATE
     //Serial.println("Sensors state=" + String(values.state) + ",pres1=" + String(values.pressure1) + ",pres2=" + String(values.pressure2));
+#endif
     if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
 
         _sensor_error_detected = true; //An error was detected in sensors
@@ -158,11 +162,15 @@ void MechVentilation::update(void) {
             {
                 //totalCyclesInThisState = (int)(_cfgSecTimeoutExsufflation * 1000 / TIME_BASE);
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
+#if DEBUG_UPDATE
                 Serial.println("totalCyclesInThisState: " + String(totalCyclesInThisState));
+#endif
                 /* Calculate wait time */
                 waitBeforeInsuflationTime = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
                 //                                              [1000msec/1sec] / TIME_BASE
+#if DEBUG_UPDATE
                 Serial.println("waitBeforeInsuflationTime: " + String(waitBeforeInsuflationTime));
+#endif
                 /* Status update and reset timer, for next time */
                 _setState(State_WaitBeforeInsuflation);
                 //currentTime = 0;  MUST BE COMMENTED
@@ -172,7 +180,9 @@ void MechVentilation::update(void) {
                 _cfgStepper -> setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_EXSUFFLATION * STEPPER_MICROSTEPS);
                 _cfgStepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION * STEPPER_MICROSTEPS);
 
+#if DEBUG_UPDATE
                 Serial.println("Motor:Process movement position=" + String(_cfgStepper->getCurrentPositionInSteps()));
+#endif
                 _startWasTriggeredByPatient = false;
             }
             //break;  MUST BE COMMENTED
@@ -185,7 +195,9 @@ void MechVentilation::update(void) {
                     if (_cfgStepper->motionComplete()) {
                         if (false /*currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL*/) { //The start was triggered by patient
                             _startWasTriggeredByPatient = true;
+#if DEBUG_UPDATE
                             Serial.println("!!!! Trigered by patient");
+#endif
                             /* Status update, for next time */
                             _setState(Init_Insufflation);
 
@@ -194,7 +206,9 @@ void MechVentilation::update(void) {
                             /* Status update, for next time */
                             _setState(Init_Insufflation);
                         }
+#if DEBUG_UPDATE
                         Serial.println("Motor:Process movement position=" + String(_cfgStepper->getCurrentPositionInMillimeters()));
+#endif
                     }
                     //TODO check motor error
                 }
@@ -225,8 +239,10 @@ void MechVentilation::update(void) {
                     _cfgStepper->processMovement();
                 }
                 */
+#if DEBUG_UPDATE
                 Serial.println("Motor:Process movement position=" + String(_cfgStepper->getCurrentPositionInSteps()));
                 Serial.println("Motor:targetPos (tidalVol)" + String(_cfgmlTidalVolume));
+#endif
 
                 /* Status update, reset timer, for next time, and reset PID integrator to zero */
                 _setState(State_Insufflation);
@@ -260,12 +276,15 @@ void MechVentilation::update(void) {
                 /* Stepper control: set end position */
 
                 
+#if DEBUG_UPDATE
                 Serial.println("Motor:speed=" + String(stepperSpeed));
+#endif
                 _cfgStepper->setSpeedInStepsPerSecond(stepperSpeed);
 #endif
             
+#if DEBUG_UPDATE
                 Serial.println("Motor:Process movement position=" + String(_cfgStepper->getCurrentPositionInSteps()));
-
+#endif
 
                 if ((_currentVolume >= _cfgmlTidalVolume) || (currentTime > insuflationTime)) {
 
@@ -284,7 +303,9 @@ void MechVentilation::update(void) {
             {
                 totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
+#if DEBUG_UPDATE
                 Serial.println("totalCyclesInThisState" + String(totalCyclesInThisState));
+#endif
                 /* Status update and reset timer, for next time */
                 _setState(State_WaitBeforeExsufflation);
                 currentTime = 0;
@@ -334,7 +355,9 @@ void MechVentilation::update(void) {
                 if (_sensor_error_detected) {
                     // error sensor reading
                     _running = false;
+#if DEBUG_UPDATE
                     Serial.println("Sensor: FAILED");
+#endif
                 }
                     
                 if (!digitalRead(ENDSTOPpin)) { //If not in HOME, do Homming
@@ -343,7 +366,9 @@ void MechVentilation::update(void) {
                     //bool moveToHomeInMillimeters(long directionTowardHome,
                     //  float speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters,
                     //  int homeLimitSwitchPin)
+#if DEBUG_UPDATE
                     Serial.println("**********  HOMMING  **********");
+#endif
 
                     while(!_cfgStepper->moveToHomeInSteps( STEPPER_HOMING_DIRECTION, HOMMING_SPEED, STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS, ENDSTOPpin));
                 }
