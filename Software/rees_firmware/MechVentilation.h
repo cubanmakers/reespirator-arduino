@@ -123,7 +123,7 @@ private:
     void _setState(State state);
 
     /* Configuration parameters */
-    FlexyStepper _cfgStepper;
+    FlexyStepper* _cfgStepper;
     Sensors* _sensors;
 
     /** Tidal volume in millilitres. */
