@@ -335,6 +335,7 @@ void loop() {
         } else {
             if (!startedExsuflation && periodCounter > int(tIns * 1000)) {
                 ventilation->update(false);
+                startedExsuflation = true;
             }
         }
 
