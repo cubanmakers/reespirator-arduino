@@ -10,9 +10,11 @@
 #include "MechVentilation.h"
 #include "src/FlexyStepper/FlexyStepper.h"
 #include "src/TimerOne/TimerOne.h"
+#include "src/TimerThree/TimerThree.h"
 #include "src/Adafruit_BME280/Adafruit_BME280.h"
 #include "Sensors.h"
 
+#define PRUEBAS 0
 // =========================================================================
 // VARIABLES
 // =========================================================================
@@ -39,7 +41,6 @@ Encoder encoder(ENCODER_DT_PIN, ENCODER_CLK_PIN, ENCODER_SW_PIN);
 Display display = Display();
 
 Adafruit_BME280 bme1(BME_CS1, BME_MOSI, BME_MISO, BME_SCK);
-
 Adafruit_BME280 bme2(BME_CS2, BME_MOSI, BME_MISO, BME_SCK);
 
 Sensors * sensors;
@@ -69,6 +70,11 @@ void setup() {
     // FC efecto hall
     pinMode(ENDSTOP_PIN, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
 
+    // Parte motor
+    pinMode(MOTOR_ENABLE_PIN, OUTPUT);
+    digitalWrite(MOTOR_ENABLE_PIN, HIGH); // high lo inhabilita
+
+#if PRUEBAS
     // Sensores de presión
     sensors = new Sensors(bme1, bme2);
     int check = sensors->begin();
@@ -85,9 +91,8 @@ void setup() {
         while (1) ;
         }
     
-    // Parte motor
-    pinMode(MOTOR_ENABLE_PIN, OUTPUT);
-    digitalWrite(MOTOR_ENABLE_PIN, HIGH); // high lo inhabilita
+    
+
 
     Serial.println("Setup");
 
@@ -227,6 +232,7 @@ void setup() {
   delay(2000);
   display.clear();
   */
+ #endif
     rpm = 24;
 
     // CÁLCULO: CONSTANTES DE TIEMPO INSPIRACION/ESPIRACION
@@ -261,19 +267,24 @@ void setup() {
     } else {
         display.writeLine(1, "No trigger");
     }
+        #if PRUEBAS
     delay(4000);
     display.clear();
+    #endif
 
     // INTERACCIÓN: ARRANQUE
     // =========================================================================
     display.writeLine(0, "Pulsa para iniciar");
     display.writeLine(1, "Esperando...");
+    #if PRUEBAS
     while (!encoder.readButton()) 
     ;
+    #endif
     display.clear();
     display.writeLine(1, "Iniciando...");
     delay(1000);
     display.clear();
+
 
     // OPERACIÓN: HOMING DEL STEPPER
     // =========================================================================
@@ -287,6 +298,7 @@ void setup() {
     stepper->setStepsPerRevolution(
         STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS
     );
+    #if PRUEBAS
     if (stepper->moveToHomeInSteps(
         STEPPER_HOMING_DIRECTION,
         STEPPER_HOMING_SPEED,
@@ -299,20 +311,25 @@ void setup() {
         display.writeLine(1, "Home not found");
         while (true) ;
         }
-    
+    #endif
+
     // Save first period timestamp
     periodTimeStamp = millis();
     ventilation = new MechVentilation(stepper, sensors);
 
-    Timer1.initialize(100); // 100us
-    Timer1.stop();
+    //Timer1.initialize(100); // 100us
+    Timer1.initialize(1000); // 
     Timer1.attachInterrupt(timer1Isr);
-    Timer1.start();
+    Timer3.initialize(50);
+    Timer3.attachInterrupt(timer3Isr);
+    Serial.println("End setup");
 }
 
 // =========================================================================
 // LOOP
 // =========================================================================
+
+ volatile int  flagTimer1 = 0;
 
 void loop() {
 
@@ -321,9 +338,10 @@ void loop() {
     unsigned long static lastReadSensors = 0;
     if (timestamp >= lastReadSensors + SENSORS_PERIOD_READING) {
       lastReadSensors = timestamp;
+      #if PRUEBAS
       sensors->readPressure();
+      #endif
     }
-
     bool static startedInsuflation = false;
     bool static startedExsuflation = false;
     periodCounter = millis() - periodTimeStamp;
@@ -331,9 +349,12 @@ void loop() {
     if (periodCounter < int(tCiclo * 1000)) {
         if (!startedInsuflation) {
             startedInsuflation = true;
+            Serial.println("Insuflation at " + String (timestamp));
+            //Serial.println("Timer " + String(Timer1.read()));
             ventilation->update(true);
         } else {
             if (!startedExsuflation && periodCounter > int(tIns * 1000)) {
+              Serial.println("Exsuflation at " + String (timestamp));
                 ventilation->update(false);
                 startedExsuflation = true;
             }
@@ -344,6 +365,11 @@ void loop() {
         periodTimeStamp = millis();
         startedExsuflation = false;
         startedInsuflation = false;
+    }
+
+    if (flagTimer1) {
+      flagTimer1 = 0;
+      Serial.println("Timer launched" + String (timestamp));
     }
 
     // if (sensors -> getPressure().state == SensorStateFailed) {
@@ -362,7 +388,11 @@ void loop() {
 /**
  * Timer 1 ISR
  */
-void timer1Isr() {
-    // ventilation->update(); updateCounter++;
+void timer1Isr(void) {
+    flagTimer1 = 1;
+    //ventilation->update();
+}
+
+void timer3Isr(void) {
     stepper->processMovement();
 }
