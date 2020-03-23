@@ -389,10 +389,11 @@ void loop() {
  * Timer 1 ISR
  */
 void timer1Isr(void) {
-    flagTimer1 = 1;
+  flagTimer1 = 1;  
     //ventilation->update();
 }
 
 void timer3Isr(void) {
+  
     stepper->processMovement();
 }
