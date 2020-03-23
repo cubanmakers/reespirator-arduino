@@ -6,6 +6,7 @@
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE 5 //msec
+#define SENSORS_PERIOD_READING 3 //msec
 
 // Valores motor
 #define STEPPER_MICROSTEPS 4

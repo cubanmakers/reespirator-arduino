@@ -18,17 +18,17 @@ unsigned int Sensors::begin(void) {
     /* Default settings from datasheet. */  //TODO: valorar SAMPLING_NONE, lecturas mas rapidas?
     // Ver ejemplos: https://github.com/adafruit/Adafruit_BME280_Library/blob/master/examples/advancedsettings/advancedsettings.ino
     _pres1Sensor.setSampling(Adafruit_BME280::MODE_NORMAL,     /* Operating Mode. */
-                      Adafruit_BME280::SAMPLING_X2,     /* Temp. oversampling */
-                      Adafruit_BME280::SAMPLING_X16,    /* Pressure oversampling */
+                      Adafruit_BME280::SAMPLING_X1,     /* Temp. oversampling */
+                      Adafruit_BME280::SAMPLING_X2,    /* Pressure oversampling */
                       Adafruit_BME280::SAMPLING_NONE,   /* humidity sampling */
                       Adafruit_BME280::FILTER_X16,      /* Filtering. */
-                      Adafruit_BME280::STANDBY_MS_500); /* Standby time. */
+                      Adafruit_BME280::STANDBY_MS_0_5); /* Standby time. */
     _pres2Sensor.setSampling(Adafruit_BME280::MODE_NORMAL,     /* Operating Mode. */
-                      Adafruit_BME280::SAMPLING_X2,     /* Temp. oversampling */
-                      Adafruit_BME280::SAMPLING_X16,    /* Pressure oversampling */
+                      Adafruit_BME280::SAMPLING_X1,     /* Temp. oversampling */
+                      Adafruit_BME280::SAMPLING_X2,    /* Pressure oversampling */
                       Adafruit_BME280::SAMPLING_NONE,   /* humidity sampling */
                       Adafruit_BME280::FILTER_X16,      /* Filtering. */
-                      Adafruit_BME280::STANDBY_MS_500); /* Standby time. */
+                      Adafruit_BME280::STANDBY_MS_0_5); /* Standby time. */
 
     return 0;
 }

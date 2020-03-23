@@ -71,7 +71,7 @@ void setup() {
 
     // Sensores de presión
     sensors = new Sensors(bme1, bme2);
-    int check = sensors -> begin();
+    int check = sensors->begin();
     if (check) {
         display.clear();
         if (check == 1) {
@@ -279,15 +279,15 @@ void setup() {
     // =========================================================================
     // Habilita el motor
     digitalWrite(MOTOR_ENABLE_PIN, LOW);
-    stepper -> connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
-    stepper -> setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT * STEPPER_MICROSTEPS);
-    stepper -> setAccelerationInStepsPerSecondPerSecond(
+    stepper->connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
+    stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT * STEPPER_MICROSTEPS);
+    stepper->setAccelerationInStepsPerSecondPerSecond(
         STEPPER_ACC_DEFAULT * STEPPER_MICROSTEPS
     );
-    stepper -> setStepsPerRevolution(
+    stepper->setStepsPerRevolution(
         STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS
     );
-    if (stepper -> moveToHomeInSteps(
+    if (stepper->moveToHomeInSteps(
         STEPPER_HOMING_DIRECTION,
         STEPPER_HOMING_SPEED,
         STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS,
@@ -316,6 +316,14 @@ void setup() {
 
 void loop() {
 
+    unsigned long static timestamp;
+    timestamp = millis();
+    unsigned long static lastReadSensors = 0;
+    if (timestamp >= lastReadSensors + SENSORS_PERIOD_READING) {
+      lastReadSensors = timestamp;
+      sensors->readPressure();
+    }
+
     bool static startedInsuflation = false;
     bool static startedExsuflation = false;
     periodCounter = millis() - periodTimeStamp;
@@ -323,10 +331,10 @@ void loop() {
     if (periodCounter < int(tCiclo * 1000)) {
         if (!startedInsuflation) {
             startedInsuflation = true;
-            ventilation -> update(true);
+            ventilation->update(true);
         } else {
             if (!startedExsuflation && periodCounter > int(tIns * 1000)) {
-                ventilation -> update(false);
+                ventilation->update(false);
             }
         }
 
@@ -355,5 +363,5 @@ void loop() {
  */
 void timer1Isr() {
     // ventilation->update(); updateCounter++;
-    stepper -> processMovement();
+    stepper->processMovement();
 }
