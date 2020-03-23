@@ -318,7 +318,7 @@ void setup() {
     ventilation = new MechVentilation(stepper, sensors);
 
     //Timer1.initialize(100); // 100us
-    Timer1.initialize(1000); // 
+    Timer1.initialize(1000000); // 
     Timer1.attachInterrupt(timer1Isr);
     Timer3.initialize(50);
     Timer3.attachInterrupt(timer3Isr);
@@ -330,6 +330,7 @@ void setup() {
 // =========================================================================
 
  volatile int  flagTimer1 = 0;
+ volatile unsigned long tmp;
 
 void loop() {
 
@@ -369,7 +370,12 @@ void loop() {
 
     if (flagTimer1) {
       flagTimer1 = 0;
-      Serial.println("Timer launched" + String (timestamp));
+      //Serial.println("Timer launched" + String (timestamp));
+      Serial.println("tmp=" + String(tmp));
+    }
+
+    if (encoder.readButton()) {
+      Serial.println("Button presses");
     }
 
     // if (sensors -> getPressure().state == SensorStateFailed) {
@@ -394,6 +400,8 @@ void timer1Isr(void) {
 }
 
 void timer3Isr(void) {
-  
+    unsigned long t1 = micros();
     stepper->processMovement();
+    unsigned long t2 = micros();
+    tmp = t2 - t1;
 }
