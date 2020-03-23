@@ -10,6 +10,7 @@
 #include "MechVentilation.h"
 #include "src/FlexyStepper/FlexyStepper.h"
 #include "src/TimerOne/TimerOne.h"
+#include "src/TimerThree/TimerThree.h"
 #include "src/Adafruit_BME280/Adafruit_BME280.h"
 #include "Sensors.h"
 
@@ -33,7 +34,7 @@ float speedIns, speedEsp, tCiclo, tIns, tEsp;
 
 
 // pines en pinout.h
-FlexyStepper stepper; // direction Digital 6 (CW), pulses Digital 7 (CLK)
+FlexyStepper * stepper = new FlexyStepper(); // direction Digital 6 (CW), pulses Digital 7 (CLK)
 
 Encoder encoder(
   DTpin,
@@ -297,12 +298,12 @@ void setup()
   ventilation->start();
   delay(1000);
   display.clear();
-    #if 0
+
   Timer1.initialize(5000); // 5 ms
-  Timer1.stop();
   Timer1.attachInterrupt(timer1Isr);
-  Timer1.start();
-  #endif
+  Timer3.initialize(50); //50us
+  Timer3.attachInterrupt(timer3Isr);
+  
 
     #if 0
     stepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
@@ -317,15 +318,8 @@ void setup()
 // LOOP
 // =========================================================================
 
-int updateCounter = 0;
-int incomingByte = 0; // for incoming serial data
 
 void loop() {
-
-  if (Serial.available() > 0) {
-    // read the incoming byte:
-    STEPPER_HOMMING_OFFSET = Serial.read();
-  }
 
 #if 0
   // calculate real zero stepper
@@ -337,17 +331,10 @@ void loop() {
   stepper.moveToPositionInSteps(estatura);
   display.writeLine(1, "Pos=" + String(stepper.getCurrentPositionInSteps()));
   #else
-    unsigned long static time;
+    unsigned long time;
     time = millis();
-    const int deltaUpdate = 20;
-    unsigned long static lastLaunch = time;
     unsigned long static lastReadSensor = time;
 
-    if (time > lastLaunch + deltaUpdate) {
-        lastLaunch = time;
-        ventilation->update();
-        updateCounter++;
-    }
     if (time > lastReadSensor + 10) {
             sensors->readPressure(); //TODO timing
             lastReadSensor = time;
@@ -357,14 +344,8 @@ void loop() {
     if (sensors -> getPressure().state == SensorStateFailed) {
         //TODO sensor fail. do something
         display.clear();
-        display.writeLine(0, "Valor guardado");
+        display.writeLine(0, "FALLO Sensor");
 
-    } else {
-      /*
-        char tmp[16];
-        snprintf(tmp, 16, "Cnt:%d", updateCounter);
-        display.writeLine(0, tmp);
-        */
     }
 
     // TODO: si hay nueva configuración: cambiar parámetros escuchando entrada desde
@@ -380,9 +361,12 @@ void loop() {
 /**
  * Timer 1 ISR
  */
-void timer1Isr () {
-  ventilation->update();
-  updateCounter++;
+void timer1Isr(void) {
+    ventilation->update();
+}
+
+void timer3Isr(void) {
+    stepper->processMovement();
 }
 
 

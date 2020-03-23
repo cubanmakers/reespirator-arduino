@@ -43,7 +43,7 @@ public:
      *
 	 */
 	MechVentilation(
-        FlexyStepper stepper,
+        FlexyStepper* stepper,
         Sensors* sensors,
         int mlTidalVolume,
         float secTimeoutInsufflation,
@@ -65,7 +65,7 @@ public:
      *
 	 */
 	MechVentilation(
-        FlexyStepper stepper,
+        FlexyStepper* stepper,
         Sensors* sensors,
         int mlTidalVolume,
         float secTimeoutInsufflation,
@@ -108,7 +108,7 @@ public:
 private:
     /** Initialization. */
     void _init(
-        FlexyStepper stepper,
+        FlexyStepper* stepper,
         Sensors* sensors,
         int mlTidalVolume,
         float secTimeoutInsufflation,
