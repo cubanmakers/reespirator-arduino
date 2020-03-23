@@ -22,9 +22,9 @@ int rpm                    = DEFAULT_RPM;
 int porcentajeInspiratorio = DEFAULT_POR_INSPIRATORIO;
 int estatura               = DEFAULT_ESTATURA;
 int sexo                   = DEFAULT_SEXO;
-int microStepper           = DEFAULT_MICROSTEPPER;
+int microStepper           = STEPPER_MICROSTEPS;
 //int aceleracion            = DEFAULT_ACELERACION * microStepper;
-int pasosPorRevolucion     = DEFAULT_PASOS_POR_REVOLUCION;
+int pasosPorRevolucion     = STEPPER_MICROSTEPS_PER_REVOLUTION;
 float flujoTrigger         = DEFAULT_FLUJO_TRIGGER;
 
 bool tieneTrigger;
@@ -299,13 +299,13 @@ void setup()
   delay(1000);
   display.clear();
 
-  Timer1.initialize(5000); // 5 ms
+  Timer1.initialize(TIME_BASE *1000); // 5 ms
   Timer1.attachInterrupt(timer1Isr);
   Timer3.initialize(50); //50us
   Timer3.attachInterrupt(timer3Isr);
   
 
-    #if 0
+    #if ADJUST_ZERO_STEPPER
     stepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
     stepper.setSpeedInStepsPerSecond(STEPPER_SPEED);
     stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
@@ -321,7 +321,7 @@ void setup()
 
 void loop() {
 
-#if 0
+#if ADJUST_ZERO_STEPPER
   // calculate real zero stepper
   display.writeLine(0, "Steps");
   while(!encoder.readButton()) {

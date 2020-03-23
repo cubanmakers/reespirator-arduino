@@ -14,7 +14,7 @@
 #include "src/Adafruit_BME280/Adafruit_BME280.h"
 #include "Sensors.h"
 
-#define PRUEBAS 0
+#define PRUEBAS 1
 // =========================================================================
 // VARIABLES
 // =========================================================================

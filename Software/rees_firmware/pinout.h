@@ -40,7 +40,7 @@
 #define BUZZpin 11
 
 // Sensor hall
-#define ENDSTOPpin 5
+#define ENDSTOPpin 21
 
 // BME280 SPI al menos para Arduino Nano o Mega 128
 // #define BMP_SCK  13
