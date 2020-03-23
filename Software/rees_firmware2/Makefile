@@ -12,7 +12,7 @@ ARDUINO_LIBS      = Adafruit_BME280 Adafruit_Sensor FlexyStepper LiquidCrystal L
 
 # This get the project dict from CI_PROJECT_DIR env var, or the value if not set.
 CI_PROJECT_DIR   ?= /app
-PROJECT_DIR       = $(CI_PROJECT_DIR)/Software/rees_firmware
+PROJECT_DIR       = $(CI_PROJECT_DIR)/Software/rees_firmware2
 USER_LIB_PATH     = $(PROJECT_DIR)/src
 ARDUINO_LIB_PATH  = $(ARDUINO_DIR)/hardware/arduino/avr/libraries/
 ARCHITECTURE      = avr
