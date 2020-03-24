@@ -309,6 +309,10 @@ void setup()
   delay(1000);
   display.clear();
 
+#ifndef PRUEBAS
+  sensors->readPressure(); 
+#endif
+
   Timer1.initialize(TIME_BASE * 1000); // 5 ms
   Timer1.attachInterrupt(timer1Isr);
 
@@ -343,24 +347,25 @@ void loop() {
   }
   stepper.moveToPositionInSteps(estatura);
   display.writeLine(1, "Pos=" + String(stepper.getCurrentPositionInSteps()));
-  #else
+#else
     unsigned long time;
     time = millis();
     unsigned long static lastReadSensor = 0;
 
     if (time > lastReadSensor + 10) {
       #ifndef PRUEBAS
-            sensors->readPressure(); //TODO timing
-            #endif
+            sensors->readPressure(); 
+      #endif
             lastReadSensor = time;
     }
 
+#ifndef PRUEBAS
     if (sensors->getPressure().state == SensorStateFailed) {
         //TODO sensor fail. do something
         display.clear();
         display.writeLine(0, "FALLO Sensor");
-
     }
+#endif
 
     #if DEBUG_STATE_MACHINE
     if (debugMsgCounter) {

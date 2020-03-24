@@ -22,8 +22,8 @@ int currentStopInsufflationTime = 0;
 float currentFlow = 0;
 
 MechVentilation::MechVentilation(
-    FlexyStepper *stepper,
-    Sensors *sensors,
+    FlexyStepper * stepper,
+    Sensors * sensors,
     int mlTidalVolume,
     float secTimeoutInsufflation,
     float secTimeoutExsufflation,
@@ -47,8 +47,8 @@ MechVentilation::MechVentilation(
 }
 
 MechVentilation::MechVentilation(
-    FlexyStepper *stepper,
-    Sensors *sensors,
+    FlexyStepper * stepper,
+    Sensors * sensors,
     int mlTidalVolume,
     float secTimeoutInsufflation,
     float secTimeoutExsufflation,
@@ -120,38 +120,32 @@ void MechVentilation::stop(void) {
     _running = false;
 }
 
-
-
 /**
  * I's called from timer1Isr
  */
 void MechVentilation::update(void) {
-    static int currentWaitInsuflationTime = 0; //TODO static function in cpp. check
-    static int currentInsuflationTime = 0; //TODO static function in cpp. check
-    static int currentWaitExsufflationTime = 0; //TODO static function in cpp. check
-    static int currentExsufflationTime = 0; //TODO static function in cpp. check
+
     static int totalCyclesInThisState = 0;
-    static int waitBeforeInsuflationTime = 0;
     static int currentTime = 0;
-    static int insuflationTime = 0;
-    static int exsuflationTime = 0;
     static int flowSetpoint = 0;
 
     // TODO: meter algo como esto en loop ppal (creo que ya está)      Acquire
     // sensors data     SensorValues_t sensorValues = _sensors.getPressure();
 
-#if DEBUG_STATE_MACHINE
-extern String debugMsg[];
-extern byte debugMsgCounter;
-#endif
+    #if DEBUG_STATE_MACHINE
+    extern String debugMsg[];
+    extern byte debugMsgCounter;
+    #endif
 
-#if DEBUG_STATE_MACHINE
-    debugMsg[debugMsgCounter++] = "Starting update state: " + String(_currentState);
-#endif
+    #if DEBUG_STATE_MACHINE
+    // debugMsg[debugMsgCounter++] = "Starting update state: " +
+    // String(_currentState);
+    #endif
 
     SensorValues_t values = _sensors->getPressure();
-    //Serial.println("Sensors state=" + String(values.state) + ",pres1=" + String(values.pressure1) + ",pres2=" + String(values.pressure2));
-#if 0
+    // Serial.println("Sensors state=" + String(values.state) + ",pres1=" +
+    // String(values.pressure1) + ",pres2=" + String(values.pressure2));
+    #ifndef PRUEBAS
     if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
         _sensor_error_detected = true; //An error was detected in sensors
         /* Status update, for this time */
@@ -159,7 +153,7 @@ extern byte debugMsgCounter;
     } else {
         _sensor_error_detected = false; //clear flag
     }
-#endif
+    #endif
     currentFlow = getCurrentFlow(values.pressure1, values.pressure2); //TODO Must calculate Flow using the last measured pressure couple,
     //but the pressure reading must be done as non blocking in the main loop
     integratorFlowToVolume(&_currentVolume, currentFlow);
@@ -169,44 +163,40 @@ extern byte debugMsgCounter;
 
         case Init_WaitBeforeInsuflation:
 
-#if DEBUG_STATE_MACHINE
-    debugMsg[debugMsgCounter++] ="totalCyclesInThisState: " + String(totalCyclesInThisState);
-#endif
-            {
-                // Close Solenoid Valve
-                digitalWrite(SOLENOIDpin, SOLENOID_CLOSED);
+            // Close Solenoid Valve
+            digitalWrite(SOLENOIDpin, SOLENOID_CLOSED);
 
-                totalCyclesInThisState = (int)(_cfgSecTimeoutExsufflation * 1000 / TIME_BASE);
-                //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
+            totalCyclesInThisState = (int)(_cfgSecTimeoutExsufflation * 1000 / TIME_BASE);
+            //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
 
-#if DEBUG_STATE_MACHINE
-    debugMsg[debugMsgCounter++] = "totalCyclesInThisState: " + String(totalCyclesInThisState);
-#endif
-                /* Calculate wait time */
-                waitBeforeInsuflationTime = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
-                //                                              [1000msec/1sec] / TIME_BASE
+            #if DEBUG_STATE_MACHINE
+            debugMsg[debugMsgCounter++] = "totalCycles in IniTWaitBeforeInsuf: " + String(
+                totalCyclesInThisState
+            );
+            #endif
 
-#if DEBUG_STATE_MACHINE
-    debugMsg[debugMsgCounter++] = "waitBeforeInsuflationTime: " + String(waitBeforeInsuflationTime);
-#endif
-                /* Status update and reset timer, for next time */
-                _setState(State_WaitBeforeInsuflation);
-                //currentTime = 0;  MUST BE COMMENTED
+            /* Status update and reset timer, for next time */
+            _setState(State_WaitBeforeInsuflation);
+            //currentTime = 0;  MUST BE COMMENTED
 
-                /* Stepper control*/
-                _cfgStepper->setSpeedInStepsPerSecond(STEPPER_SPEED_EXSUFFLATION);
-                _cfgStepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_EXSUFFLATION);
-                _cfgStepper->setTargetPositionInSteps(STEPPER_DIR * (STEPPER_LOWEST_POSITION + 0));
+            /* Stepper control*/
+            _cfgStepper->setSpeedInStepsPerSecond(STEPPER_SPEED_EXSUFFLATION);
+            _cfgStepper->setAccelerationInStepsPerSecondPerSecond(
+                STEPPER_ACC_EXSUFFLATION
+            );
+            _cfgStepper->setTargetPositionInSteps(
+                STEPPER_DIR * (STEPPER_LOWEST_POSITION + 0)
+            );
+            #if DEBUG_STATE_MACHINE
+                debugMsg[debugMsgCounter++] = "Motor: to exsuflation at " + String(millis());
+            #endif
 
-#if DEBUG_UPDATE
-                Serial.println("Motor:Process movement position=" + String(_cfgStepper->getCurrentPositionInSteps()));
-#endif
-                _startWasTriggeredByPatient = false;
-            }
+            _startWasTriggeredByPatient = false;
+            
             //break;  MUST BE COMMENTED
         case State_WaitBeforeInsuflation:
             { //Wait Trigger or Time.  Stepper is stopped in this state
-                
+
                 // Close Solenoid Valve
                 digitalWrite(SOLENOIDpin, SOLENOID_CLOSED);
 
@@ -214,55 +204,61 @@ extern byte debugMsgCounter;
 
                     /* Stepper control*/
                     if (_cfgStepper->motionComplete()) {
-//@dm enable for production
-                        if (false /*currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL*/) { //The start was triggered by patient
+                        //@dm enable for production
+                        #if 0
+                        if (currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) { //The start was triggered by patient
                             _startWasTriggeredByPatient = true;
 
-#if DEBUG_STATE_MACHINE
-    debugMsg[debugMsgCounter++] = "!!!! Trigered by patient";
-#endif
+                            #if DEBUG_STATE_MACHINE
+                            debugMsg[debugMsgCounter++] = "!!!! Trigered by patient";
+                            #endif
                             /* Status update, for next time */
                             _setState(Init_Insufflation);
 
-                         } else if (currentTime > waitBeforeInsuflationTime) {
+                        } else 
+                        #endif
+                        if (currentTime > totalCyclesInThisState) {
 
                             /* Status update, for next time */
                             _setState(Init_Insufflation);
                         }
-#if DEBUG_UPDATE
-                        Serial.println("Motor:Process movement position=" + String(_cfgStepper->getCurrentPositionInMillimeters()));
-#endif
+
                     }
                     //TODO check motor error
                 }
-                //This is a "currentTime++" but avoiding overflow, that could happen if (_running = false).
-                //And MUST be here, to be counting even when (_running = false).
-                if (currentTime <= waitBeforeInsuflationTime) { currentTime++; }
+                // This is a "currentTime++" but avoiding overflow, that could happen if
+                // (_running = false). And MUST be here, to be counting even when (_running =
+                // false).
+                if (currentTime <= totalCyclesInThisState) {
+                    currentTime++;
+                }
             }
             break;
 
         case Init_Insufflation:
             {
                 totalCyclesInThisState = _cfgSecTimeoutInsufflation * 1000 / TIME_BASE;
-                //											[1000msec/1sec]*[1sec/1cycle]
+                // [1000msec/1sec]*[1sec/1cycle] /* Calculate wait time */ insuflationTime =
+                // _cfgSecTimeoutInsufflation * 1000 / TIME_BASE;
+                // [1000msec/1sec]
 
-                // /* Calculate wait time */
-                // insuflationTime = _cfgSecTimeoutInsufflation * 1000 / TIME_BASE;
-                // //                                              [1000msec/1sec]
-
-                flowSetpoint = (_cfgmlTidalVolume / insuflationTime);
+                flowSetpoint = (_cfgmlTidalVolume / totalCyclesInThisState);
                 /////¿¿¿¿¿ === ???? _cfgSpeedInsufflation [step/sec]
 
                 /* Stepper control: set acceleration and end-position */
                 _cfgStepper->setSpeedInStepsPerSecond(STEPPER_SPEED_INSUFFLATION);
-                _cfgStepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_INSUFFLATION);
-                _cfgStepper->setTargetPositionInSteps(STEPPER_DIR * (STEPPER_LOWEST_POSITION + vol2pos(_cfgmlTidalVolume)));
-// TEST            _cfgStepper->setTargetPositionInSteps(-128 * STEPPER_MICROSTEPS); // this line for testing
+                _cfgStepper->setAccelerationInStepsPerSecondPerSecond(
+                    STEPPER_ACC_INSUFFLATION
+                );
+                _cfgStepper->setTargetPositionInSteps(
+                    STEPPER_DIR * (STEPPER_LOWEST_POSITION + vol2pos(_cfgmlTidalVolume))
+                );
+                #if DEBUG_STATE_MACHINE
+                debugMsg[debugMsgCounter++] = "Motor: to insuflation at " + String(millis());
+                #endif
+                // TEST            _cfgStepper->setTargetPositionInSteps(-128 *
+                // STEPPER_MICROSTEPS);  this line for testing
 
-#if DEBUG_UPDATE
-                Serial.println("Motor:Process movement position=" + String(_cfgStepper->getCurrentPositionInSteps()));
-                Serial.println("Motor:targetPos (tidalVol)" + String(_cfgmlTidalVolume));
-#endif
 
                 /* Status update, reset timer, for next time, and reset PID integrator to zero */
                 _setState(State_Insufflation);
@@ -276,8 +272,8 @@ extern byte debugMsgCounter;
                 float pidOutput_FlowSetpoint = 0;
                 float pidOutput_StepperSpeedSetpoint = 0;
                 float stepperSpeed = 0;
-#if 0
-//@fm enable for production
+                #if 0
+                //@fm enable for production
                 float currentProgressFactor = currentTime / totalCyclesInThisState;
 
                 /* Calculate FlowSetpoint */
@@ -285,7 +281,6 @@ extern byte debugMsgCounter;
                     flowSetpoint,
                     currentProgressFactor
                 );
-
 
                 /* Calculate Flow PID */
                 pidOutput_FlowSetpoint = computePID(curveOutput_FlowSetpoint, currentFlow);
@@ -295,18 +290,13 @@ extern byte debugMsgCounter;
 
                 /* Stepper control: set end position */
 
-                
-#if DEBUG_UPDATE
+                #if DEBUG_UPDATE
                 Serial.println("Motor:speed=" + String(stepperSpeed));
-#endif
+                #endif
                 _cfgStepper->setSpeedInStepsPerSecond(stepperSpeed);
-#endif
-            
-#if DEBUG_UPDATE
-                Serial.println("Motor:Process movement position=" + String(_cfgStepper->getCurrentPositionInSteps()));
-#endif
+                #endif
 
-                if ((_currentVolume >= _cfgmlTidalVolume) || (currentTime > insuflationTime)) {
+                if ((_currentVolume >= _cfgmlTidalVolume) || (currentTime > totalCyclesInThisState)) {
 
                     /* Status update and reset timer, for next time */
                     _setState(Init_WaitBeforeExsufflation);
@@ -326,9 +316,10 @@ extern byte debugMsgCounter;
 
                 totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
-#if DEBUG_UPDATE
-                Serial.println("totalCyclesInThisState" + String(totalCyclesInThisState));
-#endif
+
+                #if DEBUG_STATE_MACHINE
+                debugMsg[debugMsgCounter++] = "State InitWaitBeforeExsuf. cycles=" + String(totalCyclesInThisState);
+                #endif
                 /* Status update and reset timer, for next time */
                 _setState(State_WaitBeforeExsufflation);
                 currentTime = 0;
@@ -342,38 +333,45 @@ extern byte debugMsgCounter;
                     /* Status update, for next time */
                     _setState(Init_Exsufflation);
                 } else {
-                currentTime++;
+                    currentTime++;
                 }
             }
             break;
 
         case Init_Exsufflation:
             {
-                totalCyclesInThisState = _cfgSecTimeoutExsufflation * (1000 / TIME_BASE);
+                #if DEBUG_STATE_MACHINE
+                debugMsg[debugMsgCounter++] = "State InitExsuf " + String(millis());
+                #endif
+                totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
 
-                /* Calculate wait time */
-                exsuflationTime = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
-                //                                              [1000msec/1sec] / TIME_BASE
-#if DEBUG_STATE_MACHINE
-    debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(exsuflationTime);
-#endif
+                #if DEBUG_STATE_MACHINE
+                debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(totalCyclesInThisState);
+                #endif
                 /* Stepper control*/
                 _cfgStepper->setSpeedInStepsPerSecond(STEPPER_SPEED_EXSUFFLATION);
-                _cfgStepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_EXSUFFLATION);
-                _cfgStepper->setTargetPositionInSteps(STEPPER_DIR * (STEPPER_LOWEST_POSITION + 0));
-                               
+                _cfgStepper->setAccelerationInStepsPerSecondPerSecond(
+                    STEPPER_ACC_EXSUFFLATION
+                );
+                _cfgStepper->setTargetPositionInSteps(
+                    STEPPER_DIR * (STEPPER_LOWEST_POSITION + 0)
+                );
+                #if DEBUG_STATE_MACHINE
+                debugMsg[debugMsgCounter++] = "Motor: to exsuflation at " + String(millis());
+                #endif
+
                 /* Status update and reset timer, for next time */
                 _setState(State_Exsufflation);
                 currentTime = 0;
-           }
+            }
             //break;  MUST BE COMMENTED
         case State_Exsufflation:
             {
                 // Open Solenoid Valve
                 digitalWrite(SOLENOIDpin, SOLENOID_OPEN);
 
-                if (currentTime > exsuflationTime) {
+                if (currentTime > totalCyclesInThisState) {
 
                     /* Status update and reset timer, for next time */
                     _setState(Init_WaitBeforeInsuflation);
@@ -393,23 +391,26 @@ extern byte debugMsgCounter;
                 if (_sensor_error_detected) {
                     // error sensor reading
                     _running = false;
-#if DEBUG_UPDATE
+                    #if DEBUG_UPDATE
                     Serial.println("Sensor: FAILED");
-#endif
+                    #endif
                 }
-                    
+
                 if (!digitalRead(ENDSTOPpin)) { //If not in HOME, do Homming
 
                     /* Stepper control: homming */
-                    //bool moveToHomeInMillimeters(long directionTowardHome, float speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters, int homeLimitSwitchPin)
- 
- #ifndef PRUEBAS
- 
+                    // bool moveToHomeInMillimeters(long directionTowardHome, float
+                    // speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters, int
+                    // homeLimitSwitchPin)
+
+                    #ifndef PRUEBAS
+
                     while (
                         _cfgStepper->moveToHomeInSteps(1, STEPPER_HOMING_SPEED, STEPPER_MICROSTEPS_PER_REVOLUTION, ENDSTOPpin)
-                    ) ;
- 
- #endif
+                    ) 
+                    ;
+
+                    #endif
                 }
 
                 /* Status update and reset timer, for next time */
@@ -422,12 +423,12 @@ extern byte debugMsgCounter;
             {}
             break;
     }
-    
+
 }
 
 void MechVentilation::_init(
-    FlexyStepper *stepper,
-    Sensors *sensors,
+    FlexyStepper * stepper,
+    Sensors * sensors,
     int mlTidalVolume,
     float secTimeoutInsufflation,
     float secTimeoutExsufflation,
@@ -459,8 +460,8 @@ void MechVentilation::_init(
     //
     //;
     _cfgStepper->connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
-    //_cfgStepper->setSpeedInStepsPerSecond(STEPPER_SPEED);
-    //_cfgStepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
+    // _cfgStepper->setSpeedInStepsPerSecond(STEPPER_SPEED);
+    // _cfgStepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
     _cfgStepper->setStepsPerRevolution(STEPPER_STEPS_PER_REVOLUTION);
 
     _sensor_error_detected = false;
