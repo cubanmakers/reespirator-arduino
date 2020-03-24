@@ -157,8 +157,11 @@ void MechVentilation::update(void) {
     switch (_currentState) {
 
         case Init_WaitBeforeInsuflation:
+#if DEBUG_UPDATE
+                Serial.println("totalCyclesInThisState: " + String(totalCyclesInThisState));
+#endif
             {
-                //totalCyclesInThisState = (int)(_cfgSecTimeoutExsufflation * 1000 / TIME_BASE);
+                totalCyclesInThisState = (int)(_cfgSecTimeoutExsufflation * 1000 / TIME_BASE);
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
 #if DEBUG_UPDATE
                 Serial.println("totalCyclesInThisState: " + String(totalCyclesInThisState));
@@ -222,9 +225,9 @@ void MechVentilation::update(void) {
                 totalCyclesInThisState = _cfgSecTimeoutInsufflation * 1000 / TIME_BASE;
                 //											[1000msec/1sec]*[1sec/1cycle]
 
-                /* Calculate wait time */
-                insuflationTime = _cfgSecTimeoutInsufflation * 1000 / TIME_BASE;
-                //                                              [1000msec/1sec]
+                // /* Calculate wait time */
+                // insuflationTime = _cfgSecTimeoutInsufflation * 1000 / TIME_BASE;
+                // //                                              [1000msec/1sec]
 
                 flowSetpoint = (_cfgmlTidalVolume / insuflationTime);
                 /////¿¿¿¿¿ === ???? _cfgSpeedInsufflation [step/sec]
