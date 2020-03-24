@@ -368,13 +368,17 @@ void MechVentilation::update(void) {
                     
                 if (!digitalRead(ENDSTOPpin)) { //If not in HOME, do Homming
                 
-#if DEBUG_UPDATE
-                    Serial.println("**********  HOMMING  **********");
-#endif
+//#if DEBUG_UPDATE
+                    Serial.println("H");
+//#endif
 
                     /* Stepper control: homming */
                     //bool moveToHomeInMillimeters(long directionTowardHome, float speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters, int homeLimitSwitchPin)
-                    _cfgStepper->moveToHomeInSteps(STEPPER_HOMING_DIRECTION, STEPPER_HOMING_SPEED, STEPPER_MICROSTEPS_PER_REVOLUTION * 0.55, ENDSTOPpin);
+ 
+                    while (
+                        _cfgStepper->moveToHomeInSteps(1, STEPPER_HOMING_SPEED, STEPPER_MICROSTEPS_PER_REVOLUTION, ENDSTOPpin);
+                    ) ;
+ 
                 }
 
                 /* Status update and reset timer, for next time */
