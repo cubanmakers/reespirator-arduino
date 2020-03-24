@@ -167,7 +167,7 @@ void setup()
   volumenTidal = calcularVolumenTidal(estatura, sexo);
   display.writeLine(1, String(volumenTidal) + " ml");
   Serial.println("Volumen tidal estimado (ml): " + String(volumenTidal));
-  delay(2000);
+  delay(1000);
   display.clear();
 
 
@@ -218,6 +218,7 @@ void setup()
   // INTERACCIÓN: VALOR DEL TRIGGER
   // =========================================================================
   if (tieneTrigger) {
+    #if 0
     display.writeLine(0, "Modifica trigger");
     while(!encoder.readButton()) {
       encoder.updateValue(&flujoTrigger, 0.1);
@@ -226,6 +227,7 @@ void setup()
     display.clear();
     display.writeLine(0, "Valor guardado");
     display.writeLine(1, "Flujo: " + String(flujoTrigger) + " LPM");
+    #endif
     Serial.println("Flujo trigger (LPM): " + String(flujoTrigger));
     delay(2000);
     display.clear();
@@ -274,7 +276,7 @@ void setup()
   } else {
     display.writeLine(1, "No trigger");
   }
-  delay(4000);
+  delay(1000);
   display.clear();
 
 
