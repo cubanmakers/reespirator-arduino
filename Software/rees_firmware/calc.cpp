@@ -46,17 +46,6 @@ void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
   *speedEsp = STEPS_FOR_TOTALLY_PRESSED_AMBU / *tEsp; // step/sec
 }
 
-/**
- * @brief estima el caudal a partir de la diferencia de presión
- *
- * @param pressure1 presión a un lado
- * @param pressure2 presión a otro lado
- * @param flow caudal resultante
- */
-float getCurrentFlow(float pressure1, float pressure2) {
-  float flow = (pressure1 - pressure2) * DEFAULT_PRESSURE_V_FLOW_K1;
-  return flow;
-}
 
 /**
  * @brief Constrains the value within the limits

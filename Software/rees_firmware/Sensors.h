@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "src/Adafruit_BME280/Adafruit_BME280.h"
+#include "defaults.h"
 
 
 #define SENSORS_MAX_ERRORS 5
@@ -16,7 +17,12 @@ typedef struct {
     SensorState state;
     float pressure1;
     float pressure2;
-} SensorValues_t;
+} SensorPressureValues_t;
+
+typedef struct {
+    SensorState state;
+    float volume;
+} SensorVolumeValue_t;
 
 class Sensors
 {
@@ -25,7 +31,8 @@ class Sensors
     Sensors (Adafruit_BME280 pres1, Adafruit_BME280 pres2);
     unsigned int begin(void);
     void readPressure();
-    SensorValues_t getPressure(); 
+    SensorPressureValues_t getPressure(); 
+    SensorVolumeValue_t getVolume();
 
     private:
     void _init(Adafruit_BME280 pres1, Adafruit_BME280 pres2);

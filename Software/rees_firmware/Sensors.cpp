@@ -72,10 +72,20 @@ void Sensors::readPressure() {
     }
 }
 
-SensorValues_t Sensors::getPressure() {
-    SensorValues_t values;
+SensorPressureValues_t Sensors::getPressure() {
+    SensorPressureValues_t values;
     values.state = _state;
     values.pressure1 = _pressure1;
     values.pressure2 = _pressure2;
+    return values;
+}
+
+SensorVolumeValue_t Sensors::getVolume() {
+    SensorVolumeValue_t values;
+
+    float flow = (_pressure1 - _pressure2) * DEFAULT_PRESSURE_V_FLOW_K1;
+
+    values.state = _state;
+    values.volume = flow;
     return values;
 }

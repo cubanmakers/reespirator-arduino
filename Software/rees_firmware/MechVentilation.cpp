@@ -139,7 +139,7 @@ void MechVentilation::update(void) {
     // String(_currentState);
     #endif
 
-    SensorValues_t values = _sensors->getPressure();
+    SensorPressureValues_t values = _sensors->getPressure();
   
 #ifndef PRUEBAS
     if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
@@ -150,7 +150,7 @@ void MechVentilation::update(void) {
         _sensor_error_detected = false; //clear flag
     }
 #endif
-    currentFlow = getCurrentFlow(values.pressure1, values.pressure2); //TODO Must calculate Flow using the last measured pressure couple,
+    currentFlow = _sensors->getVolume().volume;
     //but the pressure reading must be done as non blocking in the main loop
     integratorFlowToVolume(&_currentVolume, currentFlow);
 

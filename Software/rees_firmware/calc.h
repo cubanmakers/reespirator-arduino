@@ -39,14 +39,6 @@ void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
                                int pasosPorRevolucion, int microStepper,
                                int porcentajeInspiratorio, int rpm);
 
-/**
- * @brief estima el caudal a partir de la diferencia de presión
- *
- * @param pressure1 presión a un lado
- * @param pressure2 presión a otro lado
- * @param flux caudal resultante
- */
-float getCurrentFlow(float pressure1, float pressure2);
 
 /**
  * @brief Constrains the value within the limits
