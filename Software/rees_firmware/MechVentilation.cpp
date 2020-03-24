@@ -131,6 +131,7 @@ void MechVentilation::update(void) {
     static int waitBeforeInsuflationTime = 0;
     static int currentTime = 0;
     static int insuflationTime = 0;
+    static int exsuflationTime = 0;
     static int flowSetpoint = 0;
 
     // TODO: meter algo como esto en loop ppal (creo que ya está)      Acquire
@@ -142,7 +143,7 @@ void MechVentilation::update(void) {
 
     SensorValues_t values = _sensors->getPressure();
     //Serial.println("Sensors state=" + String(values.state) + ",pres1=" + String(values.pressure1) + ",pres2=" + String(values.pressure2));
-    if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
+    if (false /*values.state != SensorStateOK*/) { // Sensor error detected: return to zero position and continue from there
         _sensor_error_detected = true; //An error was detected in sensors
         /* Status update, for this time */
         _setState(State_Exsufflation);
@@ -329,13 +330,13 @@ void MechVentilation::update(void) {
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
 
                 /* Calculate wait time */
-                //exsuflationTime = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
+                exsuflationTime = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
                 //                                              [1000msec/1sec] / TIME_BASE
 
                 /* Stepper control*/
                 _cfgStepper->setSpeedInStepsPerSecond(STEPPER_SPEED_EXSUFFLATION);
                 _cfgStepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_EXSUFFLATION);
-                _cfgStepper->setTargetPositionInSteps(STEPPER_DIR * (STEPPER_LOWEST_POSITION + 0);
+                _cfgStepper->setTargetPositionInSteps(STEPPER_DIR * (STEPPER_LOWEST_POSITION + 0));
                                
                 /* Status update and reset timer, for next time */
                 _setState(State_Exsufflation);
@@ -366,7 +367,7 @@ void MechVentilation::update(void) {
 #endif
                 }
                     
-                //if (!digitalRead(ENDSTOPpin)) { //If not in HOME, do Homming
+                if (!digitalRead(ENDSTOPpin)) { //If not in HOME, do Homming
                 
 //#if DEBUG_UPDATE
                     Serial.println("H");
@@ -376,7 +377,7 @@ void MechVentilation::update(void) {
                     //bool moveToHomeInMillimeters(long directionTowardHome, float speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters, int homeLimitSwitchPin)
  
                     while (
-                        _cfgStepper->moveToHomeInSteps(1, STEPPER_HOMING_SPEED, STEPPER_MICROSTEPS_PER_REVOLUTION, ENDSTOPpin);
+                        _cfgStepper->moveToHomeInSteps(1, STEPPER_HOMING_SPEED, STEPPER_MICROSTEPS_PER_REVOLUTION, ENDSTOPpin)
                     ) ;
  
                 }
