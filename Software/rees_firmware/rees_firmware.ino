@@ -333,7 +333,7 @@ void loop() {
   #else
     unsigned long time;
     time = millis();
-    unsigned long static lastReadSensor = time;
+    unsigned long static lastReadSensor = 0;
 
     if (time > lastReadSensor + 10) {
             sensors->readPressure(); //TODO timing
