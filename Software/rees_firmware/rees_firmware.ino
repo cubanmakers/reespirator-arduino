@@ -33,6 +33,11 @@ int volumenTidal;
 float speedIns, speedEsp, tCiclo, tIns, tEsp;
 
 
+#if DEBUG_STATE_MACHINE
+String debugMsg[10];
+byte debugMsgCounter = 0;
+#endif
+
 // pines en pinout.h
 FlexyStepper * stepper = new FlexyStepper(); // direction Digital 6 (CW), pulses Digital 7 (CLK)
 
@@ -72,7 +77,7 @@ void setup()
   // =========================================================================
 
   // Puerto serie
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("Inicio");
 
   // Display de inicio
@@ -87,6 +92,7 @@ void setup()
   // FC efecto hall
   pinMode(ENDSTOPpin, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
 
+#ifndef PRUEBAS
   // Sensores de presión
   sensors = new Sensors(bmp1, bmp2);
   int check = sensors->begin();
@@ -102,13 +108,14 @@ void setup()
       display.writeLine(1, "Check wires!");
       while(1);
     }
+#endif
 
   // Parte motor
   pinMode(ENpin, OUTPUT);
   digitalWrite(ENpin, HIGH);
 
   Serial.println("Setup");
-
+#ifndef PRUEBAS
   // deja la display en blanco
   delay(3000);
   display.clear();
@@ -117,7 +124,7 @@ void setup()
   delay(3000);
   display.clear();
   delay(100);
-
+#endif
   // INTERACCIÓN: ESTATURA
   // =========================================================================
   /*
@@ -265,7 +272,8 @@ void setup()
   Serial.println("Tiempo espiratorio (seg):" + String(tEsp));
   Serial.println("Velocidad 1 calculada:" + String(speedIns));
   Serial.println("Velocidad 2 calculada:" + String(speedEsp));
-  delay(4000);
+#ifndef PRUEBAS
+  delay(1000);
   display.clear();
 
   // INFORMACIÓN: PARÁMETROS
@@ -287,7 +295,7 @@ void setup()
   while(!encoder.readButton());
   display.clear();
   display.writeLine(1, "Iniciando...");
-
+#endif
   // Habilita el motor
   digitalWrite(ENpin, LOW);
 
@@ -341,17 +349,27 @@ void loop() {
     unsigned long static lastReadSensor = 0;
 
     if (time > lastReadSensor + 10) {
+      #ifndef PRUEBAS
             sensors->readPressure(); //TODO timing
+            #endif
             lastReadSensor = time;
     }
 
-
-    if (sensors -> getPressure().state == SensorStateFailed) {
+    if (sensors->getPressure().state == SensorStateFailed) {
         //TODO sensor fail. do something
         display.clear();
         display.writeLine(0, "FALLO Sensor");
 
     }
+
+    #if DEBUG_STATE_MACHINE
+    if (debugMsgCounter) {
+      for (byte i = 0; i < debugMsgCounter; i++) {
+        Serial.println(debugMsg[i]);
+      }
+      debugMsgCounter = 0;
+    }
+    #endif
 
     // TODO: si hay nueva configuración: cambiar parámetros escuchando entrada desde
     // el encoder

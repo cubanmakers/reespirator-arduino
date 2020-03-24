@@ -5,6 +5,8 @@
 #undef I2C // definido = Display i2c, sin definir Display parallel
 
 #define DEBUG_UPDATE 0 //
+#define DEBUG_STATE_MACHINE 1
+#define PRUEBAS 1
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE 5 //msec

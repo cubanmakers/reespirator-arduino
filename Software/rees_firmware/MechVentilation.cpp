@@ -12,6 +12,7 @@
 //#include "src/AccelStepper/AccelStepper.h"
 #include "src/FlexyStepper/FlexyStepper.h"
 #include "pinout.h"
+#include "defaults.h"
 
 /** No trigger. */
 #define LPM_FLUX_TRIGGER_VALUE_NONE FLT_MAX
@@ -119,6 +120,8 @@ void MechVentilation::stop(void) {
     _running = false;
 }
 
+
+
 /**
  * I's called from timer1Isr
  */
@@ -137,19 +140,26 @@ void MechVentilation::update(void) {
     // TODO: meter algo como esto en loop ppal (creo que ya está)      Acquire
     // sensors data     SensorValues_t sensorValues = _sensors.getPressure();
 
-#if DEBUG_UPDATE
-    Serial.println("Starting update state: " + String(_currentState));
+#if DEBUG_STATE_MACHINE
+extern String debugMsg[];
+extern byte debugMsgCounter;
+#endif
+
+#if DEBUG_STATE_MACHINE
+    debugMsg[debugMsgCounter++] = "Starting update state: " + String(_currentState);
 #endif
 
     SensorValues_t values = _sensors->getPressure();
     //Serial.println("Sensors state=" + String(values.state) + ",pres1=" + String(values.pressure1) + ",pres2=" + String(values.pressure2));
-    if (false /*values.state != SensorStateOK*/) { // Sensor error detected: return to zero position and continue from there
+#if 0
+    if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
         _sensor_error_detected = true; //An error was detected in sensors
         /* Status update, for this time */
         _setState(State_Exsufflation);
     } else {
         _sensor_error_detected = false; //clear flag
     }
+#endif
     currentFlow = getCurrentFlow(values.pressure1, values.pressure2); //TODO Must calculate Flow using the last measured pressure couple,
     //but the pressure reading must be done as non blocking in the main loop
     integratorFlowToVolume(&_currentVolume, currentFlow);
@@ -158,20 +168,23 @@ void MechVentilation::update(void) {
     switch (_currentState) {
 
         case Init_WaitBeforeInsuflation:
-#if DEBUG_UPDATE
-                Serial.println("totalCyclesInThisState: " + String(totalCyclesInThisState));
+
+#if DEBUG_STATE_MACHINE
+    debugMsg[debugMsgCounter++] ="totalCyclesInThisState: " + String(totalCyclesInThisState);
 #endif
             {
                 totalCyclesInThisState = (int)(_cfgSecTimeoutExsufflation * 1000 / TIME_BASE);
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
-#if DEBUG_UPDATE
-                Serial.println("totalCyclesInThisState: " + String(totalCyclesInThisState));
+
+#if DEBUG_STATE_MACHINE
+    debugMsg[debugMsgCounter++] = "totalCyclesInThisState: " + String(totalCyclesInThisState);
 #endif
                 /* Calculate wait time */
                 waitBeforeInsuflationTime = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
                 //                                              [1000msec/1sec] / TIME_BASE
-#if DEBUG_UPDATE
-                Serial.println("waitBeforeInsuflationTime: " + String(waitBeforeInsuflationTime));
+
+#if DEBUG_STATE_MACHINE
+    debugMsg[debugMsgCounter++] = "waitBeforeInsuflationTime: " + String(waitBeforeInsuflationTime);
 #endif
                 /* Status update and reset timer, for next time */
                 _setState(State_WaitBeforeInsuflation);
@@ -198,8 +211,9 @@ void MechVentilation::update(void) {
 //@dm enable for production
                         if (false /*currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL*/) { //The start was triggered by patient
                             _startWasTriggeredByPatient = true;
-#if DEBUG_UPDATE
-                            Serial.println("!!!! Trigered by patient");
+
+#if DEBUG_STATE_MACHINE
+    debugMsg[debugMsgCounter++] = "!!!! Trigered by patient";
 #endif
                             /* Status update, for next time */
                             _setState(Init_Insufflation);
@@ -332,7 +346,9 @@ void MechVentilation::update(void) {
                 /* Calculate wait time */
                 exsuflationTime = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
                 //                                              [1000msec/1sec] / TIME_BASE
-
+#if DEBUG_STATE_MACHINE
+    debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(exsuflationTime);
+#endif
                 /* Stepper control*/
                 _cfgStepper->setSpeedInStepsPerSecond(STEPPER_SPEED_EXSUFFLATION);
                 _cfgStepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_EXSUFFLATION);
@@ -368,18 +384,17 @@ void MechVentilation::update(void) {
                 }
                     
                 if (!digitalRead(ENDSTOPpin)) { //If not in HOME, do Homming
-                
-//#if DEBUG_UPDATE
-                    Serial.println("H");
-//#endif
 
                     /* Stepper control: homming */
                     //bool moveToHomeInMillimeters(long directionTowardHome, float speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters, int homeLimitSwitchPin)
+ 
+ #ifndef PRUEBAS
  
                     while (
                         _cfgStepper->moveToHomeInSteps(1, STEPPER_HOMING_SPEED, STEPPER_MICROSTEPS_PER_REVOLUTION, ENDSTOPpin)
                     ) ;
  
+ #endif
                 }
 
                 /* Status update and reset timer, for next time */
@@ -392,6 +407,7 @@ void MechVentilation::update(void) {
             {}
             break;
     }
+    
 }
 
 void MechVentilation::_init(
