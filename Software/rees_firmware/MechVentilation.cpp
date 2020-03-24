@@ -360,7 +360,7 @@ void MechVentilation::update(void) {
 #endif
                 }
                     
-                if (!digitalRead(ENDSTOPpin)) { //If not in HOME, do Homming
+                //if (!digitalRead(ENDSTOPpin)) { //If not in HOME, do Homming
                 
                     /* Stepper control: homming */
                     //bool moveToHomeInMillimeters(long directionTowardHome,
@@ -371,7 +371,7 @@ void MechVentilation::update(void) {
 #endif
 
                     while(!_cfgStepper->moveToHomeInSteps( STEPPER_HOMING_DIRECTION, HOMMING_SPEED, STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS, ENDSTOPpin));
-                }
+                //}
 
                 /* Status update and reset timer, for next time */
                 currentTime = 0;
