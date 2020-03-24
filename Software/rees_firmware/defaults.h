@@ -4,6 +4,8 @@
 
 #undef I2C // definido = Display i2c, sin definir Display parallel
 
+#define DEBUG_UPDATE 0 //
+
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE 5 //msec
 
@@ -18,28 +20,30 @@
 #define STEPPER_HOMMING_OFFSET (333)
 //int STEPPER_HOMMING_OFFSET = 333;
 #define STEPPER_DIR (-1)
-
 #endif
+
+//STEPPER_SPEED_EXSUFFLATION
+
 // Valores motor
 #define STEPPER_MICROSTEPS 4
 #define STEPPER_STEPS_PER_REVOLUTION 200
-#define STEPPER_HOMING_DIRECTION -1
-#define STEPPER_HOMING_SPEED 50        // Steps/S
-#define STEPPER_LOWEST_POSITION 70      // Steps
-#define STEPPER_HIGHEST_POSITION -120   // Steps
-#define STEPPER_SPEED_DEFAULT 800       // Steps/s
-#define STEPPER_SPEED_INSUFFLATION 800  // Steps/s
-#define STEPPER_SPEED_EXSUFFLATION 800  // Steps/s
-#define STEPPER_ACC_DEFAULT 600         // Steps/s2
-#define STEPPER_ACC_EXSUFFLATION 600    // Steps/s2
+
 #define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
+#define STEPPER_DIR 1
+#define STEPPER_HOMING_DIRECTION    (-1)
+#define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS *   50)   // Steps/s
+#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *   70)   // Steps
+#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS * -120)   // Steps
+#define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  800)   // Steps/s
+#define STEPPER_SPEED_INSUFFLATION  (STEPPER_MICROSTEPS *  800)   // Steps/s
+#define STEPPER_SPEED_EXSUFFLATION  (STEPPER_MICROSTEPS *  800)   // Steps/s
+#define STEPPER_ACC_DEFAULT         (STEPPER_MICROSTEPS *  600)   // Steps/s2
+#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  600)   // Steps/s2
+#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  450)   // Steps/s2
 
-
-
-#define INSUFFLATION_ACCEL 450
-#define EXSUFFLATION_SPEED 500
-#define EXSUFFLATION_ACCEL 1000
-#define HOMMING_SPEED 50
+// #define EXSUFFLATION_SPEED 500
+// #define EXSUFFLATION_ACCEL 1000
+// #define HOMMING_SPEED 50
 
 // Valores por defecto
 #define DEFAULT_ESTATURA 170 // cm
