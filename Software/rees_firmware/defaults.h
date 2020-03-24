@@ -6,25 +6,11 @@
 
 #define DEBUG_UPDATE 0 //
 #define DEBUG_STATE_MACHINE 1
-#define PRUEBAS 1 // testing over arduino without sensors
+//#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE 5 //msec
 
-#if 0
-//@fm old parameters
-// Valores motor
-#define DEFAULT_ACELERACION 6000
-#define DEFAULT_MICROSTEPPER 8
-#define STEPPER_SPEED (100) //Steps/s
-#define STEPPER_ACCELERATION 250 //Steps/s2
-#define STEPPER_PER_REVOLUTION 800
-#define STEPPER_HOMMING_OFFSET (333)
-//int STEPPER_HOMMING_OFFSET = 333;
-#define STEPPER_DIR (-1)
-#endif
-
-//STEPPER_SPEED_EXSUFFLATION
 
 // Valores motor
 #define STEPPER_MICROSTEPS 4
@@ -42,10 +28,6 @@
 #define STEPPER_ACC_DEFAULT         (STEPPER_MICROSTEPS *  600)   // Steps/s2
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  600)   // Steps/s2
 #define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  450)   // Steps/s2
-
-// #define EXSUFFLATION_SPEED 500
-// #define EXSUFFLATION_ACCEL 1000
-// #define HOMMING_SPEED 50
 
 // Valores por defecto
 #define DEFAULT_ESTATURA 170 // cm

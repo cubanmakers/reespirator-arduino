@@ -129,13 +129,10 @@ void MechVentilation::update(void) {
     static int currentTime = 0;
     static int flowSetpoint = 0;
 
-    // TODO: meter algo como esto en loop ppal (creo que ya está)      Acquire
-    // sensors data     SensorValues_t sensorValues = _sensors.getPressure();
-
-    #if DEBUG_STATE_MACHINE
+#if DEBUG_STATE_MACHINE
     extern String debugMsg[];
     extern byte debugMsgCounter;
-    #endif
+#endif
 
     #if DEBUG_STATE_MACHINE
     // debugMsg[debugMsgCounter++] = "Starting update state: " +
@@ -143,9 +140,8 @@ void MechVentilation::update(void) {
     #endif
 
     SensorValues_t values = _sensors->getPressure();
-    // Serial.println("Sensors state=" + String(values.state) + ",pres1=" +
-    // String(values.pressure1) + ",pres2=" + String(values.pressure2));
-    #ifndef PRUEBAS
+  
+#ifndef PRUEBAS
     if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
         _sensor_error_detected = true; //An error was detected in sensors
         /* Status update, for this time */
@@ -153,7 +149,7 @@ void MechVentilation::update(void) {
     } else {
         _sensor_error_detected = false; //clear flag
     }
-    #endif
+#endif
     currentFlow = getCurrentFlow(values.pressure1, values.pressure2); //TODO Must calculate Flow using the last measured pressure couple,
     //but the pressure reading must be done as non blocking in the main loop
     integratorFlowToVolume(&_currentVolume, currentFlow);
@@ -256,9 +252,6 @@ void MechVentilation::update(void) {
                 #if DEBUG_STATE_MACHINE
                 debugMsg[debugMsgCounter++] = "Motor: to insuflation at " + String(millis());
                 #endif
-                // TEST            _cfgStepper->setTargetPositionInSteps(-128 *
-                // STEPPER_MICROSTEPS);  this line for testing
-
 
                 /* Status update, reset timer, for next time, and reset PID integrator to zero */
                 _setState(State_Insufflation);

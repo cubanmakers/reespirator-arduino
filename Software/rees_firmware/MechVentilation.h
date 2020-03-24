@@ -161,8 +161,6 @@ private:
     bool _startWasTriggeredByPatient = false;
     float _currentVolume = 0;
 
-
-
     /** Estimated flux accross the bmes. @todo Denote units. */
     //float _flux;
 
