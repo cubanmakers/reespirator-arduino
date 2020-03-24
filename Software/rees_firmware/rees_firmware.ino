@@ -299,7 +299,7 @@ void setup()
   delay(1000);
   display.clear();
 
-  Timer1.initialize(TIME_BASE *1000); // 5 ms
+  Timer1.initialize(TIME_BASE * 1000); // 5 ms
   Timer1.attachInterrupt(timer1Isr);
   Timer3.initialize(50); //50us
   Timer3.attachInterrupt(timer3Isr);
