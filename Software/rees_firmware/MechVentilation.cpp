@@ -173,6 +173,9 @@ extern byte debugMsgCounter;
     debugMsg[debugMsgCounter++] ="totalCyclesInThisState: " + String(totalCyclesInThisState);
 #endif
             {
+                // Close Solenoid Valve
+                digitalWrite(SOLENOIDpin, SOLENOID_CLOSED);
+
                 totalCyclesInThisState = (int)(_cfgSecTimeoutExsufflation * 1000 / TIME_BASE);
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
 
@@ -203,6 +206,9 @@ extern byte debugMsgCounter;
             //break;  MUST BE COMMENTED
         case State_WaitBeforeInsuflation:
             { //Wait Trigger or Time.  Stepper is stopped in this state
+                
+                // Close Solenoid Valve
+                digitalWrite(SOLENOIDpin, SOLENOID_CLOSED);
 
                 if (_running) {
 
@@ -315,6 +321,9 @@ extern byte debugMsgCounter;
 
         case Init_WaitBeforeExsufflation:
             {
+                // Open Solenoid Valve
+                digitalWrite(SOLENOIDpin, SOLENOID_OPEN);
+
                 totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
 #if DEBUG_UPDATE
@@ -361,6 +370,9 @@ extern byte debugMsgCounter;
             //break;  MUST BE COMMENTED
         case State_Exsufflation:
             {
+                // Open Solenoid Valve
+                digitalWrite(SOLENOIDpin, SOLENOID_OPEN);
+
                 if (currentTime > exsuflationTime) {
 
                     /* Status update and reset timer, for next time */
@@ -375,6 +387,9 @@ extern byte debugMsgCounter;
 
         case State_Homming:
             {
+                // Open Solenoid Valve
+                digitalWrite(SOLENOIDpin, SOLENOID_OPEN);
+
                 if (_sensor_error_detected) {
                     // error sensor reading
                     _running = false;
