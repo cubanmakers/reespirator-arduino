@@ -88,4 +88,8 @@
 #define ventilationCycle_WaitBeforeInsuflationTime  800 //ms TODO parameter to mechVent
 //#define totalPatientVolume 0.8 // liters
 
+// Solenoid
+#define SOLENOID_CLOSED true
+#define SOLENOID_OPEN (!SOLENOID_CLOSED)
+
 #endif // DEFAULTS_H

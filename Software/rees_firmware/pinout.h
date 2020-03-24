@@ -42,6 +42,9 @@
 // Sensor hall
 #define ENDSTOPpin 21
 
+// Solenoid pine
+#define SOLENOIDpin 39
+
 // BME280 SPI al menos para Arduino Nano o Mega 128
 // #define BMP_SCK  13
 // #define BMP_MISO 12
