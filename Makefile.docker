@@ -1,0 +1,10 @@
+
+DOCKER_IMAGE_REPOSITORY ?= registry.gitlab.com/tinproject/reespirator-ci-images
+DOCKER_IMAGE_TAG ?= 20200322T184002Z_697116e
+DOCKER_IMAGE := $(DOCKER_IMAGE_REPOSITORY):$(DOCKER_IMAGE_TAG)
+
+.PHONY: default build shell
+default: shell
+
+shell:
+	docker container run --rm -it -v $$(pwd):/app $(DOCKER_IMAGE)
