@@ -51,7 +51,6 @@ float computePID(float setpoint, float feedbackInput);
  */
 void refreshWatchDogTimer();
 
-float vol2pos(float volume);
 float pos2vol(float position);
 float flow2speed(float flow);
 int integratorFlowToVolume(float currentFlow);

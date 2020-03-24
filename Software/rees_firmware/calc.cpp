@@ -100,18 +100,6 @@ void refreshWatchDogTimer() {
 //   return flow;
 // }
 
-float vol2pos(float volume) { //converts volume [ml] to position [steps]
-  //TODO improve with LUT to linearize if needed
-  //float position  = volume * (1/800)                 * (100/1);
-  //      [steps]      [ml]  [fully_pressed_ambu/ml]   [steps/fully_pressed_ambu]
-  //float position  = volume * (1/8);
-  //  #define K_VOL2POS (STEPS_FOR_TOTALLY_PRESSED_AMBU / VOLUME_FOR_TOTALLY_PRESSED_AMBU)
-  //  K_VOL2POS = (1/8);
-  
-  float position = volume * K_VOL2POS;
-
-  return position;
-}
 
 float pos2vol(float position) { //converts position [steps] to volume [ml]
   float volume = position * K_POS2VOL;

@@ -14,10 +14,17 @@
 #include "pinout.h"
 #include "defaults.h"
 
+
+typedef struct {
+    short mlVolume;
+    short stepperPos;
+} CalibrationVolume_t;
+
+const CalibrationVolume_t volumeCalibration[] = {{500,100}, {600, 200}, {700, 300}, {800, 400}};
+
 /** States of the mechanical ventilation. */
 enum State {
-    Init_WaitBeforeInsuflation = 0,
-    State_WaitBeforeInsuflation = 1,    /**< Wait for trigger or timer, if running is true. */
+
     Init_Insufflation = 2,
     State_Insufflation = 3,             /**< Insufflating (PID control). */
     Init_WaitBeforeExsufflation = 4,
@@ -118,6 +125,7 @@ private:
         int ventilationCyle_WaitTime,
         float lpmFluxTriggerValue
     );
+    int _calculateInsuflationPosition (void);
 
     /** Set state. */
     void _setState(State state);
@@ -140,14 +148,8 @@ private:
     float _cfgSpeedExsufflation;
 
     /* Internal state */
-    /** Previous state. @todo Consider removing. */
-    //State _previousState;
     /** Current state. */
     State _currentState;
-    /** Next state. @todo Consider removing. */
-    //State _nextState;
-    /** Timer counter in seconds. */
-    uint64_t _secTimerCnt;
     /**  Insufflation timeout in seconds. */
     float _secTimeoutInsufflation;
     /** Exsufflation timeout in seconds. */
@@ -156,6 +158,9 @@ private:
     float _speedInsufflation;
     /** Exsufflation speed. @todo Denote units. */
     float _speedExsufflation;
+    /** stepper insuflation position */
+    short _positionInsufflated;
+
     bool _running = false;
     bool _sensor_error_detected;
     bool _startWasTriggeredByPatient = false;

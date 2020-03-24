@@ -100,18 +100,6 @@ void MechVentilation::setTimeoutExsufflation(float secTimeoutExsufflation) {
     _cfgSecTimeoutExsufflation = secTimeoutExsufflation;
 }
 
-void MechVentilation::setSpeedInsufflation(float speedInsufflation) {
-    _speedInsufflation = _cfgSpeedInsufflation;
-}
-
-void MechVentilation::setSpeedExsufflation(float speedExsufflation) {
-    _speedExsufflation = _cfgSpeedExsufflation;
-}
-
-void MechVentilation::setVentilationCyle_WaitTime(float speedExsufflation) {
-    //TODO _speedExsufflation = _cfgSpeedExsufflation;
-}
-
 void MechVentilation::start(void) {
     _running = true;
 }
@@ -154,53 +142,6 @@ void MechVentilation::update(void) {
     //but the pressure reading must be done as non blocking in the main loop
     integratorFlowToVolume(&_currentVolume, currentFlow);
 
-    refreshWatchDogTimer();
-    switch (_currentState) {
-
-        case Init_WaitBeforeInsuflation:
-
-            // Close Solenoid Valve
-            digitalWrite(SOLENOIDpin, SOLENOID_CLOSED);
-
-            totalCyclesInThisState = (int)(_cfgSecTimeoutExsufflation * 1000 / TIME_BASE);
-            //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
-
-            #if DEBUG_STATE_MACHINE
-            debugMsg[debugMsgCounter++] = "totalCycles in IniTWaitBeforeInsuf: " + String(
-                totalCyclesInThisState
-            );
-            #endif
-
-            /* Status update and reset timer, for next time */
-            _setState(State_WaitBeforeInsuflation);
-            //currentTime = 0;  MUST BE COMMENTED
-
-            /* Stepper control*/
-            _cfgStepper->setSpeedInStepsPerSecond(STEPPER_SPEED_EXSUFFLATION);
-            _cfgStepper->setAccelerationInStepsPerSecondPerSecond(
-                STEPPER_ACC_EXSUFFLATION
-            );
-            _cfgStepper->setTargetPositionInSteps(
-                STEPPER_DIR * (STEPPER_LOWEST_POSITION + 0)
-            );
-            #if DEBUG_STATE_MACHINE
-                debugMsg[debugMsgCounter++] = "Motor: to exsuflation at " + String(millis());
-            #endif
-
-            _startWasTriggeredByPatient = false;
-            
-            //break;  MUST BE COMMENTED
-        case State_WaitBeforeInsuflation:
-            { //Wait Trigger or Time.  Stepper is stopped in this state
-
-                // Close Solenoid Valve
-                digitalWrite(SOLENOIDpin, SOLENOID_CLOSED);
-
-                if (_running) {
-
-                    /* Stepper control*/
-                    if (_cfgStepper->motionComplete()) {
-                        //@dm enable for production
                         #if 0
                         if (currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) { //The start was triggered by patient
                             _startWasTriggeredByPatient = true;
@@ -213,26 +154,15 @@ void MechVentilation::update(void) {
 
                         } else 
                         #endif
-                        if (currentTime > totalCyclesInThisState) {
 
-                            /* Status update, for next time */
-                            _setState(Init_Insufflation);
-                        }
 
-                    }
-                    //TODO check motor error
-                }
-                // This is a "currentTime++" but avoiding overflow, that could happen if
-                // (_running = false). And MUST be here, to be counting even when (_running =
-                // false).
-                if (currentTime <= totalCyclesInThisState) {
-                    currentTime++;
-                }
-            }
-            break;
-
+    refreshWatchDogTimer();
+    switch (_currentState) {
         case Init_Insufflation:
             {
+                // Close Solenoid Valve
+                digitalWrite(SOLENOIDpin, SOLENOID_CLOSED);
+
                 totalCyclesInThisState = ((_cfgSecTimeoutInsufflation * 1000) - WAIT_BEFORE_EXSUFLATION_TIME)/ TIME_BASE;
                 // [1000msec/1sec]*[1sec/1cycle] /* Calculate wait time */ insuflationTime =
                 // _cfgSecTimeoutInsufflation * 1000 / TIME_BASE;
@@ -246,9 +176,8 @@ void MechVentilation::update(void) {
                 _cfgStepper->setAccelerationInStepsPerSecondPerSecond(
                     STEPPER_ACC_INSUFFLATION
                 );
-                _cfgStepper->setTargetPositionInSteps(
-                    STEPPER_DIR * (STEPPER_LOWEST_POSITION + vol2pos(_cfgmlTidalVolume))
-                );
+                _cfgStepper->setTargetPositionInSteps( _positionInsufflated);
+
                 #if DEBUG_STATE_MACHINE
                 debugMsg[debugMsgCounter++] = "Motor: to insuflation at " + String(millis());
                 #endif
@@ -326,9 +255,9 @@ void MechVentilation::update(void) {
 
         case Init_Exsufflation:
             {
-                #if DEBUG_STATE_MACHINE
-                debugMsg[debugMsgCounter++] = "State InitExsuf " + String(millis());
-                #endif
+                // Open Solenoid Valve
+                digitalWrite(SOLENOIDpin, SOLENOID_OPEN);
+
                 totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
                 //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
 
@@ -358,7 +287,8 @@ void MechVentilation::update(void) {
                 if (currentTime > totalCyclesInThisState) {
 
                     /* Status update and reset timer, for next time */
-                    _setState(Init_WaitBeforeInsuflation);
+                    _setState(Init_Insufflation);
+                    _startWasTriggeredByPatient = false;
 
                     currentTime = 0;
                 } else {
@@ -391,15 +321,15 @@ void MechVentilation::update(void) {
 
                     while (
                         _cfgStepper->moveToHomeInSteps(1, STEPPER_HOMING_SPEED, STEPPER_MICROSTEPS_PER_REVOLUTION, ENDSTOPpin)
-                    ) 
-                    ;
+                    );
+                    
 
                     #endif
                 }
 
                 /* Status update and reset timer, for next time */
                 currentTime = 0;
-                _setState(Init_WaitBeforeInsuflation);
+                _setState(Init_Exsufflation);
             }
             break;
 
@@ -433,11 +363,11 @@ void MechVentilation::_init(
 
     /* Initialize internal state */
     _currentState = State_Homming;
-    _secTimerCnt = 0;
     _secTimeoutInsufflation = 0;
     _secTimeoutExsufflation = 0;
     _speedInsufflation = 0;
     _speedExsufflation = 0;
+    _positionInsufflated = _calculateInsuflationPosition();
 
     //
     // connect and configure the stepper motor to its IO pins
@@ -450,6 +380,20 @@ void MechVentilation::_init(
 
     _sensor_error_detected = false;
 }
+
+int MechVentilation::_calculateInsuflationPosition (void) {
+    short volumeTarget = (short) _cfgmlTidalVolume;
+    short lastPosition = volumeCalibration[0].stepperPos;
+    for (byte i = 1; i < sizeof(CalibrationVolume_t); i++) {
+        if (volumeTarget > volumeCalibration[i].mlVolume) {
+            lastPosition = volumeCalibration[i].stepperPos;
+        } else {
+            break;
+        }
+    }
+    return lastPosition;
+}
+
 
 void MechVentilation::_setState(State state) {
     //_previousState = _currentState;
