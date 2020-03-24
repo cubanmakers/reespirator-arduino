@@ -233,7 +233,7 @@ void MechVentilation::update(void) {
 
         case Init_Insufflation:
             {
-                totalCyclesInThisState = _cfgSecTimeoutInsufflation * 1000 / TIME_BASE;
+                totalCyclesInThisState = ((_cfgSecTimeoutInsufflation * 1000) - WAIT_BEFORE_EXSUFLATION_TIME)/ TIME_BASE;
                 // [1000msec/1sec]*[1sec/1cycle] /* Calculate wait time */ insuflationTime =
                 // _cfgSecTimeoutInsufflation * 1000 / TIME_BASE;
                 // [1000msec/1sec]
@@ -306,13 +306,6 @@ void MechVentilation::update(void) {
             {
                 // Open Solenoid Valve
                 digitalWrite(SOLENOIDpin, SOLENOID_OPEN);
-
-                totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
-                //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
-
-                #if DEBUG_STATE_MACHINE
-                debugMsg[debugMsgCounter++] = "State InitWaitBeforeExsuf. cycles=" + String(totalCyclesInThisState);
-                #endif
                 /* Status update and reset timer, for next time */
                 _setState(State_WaitBeforeExsufflation);
                 currentTime = 0;
@@ -361,9 +354,7 @@ void MechVentilation::update(void) {
             //break;  MUST BE COMMENTED
         case State_Exsufflation:
             {
-                // Open Solenoid Valve
-                digitalWrite(SOLENOIDpin, SOLENOID_OPEN);
-
+                
                 if (currentTime > totalCyclesInThisState) {
 
                     /* Status update and reset timer, for next time */
