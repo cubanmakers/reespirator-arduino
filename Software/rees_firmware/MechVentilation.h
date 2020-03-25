@@ -25,13 +25,14 @@ const CalibrationVolume_t volumeCalibration[] = {{500,100}, {600, 200}, {700, 30
 /** States of the mechanical ventilation. */
 enum State {
 
-    Init_Insufflation = 2,
-    State_Insufflation = 3,             /**< Insufflating (PID control). */
-    Init_WaitBeforeExsufflation = 4,
-    State_WaitBeforeExsufflation = 5,   /**< Wait for timer. */
-    Init_Exsufflation = 6,
-    State_Exsufflation = 7,              /**< Return to position 0 and wait for the patient to exsufflate. */
-    State_Homming = 8
+    Init_Insufflation = 1,
+    State_Insufflation = 2,             /**< Insufflating (PID control). */
+    Init_WaitBeforeExsufflation = 3,
+    State_WaitBeforeExsufflation = 4,   /**< Wait for timer. */
+    Init_Exsufflation = 5,
+    State_Exsufflation = 6,              /**< Return to position 0 and wait for the patient to exsufflate. */
+    State_Homming = 0,
+    State_Error = -1
 };
 
 /**

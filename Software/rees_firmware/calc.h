@@ -55,7 +55,6 @@ float pos2vol(float position);
 float flow2speed(float flow);
 int integratorFlowToVolume(float currentFlow);
 void integratorFlowToVolume(float* currentVolume, float currentFlow);
-void resetPID();
 float curveInterpolator(float inValue, float currentProgressFactor);
 
 #endif // CALC_H

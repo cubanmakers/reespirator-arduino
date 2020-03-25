@@ -66,11 +66,6 @@ float proportional = 0;
 static float integral = 0;
 float derivative = 0;
 float previous_feedbackInput = 0;
-
-void resetPID() {
-  integral = 0;
-}
-
 float computePID(float setpoint, float feedbackInput) {
   //dt is set to TIME_BASE msec by timer interrupt
 
