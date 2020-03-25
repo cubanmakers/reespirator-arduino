@@ -53,7 +53,7 @@ void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
  * @param flow caudal resultante
  */
 float getCurrentFlow(float pressure1, float pressure2) {
-  float flow = (pressure1 - pressure2) * DEFAULT_PRESSURE_V_FLOW_K1;
+  float flow = (pressure1 - pressure2);
   return flow;
 }
 

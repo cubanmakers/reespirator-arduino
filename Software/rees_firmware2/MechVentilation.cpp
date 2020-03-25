@@ -9,7 +9,7 @@
 #include "MechVentilation.h"
 #include "defaults.h"
 
-void MechVentilation::update(bool insuflate) {
+void MechVentilation::update(bool insuflate, int positionInSteps) {
     // Inspiración
 
         if (insuflate) {
@@ -20,7 +20,7 @@ void MechVentilation::update(bool insuflate) {
         _stepper -> setAccelerationInStepsPerSecondPerSecond(
             STEPPER_ACC_DEFAULT * STEPPER_MICROSTEPS
         );
-        _stepper -> setTargetPositionInSteps(-128 * STEPPER_MICROSTEPS);
+        _stepper -> setTargetPositionInSteps(positionInSteps * STEPPER_MICROSTEPS);
 
         // Espiración
     } else {

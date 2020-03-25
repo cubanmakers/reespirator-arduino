@@ -19,9 +19,9 @@ class MechVentilation {
 	 *
 	 */
     MechVentilation(FlexyStepper* stepper, Sensors* sensors);
-    void update(bool insuflate);
+    void update(bool insuflate, int positionInSteps = 0);
 
-    private: 
+private:
     FlexyStepper* _stepper;
     Sensors* _sensors;
 };

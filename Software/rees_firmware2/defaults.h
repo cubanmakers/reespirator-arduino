@@ -13,13 +13,13 @@
 #define STEPPER_STEPS_PER_REVOLUTION 200
 #define STEPPER_HOMING_DIRECTION -1
 #define STEPPER_HOMING_SPEED 50        // Steps/S
-#define STEPPER_LOWEST_POSITION 70      // Steps
-#define STEPPER_HIGHEST_POSITION -120   // Steps
-#define STEPPER_SPEED_DEFAULT 800       // Steps/s
-#define STEPPER_SPEED_INSUFFLATION 800  // Steps/s
-#define STEPPER_SPEED_EXSUFFLATION 800  // Steps/s
-#define STEPPER_ACC_DEFAULT 600         // Steps/s2
-#define STEPPER_ACC_EXSUFFLATION 600    // Steps/s2
+#define STEPPER_LOWEST_POSITION 77      // Steps
+#define STEPPER_HIGHEST_POSITION -128   // Steps
+#define STEPPER_SPEED_DEFAULT 12000       // Steps/s
+#define STEPPER_SPEED_INSUFFLATION 12000  // Steps/s
+#define STEPPER_SPEED_EXSUFFLATION 12000  // Steps/s
+#define STEPPER_ACC_DEFAULT 900          // Steps/s2
+#define STEPPER_ACC_EXSUFFLATION 900     // Steps/s2
 
 // Valores por defecto
 #define DEFAULT_ESTATURA 170 // cm
@@ -28,12 +28,17 @@
 #define DEFAULT_MAX_VOLUMEN_TIDAL 800
 #define DEFAULT_MIN_VOLUMEN_TIDAL 240
 #define DEFAULT_FLUJO_TRIGGER 3
+
+// Control de ciclos
 #define DEFAULT_RPM 15
 #define DEFAULT_MAX_RPM 24
 #define DEFAULT_MIN_RPM 3
 #define DEFAULT_POR_INSPIRATORIO 33.33  // %
+#define DEFAULT_RETAIN_INSIPIRATION 1000 // ms
 
-#define DEFAULT_PRESSURE_V_FLOW_K1 0.1   //Constante proporcional que relaciona presión con caudal
+#define DEFAULT_PRESSURE_V_FLOW_K1 0.719909914 // Constante proporcional que relaciona presión con caudal
+#define DEFAULT_PRESSURE_V_FLOW_0 0.7
+#define DEFAULT_PRESSURE_V_FLOW_K2 (0.5/29) // Segundo ajuste
 
 #define FLOW__INSUFLATION_TRIGGER_LEVEL 3.0   //LPM
 
