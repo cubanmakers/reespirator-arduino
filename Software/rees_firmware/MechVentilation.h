@@ -57,8 +57,7 @@ public:
         float secTimeoutInsufflation,
         float secTimeoutExsufflation,
         float speedInsufflation,
-        float speedExsufflation,
-        int ventilationCyle_WaitTime
+        float speedExsufflation
     );
 
     /**
@@ -80,7 +79,6 @@ public:
         float secTimeoutExsufflation,
         float speedInsufflation,
         float speedExsufflation,
-        int ventilationCyle_WaitTime,
         float lpmFluxTriggerValue
     ); 
 
@@ -123,7 +121,6 @@ private:
         float secTimeoutExsufflation,
         float speedInsufflation,
         float speedExsufflation,
-        int ventilationCyle_WaitTime,
         float lpmFluxTriggerValue
     );
     int _calculateInsuflationPosition (void);
@@ -155,10 +152,7 @@ private:
     /* Internal state */
     /** Current state. */
     State _currentState;
-    /**  Insufflation timeout in seconds. */
-    float _secTimeoutInsufflation;
-    /** Exsufflation timeout in seconds. */
-    float _secTimeoutExsufflation;
+
     /** Insufflation speed. @todo Denote units. */
     float _speedInsufflation;
     /** Exsufflation speed. @todo Denote units. */

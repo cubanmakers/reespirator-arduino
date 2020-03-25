@@ -27,9 +27,9 @@
 #endif // I2C
 
 // Rotary encoder
-#define CLKpin 2
+#define CLKpin 9
 #define DTpin 3
-#define SWpin 9
+#define SWpin 2
 
 #define ENpin 8
 // Stepper driver (FlexyStepper)

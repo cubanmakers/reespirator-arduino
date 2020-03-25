@@ -28,9 +28,7 @@ MechVentilation::MechVentilation(
     float secTimeoutInsufflation,
     float secTimeoutExsufflation,
     float speedInsufflation,
-    float speedExsufflation,
-    int ventilationCyle_WaitTime
-) {
+    float speedExsufflation) {
 
     _init(
         stepper,
@@ -40,7 +38,6 @@ MechVentilation::MechVentilation(
         secTimeoutExsufflation,
         speedInsufflation,
         speedExsufflation,
-        ventilationCyle_WaitTime,
         LPM_FLUX_TRIGGER_VALUE_NONE
     );
 
@@ -54,7 +51,6 @@ MechVentilation::MechVentilation(
     float secTimeoutExsufflation,
     float speedInsufflation,
     float speedExsufflation,
-    int ventilationCyle_WaitTime,
     float lpmFluxTriggerValue
 ) {
     _init(
@@ -65,7 +61,6 @@ MechVentilation::MechVentilation(
         secTimeoutExsufflation,
         speedInsufflation,
         speedExsufflation,
-        ventilationCyle_WaitTime,
         lpmFluxTriggerValue
     );
 }
@@ -251,7 +246,7 @@ void MechVentilation::update(void) {
                 debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(totalCyclesInThisState);
                 #endif
                 /* Stepper control*/
-                _cfgStepper->setSpeedInStepsPerSecond(STEPPER_SPEED_EXSUFFLATION);
+                _cfgStepper->setSpeedInStepsPerSecond(_speedExsufflation);
                 _cfgStepper->setAccelerationInStepsPerSecondPerSecond(
                     STEPPER_ACC_EXSUFFLATION
                 );
@@ -349,7 +344,6 @@ void MechVentilation::_init(
     float secTimeoutExsufflation,
     float speedInsufflation,
     float speedExsufflation,
-    int ventilationCyle_WaitTime,
     float lpmFluxTriggerValue
 ) {
     /* Set configuration parameters */
@@ -364,10 +358,8 @@ void MechVentilation::_init(
 
     /* Initialize internal state */
     _currentState = State_Homming;
-    _secTimeoutInsufflation = 0;
-    _secTimeoutExsufflation = 0;
     _speedInsufflation = STEPPER_SPEED_INSUFFLATION;
-    _speedExsufflation = 0;
+    _speedExsufflation = STEPPER_SPEED_EXSUFFLATION;
     _positionInsufflated = _calculateInsuflationPosition();
 
     //

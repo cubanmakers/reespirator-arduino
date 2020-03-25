@@ -8,6 +8,10 @@ const int8_t KNOBDIR[] = {
      0,  1, -1,  0
 };
 
+static volatile bool _buttonPressedFlag = false;
+static volatile unsigned long _buttonPressedTimestamp = 0;
+void _buttonPressed(void);
+
 Encoder::Encoder(int pin1, int pin2, int pulsador) {
   _pin1 = pin1;
   _pin2 = pin2;
@@ -17,6 +21,10 @@ Encoder::Encoder(int pin1, int pin2, int pulsador) {
   pinMode(pin1, INPUT_PULLUP);
   pinMode(pin2, INPUT_PULLUP);
   pinMode(pulsador, INPUT_PULLUP);
+  byte interrupt = digitalPinToInterrupt(pulsador);
+  if (interrupt >= 0) {
+    attachInterrupt(interrupt, _buttonPressed, FALLING);
+  }
 
   // when not started in motion, the current state of the encoder should be 3
   _oldState = 3;
@@ -96,12 +104,17 @@ void Encoder::swapValue(int* valor) {
   }
 }
 
-void Encoder::swapValue(bool* valor) {
+/**
+ * @return true if change
+ */
+bool Encoder::swapValue(bool* valor) {
   int reading = read();
   // Giramos horario o antihorario
   if (reading == 2 || reading == 8) {
     *valor = !(*valor);
+    return true;
   }
+  return false;
 }
 
 /**
@@ -112,16 +125,20 @@ void Encoder::swapValue(bool* valor) {
  *
  * @param valor valor a actualizar
  * @param delta incremento, por defecto: 1
+ * @return true if change
  */
-void Encoder::updateValue(int* valor, int delta) {
+bool Encoder::updateValue(int* valor, int delta) {
   int reading = read();
   // Giramos horario (incremento)
   if (reading == 8) {
     *valor = *valor - delta;
+    return true;
   // Giramos antihorario (decremento)
   } else if (reading == 2) {
     *valor = *valor + delta;
+    return true;
   }
+  return false;
 }
 
 void Encoder::updateValue(float* valor, float delta) {
@@ -182,4 +199,22 @@ int Encoder::read() {
     return 5;
   }
   return 0;
+}
+
+  bool Encoder::buttonHasBeenPressed(void) {
+    bool tmp = _buttonPressedFlag;
+    _buttonPressedFlag = false;
+    return tmp;
+  }
+
+
+/**
+ * ISR
+ */
+static void _buttonPressed(void) {
+  if (_buttonPressedTimestamp + 300 < millis()) {
+    _buttonPressedTimestamp = millis();
+    _buttonPressedFlag = true;
+  }
+  
 }

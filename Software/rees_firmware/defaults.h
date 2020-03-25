@@ -5,7 +5,7 @@
 #undef I2C // definido = Display i2c, sin definir Display parallel
 
 #define DEBUG_UPDATE 0 //
-#define DEBUG_STATE_MACHINE 1
+//#define DEBUG_STATE_MACHINE 1
 //#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
@@ -69,7 +69,7 @@
 #define K_FLOW2SPEED (25/12)
 
 // @fm superñapa. parametrizar desde el inicio. se usa en mechVentilation
-#define ventilationCycle_WaitBeforeInsuflationTime  800 //ms TODO parameter to mechVent
+//#define ventilationCycle_WaitBeforeInsuflationTime  800 //ms TODO parameter to mechVent
 //#define totalPatientVolume 0.8 // liters
 
 // Solenoid
