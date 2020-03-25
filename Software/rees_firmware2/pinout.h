@@ -42,6 +42,9 @@
 // Sensor hall
 #define ENDSTOP_PIN 21
 
+// Electrovalve
+#define VALVE_PIN 22
+
 // BME280 SPI al menos para Arduino Nano o Mega 128
 // #define BME_SCK  13
 // #define BME_MISO 12
