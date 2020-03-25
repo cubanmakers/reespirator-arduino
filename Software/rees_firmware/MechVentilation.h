@@ -130,6 +130,10 @@ private:
 
     /** Set state. */
     void _setState(State state);
+    void MechVentilation::_increaseInsuflationSpeed (byte factor);
+    void MechVentilation::_decreaseInsuflationSpeed (byte factor);
+    void MechVentilation::_increaseInsuflation (byte factor);
+    void MechVentilation::_decreaseInsuflation (byte factor);
 
     /* Configuration parameters */
     FlexyStepper* _cfgStepper;

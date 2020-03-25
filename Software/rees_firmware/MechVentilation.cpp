@@ -204,6 +204,7 @@ void MechVentilation::update(void) {
                     currentTime = 0;
                 }  else {
                     if (_currentVolume > _cfgmlTidalVolume) {
+                        //TODO stop motor
 
                         /* Status update and reset timer, for next time */
                         _setState(Init_WaitBeforeExsufflation);
@@ -398,13 +399,16 @@ void MechVentilation::_increaseInsuflationSpeed (byte factor)
 {
     _speedInsufflation += factor;
 }
-void MechVentilation::_decreaseInsuflationSpeed (byte factor) {
+void MechVentilation::_decreaseInsuflationSpeed (byte factor) 
+{
     _speedInsufflation -= factor;
 }
-void MechVentilation::_increaseInsuflation (byte factor) {
+void MechVentilation::_increaseInsuflation (byte factor) 
+{
     _positionInsufflated -= factor;
 }
-void MechVentilation::_decreaseInsuflation (byte factor) {
+void MechVentilation::_decreaseInsuflation (byte factor) 
+{
     _positionInsufflated += factor;
 }
 

@@ -335,9 +335,73 @@ void setup()
 // LOOP
 // =========================================================================
 
+enum ChangeConfigurationState {
+  Disabled = 0,
+  SelectMenu = 1,
+  MenuVolumeTidal = 2,
+  MenuFrecResp = 3,
+  MenuApply = 4
+};
+
+ChangeConfigurationState changeConfiguration = Disabled;
+
+void processUpdateParameters (void) {
+  static int menuRpm;
+  static int menuTidalVolume;
+
+  ChangeConfigurationState menuSelection = Disabled;
+
+  switch (changeConfiguration) {
+      case Disabled:
+        if (encoder.readButton()) {
+          changeConfiguration = SelectMenu;
+          display.clear();
+          display.writeLine(0,"Cambiar paramet");
+          display.writeLine(1, "Volumen tidal");
+          menuSelection = MenuVolumeTidal;
+        }
+        break;
+        case SelectMenu:
+          
+          if (encoder.readButton()) {
+            changeConfiguration = menuSelection;
+            display.clear();
+            switch (changeConfiguration) {
+              case MenuVolumeTidal:
+                display.writeLine(0, "Volumen tidal");
+                display.writeLine(1, String(volumenTidal) + "ml");
+                menuTidalVolume = volumenTidal;
+                break;
+              case MenuFrecResp:
+                display.writeLine(0, "Frec resp");
+                display.writeLine(1, String(rpm) + "ml");
+                menuRpm = rpm;
+                break;
+            }
+          } else {
+            int tmp;
+            encoder.updateValue(&tmp);
+            switch (tmp % 2) {
+              case 0:
+                display.writeLine(1, "Volumen tidal");
+                menuSelection = MenuVolumeTidal;
+                break;
+              case 1:
+                display.writeLine(1, "Frec resp       ");
+                menuSelection = MenuVolumeTidal;
+                break;
+            }
+          }
+        break;
+        case MenuVolumeTidal:
+
+        break;
+    }
+
+}
 
 void loop() {
-
+  
 #if ADJUST_ZERO_STEPPER
   // calculate real zero stepper
   display.writeLine(0, "Steps");
@@ -352,20 +416,25 @@ void loop() {
     time = millis();
     unsigned long static lastReadSensor = 0;
 
-    if (time > lastReadSensor + 10) {
+    if (time > lastReadSensor + 15) {
       #ifndef PRUEBAS
-            sensors->readPressure(); 
+            sensors->readPressure();
+
+            SensorPressureValues_t pressure = sensors->getPressure();
+
+            if (pressure.state == SensorStateFailed) {
+              //TODO sensor fail. do something
+              display.clear();  
+              display.writeLine(0, "FALLO Sensor");
+            } else {
+              if (changeConfiguration == Disabled) {
+                display.clear();
+                display.writeLine (0, "Pres=" + String(pressure.pressure2)); 
+              }
+            }
       #endif
             lastReadSensor = time;
     }
-
-#ifndef PRUEBAS
-    if (sensors->getPressure().state == SensorStateFailed) {
-        //TODO sensor fail. do something
-        display.clear();
-        display.writeLine(0, "FALLO Sensor");
-    }
-#endif
 
     #if DEBUG_STATE_MACHINE
     if (debugMsgCounter) {
@@ -375,6 +444,8 @@ void loop() {
       debugMsgCounter = 0;
     }
     #endif
+
+    processUpdateParameters();
 
     // TODO: si hay nueva configuración: cambiar parámetros escuchando entrada desde
     // el encoder
