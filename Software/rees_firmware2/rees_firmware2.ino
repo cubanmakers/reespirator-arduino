@@ -8,11 +8,11 @@
 #include "Display.h"
 #include "Encoder.h"
 #include "MechVentilation.h"
+#include "Sensors.h"
 #include "src/FlexyStepper/FlexyStepper.h"
 #include "src/TimerOne/TimerOne.h"
 #include "src/TimerThree/TimerThree.h"
 #include "src/Adafruit_BME280/Adafruit_BME280.h"
-#include "Sensors.h"
 
 #define PRUEBAS 1
 // =========================================================================
@@ -426,7 +426,7 @@ void loop()
     display.writeLine(1, String(positionInSteps) + "  ");
 
     int delta = periodCounter - periodTimeStamp;
-    SensorValues_t values = sensors -> getPressure();
+    SensorValues_t values = sensors -> getPressureInCmH20();
     flow = getCurrentFlow(values.pressure1, values.pressure2);
     Serial.print(delta); Serial.print(F(","));
     Serial.print(valveState); Serial.print(F(","));
@@ -435,7 +435,7 @@ void loop()
     Serial.println(flow);
 
 
-    // if (sensors -> getPressure().state == SensorStateFailed) {
+    // if (sensors -> getPressureInPascals().state == SensorStateFailed) {
     // TODO sensor fail. do something   display.clear();   display.writeLine(0,
     // "Valor guardado"); }
 

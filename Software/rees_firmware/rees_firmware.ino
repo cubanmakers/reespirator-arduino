@@ -344,7 +344,7 @@ void loop() {
     }
 
 
-    if (sensors -> getPressure().state == SensorStateFailed) {
+    if (sensors -> getPressureInPascals().state == SensorStateFailed) {
         //TODO sensor fail. do something
         display.clear();
         display.writeLine(0, "FALLO Sensor");

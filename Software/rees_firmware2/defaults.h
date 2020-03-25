@@ -36,6 +36,8 @@
 #define DEFAULT_POR_INSPIRATORIO 33.33  // %
 #define DEFAULT_RETAIN_INSIPIRATION 1000 // ms
 
+// presión
+#define DEFAULT_PA_TO_CM_H20 0.0102
 #define DEFAULT_PRESSURE_V_FLOW_K1 0.719909914 // Constante proporcional que relaciona presión con caudal
 #define DEFAULT_PRESSURE_V_FLOW_0 0.7
 #define DEFAULT_PRESSURE_V_FLOW_K2 (0.5/29) // Segundo ajuste

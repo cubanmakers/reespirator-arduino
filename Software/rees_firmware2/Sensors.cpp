@@ -3,6 +3,7 @@
  */
 #include "src/Adafruit_BME280/Adafruit_BME280.h"
 #include "Sensors.h"
+#include "defaults.h"
 
 unsigned int Sensors::begin(void) {
     // Arrancar sensores de presion 1 y 2
@@ -72,10 +73,18 @@ void Sensors::readPressure() {
     }
 }
 
-SensorValues_t Sensors::getPressure() {
+SensorValues_t Sensors::getPressureInPascals() {
     SensorValues_t values;
     values.state = _state;
     values.pressure1 = _pressure1;
     values.pressure2 = _pressure2;
+    return values;
+}
+
+SensorValues_t Sensors::getPressureInCmH20() {
+    SensorValues_t values;
+    values.state = _state;
+    values.pressure1 = _pressure1 * DEFAULT_PA_TO_CM_H20;
+    values.pressure2 = _pressure2 * DEFAULT_PA_TO_CM_H20;
     return values;
 }

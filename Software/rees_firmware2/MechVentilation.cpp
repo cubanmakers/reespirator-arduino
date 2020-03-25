@@ -13,7 +13,7 @@ void MechVentilation::update(bool insuflate, int positionInSteps) {
     // Inspiración
 
         if (insuflate) {
-        _sensors -> getPressure();
+        _sensors -> getPressureInPascals();
 
         // Apply velocity and acceleration depending on the volume tidal
         _stepper -> setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT * STEPPER_MICROSTEPS);
@@ -171,10 +171,10 @@ void MechVentilation::update(void) {
     static int flowSetpoint = 0;
 
     // TODO: meter algo como esto en loop ppal (creo que ya está)      Acquire
-    // sensors data     SensorValues_t sensorValues = _sensors.getPressure();
+    // sensors data     SensorValues_t sensorValues = _sensors.getPressureInPascals();
     Serial.println("Starting update state: " + String(_currentState));
 
-    SensorValues_t values = _sensors - >getPressure();
+    SensorValues_t values = _sensors - >getPressureInPascals();
     // Serial.println("Sensors state=" + String(values.state) + ",pres1=" +
     // String(values.pressure1) + ",pres2=" + String(values.pressure2));
     if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there

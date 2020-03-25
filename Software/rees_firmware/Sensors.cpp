@@ -72,7 +72,7 @@ void Sensors::readPressure() {
     }
 }
 
-SensorValues_t Sensors::getPressure() {
+SensorValues_t Sensors::getPressureInPascals() {
     SensorValues_t values;
     values.state = _state;
     values.pressure1 = _pressure1;
