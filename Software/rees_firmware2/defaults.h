@@ -15,9 +15,9 @@
 #define STEPPER_HOMING_SPEED 50        // Steps/S
 #define STEPPER_LOWEST_POSITION 77      // Steps
 #define STEPPER_HIGHEST_POSITION -128   // Steps
-#define STEPPER_SPEED_DEFAULT 12000       // Steps/s
-#define STEPPER_SPEED_INSUFFLATION 12000  // Steps/s
-#define STEPPER_SPEED_EXSUFFLATION 12000  // Steps/s
+#define STEPPER_SPEED_DEFAULT 12000L       // Steps/s
+#define STEPPER_SPEED_INSUFFLATION 12000L  // Steps/s
+#define STEPPER_SPEED_EXSUFFLATION 12000L  // Steps/s
 #define STEPPER_ACC_DEFAULT 900          // Steps/s2
 #define STEPPER_ACC_EXSUFFLATION 900     // Steps/s2
 

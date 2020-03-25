@@ -298,6 +298,24 @@ void setup()
 #endif
     display.clear();
 
+    // INTERACCIÓN: CALIBRACION DE SENSORES DE PRESION
+    // =========================================================================
+    display.writeLine(0, "  Pulsar para   ");
+    display.writeLine(1, "calibrar presion");
+
+    while (!encoder.readButton());
+    display.clear();
+    display.writeLine(1, "Calibrando...");
+
+    // OPERACIÓN: CALIBRACION
+    // =========================================================================
+    sensors->getOffsetBetweenPressureSensors();
+    display.clear();
+    display.writeLine(0, "Sensores");
+    display.writeLine(0, "calibrados");
+    delay(1000);
+
+
     // INTERACCIÓN: ARRANQUE
     // =========================================================================
     display.writeLine(0, "Pulsa para iniciar");

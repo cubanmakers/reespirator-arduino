@@ -7,11 +7,15 @@
  * @param sexo 0: varón, 1: mujer, sexo del paciente
  * @return *volumenTidal volumen tidal estimado, en mililitros
  */
-int calcularVolumenTidal(int estatura, int sexo) {
+int calcularVolumenTidal(int estatura, int sexo)
+{
   float peso0, pesoIdeal, volumenEstimado;
-  if (sexo == 0) { // Varón
+  if (sexo == 0)
+  { // Varón
     peso0 = 50.0;
-  } else if (sexo == 1) { // Mujer
+  }
+  else if (sexo == 1)
+  { // Mujer
     peso0 = 45.5;
   }
   pesoIdeal = peso0 + 0.91 * (estatura - 152.4); // en kg
@@ -34,11 +38,12 @@ int calcularVolumenTidal(int estatura, int sexo) {
  * @param porcentajeInspiratorio fraccion del ciclo en la que se inspira, tIns/tCiclo*100
  * @param rpm respiraciones por minuto
  */
-void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
-                               float* tIns, float* tEsp, float* tCiclo,
-                               float porcentajeInspiratorio, int rpm) {
+void calcularCicloInspiratorio(float *speedIns, float *speedEsp,
+                               float *tIns, float *tEsp, float *tCiclo,
+                               float porcentajeInspiratorio, int rpm)
+{
   *tCiclo = float(60) / float(rpm); // Tiempo de ciclo en segundos
-  *tIns = *tCiclo * porcentajeInspiratorio/100;
+  *tIns = *tCiclo * porcentajeInspiratorio / 100;
   *tEsp = *tCiclo - *tIns;
 
   *speedIns = STEPS_FOR_TOTALLY_PRESSED_AMBU / *tIns; // step/sec
@@ -52,7 +57,8 @@ void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
  * @param pressure2 presión a otro lado
  * @param flow caudal resultante
  */
-float getCurrentFlow(float pressure1, float pressure2) {
+float getCurrentFlow(float pressure1, float pressure2)
+{
   float flow = (pressure1 - pressure2);
   return flow;
 }
@@ -60,10 +66,14 @@ float getCurrentFlow(float pressure1, float pressure2) {
 /**
  * @brief Constrains the value within the limits
  */
-float constrainFloat(float value, float lowLimit, float highLimit) {
-  if (value < lowLimit) {
+float constrainFloat(float value, float lowLimit, float highLimit)
+{
+  if (value < lowLimit)
+  {
     value = lowLimit;
-  } else if (value > highLimit) {
+  }
+  else if (value > highLimit)
+  {
     value = highLimit;
   }
   return value;
@@ -77,11 +87,13 @@ static float integral = 0;
 float derivative = 0;
 float previous_feedbackInput = 0;
 
-void resetPID() {
+void resetPID()
+{
   integral = 0;
 }
 
-float computePID(float setpoint, float feedbackInput) {
+float computePID(float setpoint, float feedbackInput)
+{
   //dt is set to TIME_BASE msec by timer interrupt
 
   float error = setpoint - feedbackInput;
@@ -101,7 +113,8 @@ float computePID(float setpoint, float feedbackInput) {
 /**
  * @brief Refresca el WDT (Watch Dog Timer)
  */
-void refreshWatchDogTimer() {
+void refreshWatchDogTimer()
+{
   //TODO implementar
 }
 
@@ -110,32 +123,33 @@ void refreshWatchDogTimer() {
 //   return flow;
 // }
 
-float vol2pos(float volume) { //converts volume [ml] to position [steps]
+float vol2pos(float volume)
+{ //converts volume [ml] to position [steps]
   //TODO improve with LUT to linearize if needed
   //float position  = volume * (1/800)                 * (100/1);
   //      [steps]      [ml]  [fully_pressed_ambu/ml]   [steps/fully_pressed_ambu]
   //float position  = volume * (1/8);
   //  #define K_VOL2POS (STEPS_FOR_TOTALLY_PRESSED_AMBU / VOLUME_FOR_TOTALLY_PRESSED_AMBU)
   //  K_VOL2POS = (1/8);
-  
+
   float position = volume * K_VOL2POS;
 
   return position;
 }
 
-float pos2vol(float position) { //converts position [steps] to volume [ml]
+float pos2vol(float position)
+{ //converts position [steps] to volume [ml]
   float volume = position * K_POS2VOL;
 
   return volume;
 }
 
-
-void integratorFlowToVolume(float* currentVolume, float currentFlow) {
+void integratorFlowToVolume(float *currentVolume, float currentFlow)
+{
   //We add to currentVolume the ml that flowed in TIME_BASE msec;
   *currentVolume += currentFlow * 60 * TIME_BASE;
   //currentVolume += currentFlow * (1000/1) * (60/1) * (1/1000)   * TIME_BASE;
-}                 //  [l/m]       [l]/[ml]  [min]/[s]  [s]/[msec]   [msec]
-
+} //  [l/m]       [l]/[ml]  [min]/[s]  [s]/[msec]   [msec]
 
 #if 0
 /**
@@ -164,27 +178,34 @@ float computeLPF(int parameter, int lpfArray[])
 
 //float curveInterpolator(int[] curve, float min, float max, float currentProgressFactor);
 //float curveInterpolator(float maxValue, float currentProgressFactor);
-float curveInterpolator(float inValue, float currentProgressFactor) {
-	float outValue = 0;
+float curveInterpolator(float inValue, float currentProgressFactor)
+{
+  float outValue = 0;
 
-	if (currentProgressFactor < 0.03) {
-		outValue = 0.7 * inValue;
-	} else if ((currentProgressFactor >= 0.03) && (currentProgressFactor < 0.97))  {
-		outValue = 1.2 * inValue;
-	} else if (currentProgressFactor >= 0.97)  {
-		outValue = 0.7 * inValue;
-	}
-		
-	return outValue;
+  if (currentProgressFactor < 0.03)
+  {
+    outValue = 0.7 * inValue;
+  }
+  else if ((currentProgressFactor >= 0.03) && (currentProgressFactor < 0.97))
+  {
+    outValue = 1.2 * inValue;
+  }
+  else if (currentProgressFactor >= 0.97)
+  {
+    outValue = 0.7 * inValue;
+  }
+
+  return outValue;
 }
 
-float flow2speed(float flow) { //converts flow [LPM] to speed [steps/sec]
+float flow2speed(float flow)
+{ //converts flow [LPM] to speed [steps/sec]
   //float speed  = flow *  (1/60) * (1000/1) * (1/800)                 * (100/1);
   //     [steps/s]  [l/m]  [min/sec] [ml/l]    [fully_pressed_ambu/ml]   [steps/fully_pressed_ambu]
   //float position  = volume * (25/12);
   //  #define K_VOL2POS (STEPS_FOR_TOTALLY_PRESSED_AMBU / VOLUME_FOR_TOTALLY_PRESSED_AMBU)
   //  K_FLOW2SPEED = (25/12);
-  
+
   float speed = flow * K_FLOW2SPEED;
 
   return speed;

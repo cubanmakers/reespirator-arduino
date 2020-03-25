@@ -53,8 +53,8 @@ void Sensors::_init (Adafruit_BME280 pres1, Adafruit_BME280 pres2) {
 void Sensors::readPressure() {
     float pres1, pres2;
     // Acquire sensors data
-    pres1 = _pres1Sensor.readPressure() / 100.0F; // hPa
-    pres2 = _pres2Sensor.readPressure() / 100.0F; // hPa
+    pres1 = _pres1Sensor.readPressure(); // Pa
+    pres2 = _pres2Sensor.readPressure(); // Pa
 
     if (pres1 == 0.0 || pres2 == 0.0) {
 
@@ -73,18 +73,52 @@ void Sensors::readPressure() {
     }
 }
 
+/**
+ * @brief Get pressure in pascals.
+ *
+ * @return SensorValues_t - pressure values
+ */
 SensorValues_t Sensors::getPressureInPascals() {
     SensorValues_t values;
     values.state = _state;
     values.pressure1 = _pressure1;
-    values.pressure2 = _pressure2;
+    values.pressure2 = _pressure2 + _sensorsOffset;
     return values;
 }
 
+/**
+ * @brief Get pressure in H20 cm.
+ *
+ * @return SensorValues_t - pressure values
+ */
 SensorValues_t Sensors::getPressureInCmH20() {
-    SensorValues_t values;
-    values.state = _state;
-    values.pressure1 = _pressure1 * DEFAULT_PA_TO_CM_H20;
-    values.pressure2 = _pressure2 * DEFAULT_PA_TO_CM_H20;
+    SensorValues_t values = getPressureInPascals();
+    values.pressure1 *= DEFAULT_PA_TO_CM_H20;
+    values.pressure2 *= DEFAULT_PA_TO_CM_H20;
     return values;
+}
+
+/**
+ * @brief Get the Offset Between Pressure Sensors object
+ *
+ * This function must be called when flux is 0.
+ *
+ * @param sensors - pressure sensors that derive flux
+ * @param samples - number of samples to compute offset
+ * @return float - averaged offset bewteen pressure readings
+ */
+void Sensors::getOffsetBetweenPressureSensors(int samples)
+{
+    SensorValues_t values;
+    float deltaPressure, deltaAvg;
+    float cumDelta = 0.0;
+    for (int i = 0; i < samples; i++)
+    {
+        readPressure();
+        values = getPressureInPascals();
+        deltaPressure = values.pressure1 - values.pressure2;
+        cumDelta += deltaPressure;
+    }
+    deltaAvg = cumDelta / samples;
+    _sensorsOffset = deltaAvg;
 }
