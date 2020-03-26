@@ -26,19 +26,18 @@ int calcularVolumenTidal(int estatura, int sexo) {
  * inspiratorio y espiratorio, y las velocidades uno y dos.x
  * @param speedIns step/sec
  * @param speedEsp step/sec
- * @param tIns tiempo de inspiracion, en segundos
- * @param tEsp tiempo de espiracion, en segundos
- * @param tCiclo tiempo de ciclo, en segundos
+ * @param tIns tiempo de inspiracion, men segundos
+ * @param tEsp tiempo de espiracion, en msegundos
  * @param microStepper TODO: explicación?
  * @param porcentajeInspiratorio fraccion del ciclo en la que se inspira, tIns/tCiclo*100
  * @param rpm respiraciones por minuto
  */
 void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
-                               float* tIns, float* tEsp, float* tCiclo,
-                               int porcentajeInspiratorio, int rpm) {
-  *tCiclo = 60 / rpm; // Tiempo de ciclo en segundos
-  *tIns = *tCiclo * porcentajeInspiratorio/100;
-  *tEsp = *tCiclo - *tIns;
+                               short* tIns, short* tEsp, 
+                               uint8_t porcentajeInspiratorio, uint8_t rpm) {
+  float tCiclo = 60 *1000/ ((float)rpm); // Tiempo de ciclo en msegundos
+  *tIns = tCiclo * porcentajeInspiratorio/100;
+  *tEsp = (tCiclo) - *tIns;
 
   *speedIns = STEPS_FOR_TOTALLY_PRESSED_AMBU / *tIns; // step/sec
   *speedEsp = STEPS_FOR_TOTALLY_PRESSED_AMBU / *tEsp; // step/sec

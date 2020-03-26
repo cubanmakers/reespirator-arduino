@@ -53,9 +53,9 @@ public:
 	MechVentilation(
         FlexyStepper* stepper,
         Sensors* sensors,
-        int mlTidalVolume,
-        float secTimeoutInsufflation,
-        float secTimeoutExsufflation,
+        unsigned short mlTidalVolume,
+        short secTimeoutInsufflation,
+        short secTimeoutExsufflation,
         float speedInsufflation,
         float speedExsufflation
     );
@@ -74,26 +74,14 @@ public:
 	MechVentilation(
         FlexyStepper* stepper,
         Sensors* sensors,
-        int mlTidalVolume,
-        float secTimeoutInsufflation,
-        float secTimeoutExsufflation,
+        unsigned short mlTidalVolume,
+        short secTimeoutInsufflation,
+        short secTimeoutExsufflation,
         float speedInsufflation,
         float speedExsufflation,
         float lpmFluxTriggerValue
     ); 
 
-    /* Setters/getters */
-    // TODO: Add stepper, bme1, bme2 setters
-    /** Set tidal volume */
-    void setTidalVolume(float mlTidalVolume);
-    /** Set insufflation timeout. */
-    void setTimeoutInsufflation(float secTimeoutInsufflation);
-    /** Set exsufflation timeout. */
-    void setTimeoutExsufflation(float secTimeoutExsufflation);
-    /** Set insufflation speed. */
-    void setSpeedInsufflation(float speedInsufflation);
-    /** Set exsufflation speed. */
-    void setSpeedExsufflation(float speedExsufflation);
     boolean getStartWasTriggeredByPatient();
     void setVentilationCyle_WaitTime(float speedExsufflation);
     /** Start mechanical ventilation. */
@@ -110,15 +98,22 @@ public:
      */
     void update(void);
     bool getSensorErrorDetecte();
+    /**
+     * Get tidal volume. In ml
+     */
+    short getTidalVolume(void);
+    uint8_t getRPM(void);
+    short getExsuflationTime(void);
+    short getInsuflationTime(void);
 
 private:
     /** Initialization. */
     void _init(
         FlexyStepper* stepper,
         Sensors* sensors,
-        int mlTidalVolume,
-        float secTimeoutInsufflation,
-        float secTimeoutExsufflation,
+        unsigned short mlTidalVolume,
+        short secTimeoutInsufflation,
+        short secTimeoutExsufflation,
         float speedInsufflation,
         float speedExsufflation,
         float lpmFluxTriggerValue
@@ -137,17 +132,18 @@ private:
     Sensors* _sensors;
 
     /** Tidal volume in millilitres. */
-    float _cfgmlTidalVolume;
+    unsigned short _cfgmlTidalVolume;
     /** Flux trigger value in litres per minute. */
     float _cfgLpmFluxTriggerValue;
     /**  Insufflation timeout in seconds. */
-    float _cfgSecTimeoutInsufflation;
+    short _cfg_msecTimeoutInsufflation;
     /* Exsufflation timeout in seconds. */
-    float _cfgSecTimeoutExsufflation;
+    short _cfg_msecTimeoutExsufflation;
     /** Insufflation speed. @todo Denote units. */
     float _cfgSpeedInsufflation;
     /** Exsufflation speed. @todo Denote units. */
     float _cfgSpeedExsufflation;
+    uint8_t _cfgRpm;
 
     /* Internal state */
     /** Current state. */

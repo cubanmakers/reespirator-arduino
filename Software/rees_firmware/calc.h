@@ -28,14 +28,12 @@ int calcularVolumenTidal(int estatura, int sexo);
  * @param speedEsp TODO: explicación?
  * @param tIns tiempo de inspiracion, en segundos
  * @param tEsp tiempo de espiracion, en segundos
- * @param tCiclo tiempo de ciclo, en segundos
- * @param pasosPorRevolucion TODO: explicación?
  * @param porcentajeInspiratorio fraccion del ciclo en la que se inspira, tIns/tCiclo*100
  * @param rpm respiraciones por minuto
  */
 void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
-                               float* tIns, float* tEsp, float* tCiclo,
-                               int porcentajeInspiratorio, int rpm);
+                               short* tIns, short* tEsp, 
+                               uint8_t porcentajeInspiratorio, uint8_t rpm);
 
 
 /**

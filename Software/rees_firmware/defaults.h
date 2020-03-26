@@ -6,7 +6,7 @@
 
 #define DEBUG_UPDATE 0 //
 //#define DEBUG_STATE_MACHINE 1
-//#define PRUEBAS 1 // testing over arduino without sensors
+#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE 5 //msec

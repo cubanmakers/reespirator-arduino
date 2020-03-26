@@ -18,8 +18,8 @@
 // VARIABLES
 // =========================================================================
 
-byte rpm                    = DEFAULT_RPM;
-byte porcentajeInspiratorio = DEFAULT_POR_INSPIRATORIO;
+uint8_t rpm                    = DEFAULT_RPM;
+uint8_t porcentajeInspiratorio = DEFAULT_POR_INSPIRATORIO;
 short estatura               = DEFAULT_ESTATURA;
 bool sexo                   = DEFAULT_SEXO;
 //byte microStepper           = STEPPER_MICROSTEPS;
@@ -30,7 +30,8 @@ float flujoTrigger         = DEFAULT_FLUJO_TRIGGER;
 bool tieneTrigger;
 bool modo = true, errorFC = false;
 int volumenTidal;
-float speedIns, speedEsp, tCiclo, tIns, tEsp;
+float speedIns, speedEsp;
+short tIns, tEsp;
 
 
 #if DEBUG_STATE_MACHINE
@@ -264,11 +265,11 @@ void setup()
   // =========================================================================
   display.writeLine(0, "Tins  | Tesp");
   calcularCicloInspiratorio(&speedIns, &speedEsp, &tIns, &tEsp,
-                            &tCiclo, porcentajeInspiratorio, rpm);
-  display.writeLine(1, String(tIns) + " s | " + String(tEsp) + " s");
-  Serial.println("Tiempo del ciclo (seg):" + String(tCiclo));
-  Serial.println("Tiempo inspiratorio (seg):" + String(tIns));
-  Serial.println("Tiempo espiratorio (seg):" + String(tEsp));
+                            porcentajeInspiratorio, rpm);
+  display.writeLine(1, String(tIns) + "ms | " + String(tEsp) + "ms");
+  Serial.println("Tiempo del ciclo (seg):" + String(tIns+tEsp));
+  Serial.println("Tiempo inspiratorio (mseg):" + String(tIns));
+  Serial.println("Tiempo espiratorio (mseg):" + String(tEsp));
   Serial.println("Velocidad 1 calculada:" + String(speedIns));
   Serial.println("Velocidad 2 calculada:" + String(speedEsp));
 #ifndef PRUEBAS
@@ -463,7 +464,7 @@ void processUpdateParameters (void) {
           if (menuAccept) {
             //Aplicar
               rpm = menuRpm;
-              volumenTidal = MenuVolumeTidal;
+              volumenTidal = menuTidalVolume;
               #ifdef PRUEBAS
                 Serial.println("Aplicado");
               #endif

@@ -24,9 +24,9 @@ float currentFlow = 0;
 MechVentilation::MechVentilation(
     FlexyStepper * stepper,
     Sensors * sensors,
-    int mlTidalVolume,
-    float secTimeoutInsufflation,
-    float secTimeoutExsufflation,
+    unsigned short mlTidalVolume,
+    short msecTimeoutInsufflation,
+    short msecTimeoutExsufflation,
     float speedInsufflation,
     float speedExsufflation) {
 
@@ -34,8 +34,8 @@ MechVentilation::MechVentilation(
         stepper,
         sensors,
         mlTidalVolume,
-        secTimeoutInsufflation,
-        secTimeoutExsufflation,
+        msecTimeoutInsufflation,
+        msecTimeoutExsufflation,
         speedInsufflation,
         speedExsufflation,
         LPM_FLUX_TRIGGER_VALUE_NONE
@@ -46,9 +46,9 @@ MechVentilation::MechVentilation(
 MechVentilation::MechVentilation(
     FlexyStepper * stepper,
     Sensors * sensors,
-    int mlTidalVolume,
-    float secTimeoutInsufflation,
-    float secTimeoutExsufflation,
+    unsigned short mlTidalVolume,
+    short msecTimeoutInsufflation,
+    short msecTimeoutExsufflation,
     float speedInsufflation,
     float speedExsufflation,
     float lpmFluxTriggerValue
@@ -57,8 +57,8 @@ MechVentilation::MechVentilation(
         stepper,
         sensors,
         mlTidalVolume,
-        secTimeoutInsufflation,
-        secTimeoutExsufflation,
+        msecTimeoutInsufflation,
+        msecTimeoutExsufflation,
         speedInsufflation,
         speedExsufflation,
         lpmFluxTriggerValue
@@ -83,24 +83,25 @@ boolean MechVentilation::getSensorErrorDetecte() { //returns true if there was a
     }
 }
 
-void MechVentilation::setTidalVolume(float mlTidalVolume) {
-    _cfgmlTidalVolume = mlTidalVolume;
-}
-
-void MechVentilation::setTimeoutInsufflation(float secTimeoutInsufflation) {
-    _cfgSecTimeoutInsufflation = secTimeoutInsufflation;
-}
-
-void MechVentilation::setTimeoutExsufflation(float secTimeoutExsufflation) {
-    _cfgSecTimeoutExsufflation = secTimeoutExsufflation;
-}
-
 void MechVentilation::start(void) {
     _running = true;
 }
 
 void MechVentilation::stop(void) {
     _running = false;
+}
+
+short MechVentilation::getTidalVolume(void) {
+    return _cfgLpmFluxTriggerValue;
+}
+uint8_t MechVentilation::getRPM(void) {
+    return _cfgRpm;
+}
+short MechVentilation::getExsuflationTime(void) {
+    return _cfg_msecTimeoutExsufflation;
+}
+short MechVentilation::getInsuflationTime(void) {
+    return _cfg_msecTimeoutInsufflation;
 }
 
 /**
@@ -139,7 +140,7 @@ void MechVentilation::update(void) {
                 // Close Solenoid Valve
                 digitalWrite(SOLENOIDpin, SOLENOID_CLOSED);
 
-                totalCyclesInThisState = ((_cfgSecTimeoutInsufflation * 1000) - WAIT_BEFORE_EXSUFLATION_TIME)/ TIME_BASE;
+                totalCyclesInThisState = (_cfg_msecTimeoutInsufflation - WAIT_BEFORE_EXSUFLATION_TIME)/ TIME_BASE;
 
                 /* Stepper control: set acceleration and end-position */
                 _cfgStepper->setSpeedInStepsPerSecond(_speedInsufflation);
@@ -239,8 +240,7 @@ void MechVentilation::update(void) {
                 // Open Solenoid Valve
                 digitalWrite(SOLENOIDpin, SOLENOID_OPEN);
 
-                totalCyclesInThisState = _cfgSecTimeoutExsufflation * 1000 / TIME_BASE;
-                //											[1000msec/1sec]*[1sec/1cycle] / TIME_BASE
+                totalCyclesInThisState = _cfg_msecTimeoutExsufflation / TIME_BASE;
 
                 #if DEBUG_STATE_MACHINE
                 debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(totalCyclesInThisState);
@@ -339,9 +339,9 @@ void MechVentilation::update(void) {
 void MechVentilation::_init(
     FlexyStepper * stepper,
     Sensors * sensors,
-    int mlTidalVolume,
-    float secTimeoutInsufflation,
-    float secTimeoutExsufflation,
+    unsigned short mlTidalVolume,
+    short msecTimeoutInsufflation,
+    short msecTimeoutExsufflation,
     float speedInsufflation,
     float speedExsufflation,
     float lpmFluxTriggerValue
@@ -350,8 +350,8 @@ void MechVentilation::_init(
     _cfgStepper = stepper;
     _sensors = sensors;
     _cfgmlTidalVolume = mlTidalVolume;
-    _cfgSecTimeoutInsufflation = secTimeoutInsufflation;
-    _cfgSecTimeoutExsufflation = secTimeoutExsufflation;
+    _cfg_msecTimeoutInsufflation = msecTimeoutInsufflation;
+    _cfg_msecTimeoutExsufflation = msecTimeoutExsufflation;
     _cfgSpeedInsufflation = speedInsufflation;
     _cfgSpeedExsufflation = speedExsufflation;
     _cfgLpmFluxTriggerValue = lpmFluxTriggerValue;
