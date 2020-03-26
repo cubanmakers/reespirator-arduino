@@ -1,8 +1,9 @@
 /**
  * Sensors reading module
  */
-#include "src/Adafruit_BME280/Adafruit_BME280.h"
 #include "Sensors.h"
+#include "defaults.h"
+#include "src/Adafruit_BME280/Adafruit_BME280.h"
 #include "pinout.h"
 
 unsigned int Sensors::begin(void) {
@@ -34,7 +35,7 @@ unsigned int Sensors::begin(void) {
     return 0;
 }
 
-Sensors::Sensors() {
+Sensors::Sensors(void) {
     _init();
 }
 
@@ -59,6 +60,14 @@ void Sensors::_init () {
     _pres2Sensor = bmp2;
     _errorCounter = 0;
     _state = SensorStateFailed;
+
+#if ENABLED_SENSOR_VOLUME_SFM3300
+    _sfm3000 = new SFM3000wedo(64);
+    _sfm3000->init();
+#endif
+#if ENABLED_SENSOR_VOLUME
+    resetVolumeIntegrator();
+#endif
 }
 
 void Sensors::readPressure() {
@@ -92,12 +101,38 @@ SensorPressureValues_t Sensors::getPressure() {
     return values;
 }
 
+#if ENABLED_SENSOR_VOLUME
+
+void Sensors::readVolume(void) {
+    #if ENABLED_SENSOR_VOLUME_SFM3300
+        float tmp = _sfm3000->getvalue(); //TODO crc
+        float flow = (tmp - SFM3300_OFFSET) / SFM3300_SCALE; //lpm
+        unsigned short mseconds = (unsigned short)(millis() - _lastReadFlow);
+        float ml = flow * mseconds / 60; // l/min * ms * 1000 (ml) /60000 (ms)
+        _volume_ml += ml;
+        _lastReadFlow = millis();
+    #else
+    #error "not implemented"
+    #endif
+}
+
+void Sensors::resetVolumeIntegrator(void) {
+    _volume_ml = 0;
+    _lastReadFlow = millis();
+}
+#endif
+
 SensorVolumeValue_t Sensors::getVolume() {
     SensorVolumeValue_t values;
 
+#if ENABLED_SENSOR_VOLUME_SFM3300
+    values.state = SensorStateOK;
+    values.volume = _volume_ml;
+#else
     float flow = (_pressure1 - _pressure2) * DEFAULT_PRESSURE_V_FLOW_K1;
 
     values.state = _state;
     values.volume = flow;
+#endif
     return values;
 }
