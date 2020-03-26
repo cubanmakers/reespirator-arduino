@@ -18,20 +18,7 @@
 // VARIABLES
 // =========================================================================
 
-uint8_t rpm                    = DEFAULT_RPM;
-uint8_t porcentajeInspiratorio = DEFAULT_POR_INSPIRATORIO;
-short estatura               = DEFAULT_ESTATURA;
-bool sexo                   = DEFAULT_SEXO;
-//byte microStepper           = STEPPER_MICROSTEPS;
-//int aceleracion            = DEFAULT_ACELERACION * microStepper;
-//int pasosPorRevolucion     = STEPPER_MICROSTEPS_PER_REVOLUTION;
-float flujoTrigger         = DEFAULT_FLUJO_TRIGGER;
 
-bool tieneTrigger;
-bool modo = true, errorFC = false;
-int volumenTidal;
-float speedIns, speedEsp;
-short tIns, tEsp;
 
 
 #if DEBUG_STATE_MACHINE
@@ -73,6 +60,14 @@ MechVentilation* ventilation;
 
 void setup()
 {
+
+uint8_t rpm                    = DEFAULT_RPM;
+short estatura               = DEFAULT_ESTATURA;
+bool sexo                   = DEFAULT_SEXO;
+float flujoTrigger         = DEFAULT_FLUJO_TRIGGER;
+bool tieneTrigger;
+bool modo = true, errorFC = false;
+unsigned short volumenTidal;
 
   // INICIALIZACION
   // =========================================================================
@@ -263,15 +258,23 @@ void setup()
 
   // CÁLCULO: CONSTANTES DE TIEMPO INSPIRACION/ESPIRACION
   // =========================================================================
+
+
+  if (tieneTrigger) {
+    ventilation = new MechVentilation(stepper, sensors, volumenTidal, rpm, flujoTrigger);
+  } else {
+    ventilation = new MechVentilation(stepper, sensors, volumenTidal, rpm);
+  }
+
   display.writeLine(0, "Tins  | Tesp");
-  calcularCicloInspiratorio(&speedIns, &speedEsp, &tIns, &tEsp,
-                            porcentajeInspiratorio, rpm);
-  display.writeLine(1, String(tIns) + "ms | " + String(tEsp) + "ms");
-  Serial.println("Tiempo del ciclo (seg):" + String(tIns+tEsp));
-  Serial.println("Tiempo inspiratorio (mseg):" + String(tIns));
-  Serial.println("Tiempo espiratorio (mseg):" + String(tEsp));
+  display.writeLine(1, String(ventilation->getInsuflationTime()) + "ms | " + String(ventilation->getExsuflationTime()) + "ms");
+  Serial.println("Tiempo del ciclo (seg):" + String(ventilation->getExsuflationTime() + ventilation->getInsuflationTime()));
+  Serial.println("Tiempo inspiratorio (mseg):" + String(ventilation->getInsuflationTime()));
+  Serial.println("Tiempo espiratorio (mseg):" + String(ventilation->getExsuflationTime()));
+  /*
   Serial.println("Velocidad 1 calculada:" + String(speedIns));
   Serial.println("Velocidad 2 calculada:" + String(speedEsp));
+  */
 #ifndef PRUEBAS
   delay(1000);
   display.clear();
@@ -301,11 +304,6 @@ void setup()
 
   // configura la ventilación
   
-  if (tieneTrigger) {
-    ventilation = new MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp, flujoTrigger);
-  } else {
-    ventilation = new MechVentilation(stepper, sensors, volumenTidal, tIns, tEsp, speedIns, speedEsp);
-  }
   
   ventilation->start();
   
@@ -371,18 +369,18 @@ void processUpdateParameters (void) {
           switch (changeConfiguration) {
             case MenuVolumeTidal:
               display.writeLine(0, F("Volumen tidal"));
-              display.writeLine(1, String(volumenTidal) + F("ml"));
-              menuTidalVolume = volumenTidal;
+              display.writeLine(1, String(ventilation->getTidalVolume()) + F("ml"));
+              menuTidalVolume = ventilation->getTidalVolume();
               #ifdef PRUEBAS
-                Serial.println("volumen tidal"+ String(volumenTidal));
+                Serial.println("volumen tidal"+ String(ventilation->getTidalVolume()));
               #endif
               break;
             case MenuFrecResp:
               display.writeLine(0, F("Frec resp"));
-              display.writeLine(1, String(rpm) + F("ml"));
-              menuRpm = rpm;
+              display.writeLine(1, String(ventilation->getRPM()) + F("ml"));
+              menuRpm = ventilation->getRPM();
               #ifdef PRUEBAS
-                Serial.println("rpm="+ String(rpm));
+                Serial.println("rpm="+ String(ventilation->getRPM()));
               #endif
               break;
             case MenuApply:
@@ -463,14 +461,13 @@ void processUpdateParameters (void) {
         if (encoder.buttonHasBeenPressed()) {
           if (menuAccept) {
             //Aplicar
-              rpm = menuRpm;
-              volumenTidal = menuTidalVolume;
+              ventilation->reconfigParameters(menuTidalVolume, menuRpm);
               #ifdef PRUEBAS
                 Serial.println("Aplicado");
               #endif
           } else {
-              menuRpm = rpm;
-              menuTidalVolume = volumenTidal;
+              menuRpm = ventilation->getRPM();
+              menuTidalVolume = ventilation->getTidalVolume();
               #ifdef PRUEBAS
                 Serial.println("Descartado");
               #endif

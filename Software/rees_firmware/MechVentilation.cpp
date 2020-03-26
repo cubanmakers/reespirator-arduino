@@ -25,19 +25,13 @@ MechVentilation::MechVentilation(
     FlexyStepper * stepper,
     Sensors * sensors,
     unsigned short mlTidalVolume,
-    short msecTimeoutInsufflation,
-    short msecTimeoutExsufflation,
-    float speedInsufflation,
-    float speedExsufflation) {
+    uint8_t rpm) {
 
     _init(
         stepper,
         sensors,
         mlTidalVolume,
-        msecTimeoutInsufflation,
-        msecTimeoutExsufflation,
-        speedInsufflation,
-        speedExsufflation,
+        rpm,
         LPM_FLUX_TRIGGER_VALUE_NONE
     );
 
@@ -47,20 +41,14 @@ MechVentilation::MechVentilation(
     FlexyStepper * stepper,
     Sensors * sensors,
     unsigned short mlTidalVolume,
-    short msecTimeoutInsufflation,
-    short msecTimeoutExsufflation,
-    float speedInsufflation,
-    float speedExsufflation,
+    uint8_t rpm,
     float lpmFluxTriggerValue
 ) {
     _init(
         stepper,
         sensors,
         mlTidalVolume,
-        msecTimeoutInsufflation,
-        msecTimeoutExsufflation,
-        speedInsufflation,
-        speedExsufflation,
+        rpm,
         lpmFluxTriggerValue
     );
 }
@@ -91,8 +79,8 @@ void MechVentilation::stop(void) {
     _running = false;
 }
 
-short MechVentilation::getTidalVolume(void) {
-    return _cfgLpmFluxTriggerValue;
+unsigned short MechVentilation::getTidalVolume(void) {
+    return _cfgmlTidalVolume;
 }
 uint8_t MechVentilation::getRPM(void) {
     return _cfgRpm;
@@ -102,6 +90,18 @@ short MechVentilation::getExsuflationTime(void) {
 }
 short MechVentilation::getInsuflationTime(void) {
     return _cfg_msecTimeoutInsufflation;
+}
+void MechVentilation::reconfigParameters (unsigned short newTidalVolume, uint8_t newRpm) {
+    _cfgRpm = newRpm;
+    _cfgmlTidalVolume = newTidalVolume;
+    _setCicloInspiratorio();
+    _positionInsufflated = _calculateInsuflationPosition();
+}
+
+void MechVentilation::_setCicloInspiratorio(void) {
+  float tCiclo = 60 *1000/ ((float)_cfgRpm); // Tiempo de ciclo en msegundos
+  _cfg_msecTimeoutInsufflation = tCiclo * DEFAULT_POR_INSPIRATORIO/100;
+  _cfg_msecTimeoutExsufflation = (tCiclo) - _cfg_msecTimeoutInsufflation;
 }
 
 /**
@@ -340,27 +340,21 @@ void MechVentilation::_init(
     FlexyStepper * stepper,
     Sensors * sensors,
     unsigned short mlTidalVolume,
-    short msecTimeoutInsufflation,
-    short msecTimeoutExsufflation,
-    float speedInsufflation,
-    float speedExsufflation,
+    uint8_t rpm,
     float lpmFluxTriggerValue
 ) {
     /* Set configuration parameters */
     _cfgStepper = stepper;
     _sensors = sensors;
     _cfgmlTidalVolume = mlTidalVolume;
-    _cfg_msecTimeoutInsufflation = msecTimeoutInsufflation;
-    _cfg_msecTimeoutExsufflation = msecTimeoutExsufflation;
-    _cfgSpeedInsufflation = speedInsufflation;
-    _cfgSpeedExsufflation = speedExsufflation;
+    _cfgRpm = rpm,
+    reconfigParameters(mlTidalVolume, rpm);
     _cfgLpmFluxTriggerValue = lpmFluxTriggerValue;
 
     /* Initialize internal state */
     _currentState = State_Homming;
     _speedInsufflation = STEPPER_SPEED_INSUFFLATION;
     _speedExsufflation = STEPPER_SPEED_EXSUFFLATION;
-    _positionInsufflated = _calculateInsuflationPosition();
 
     //
     // connect and configure the stepper motor to its IO pins

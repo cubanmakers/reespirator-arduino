@@ -19,22 +19,6 @@
  * @return *volumenTidal volumen tidal estimado, en mililitros
  */
 int calcularVolumenTidal(int estatura, int sexo);
-/**
- * @brief calcula los tiempos de ciclo, inspiratorio y espiratorio, en seg.
- *
- * Calcula a partir de las respiraciones por minuto, los tiempos de ciclo,
- * inspiratorio y espiratorio, y las velocidades uno y dos.
- * @param speedIns TODO: explicación?
- * @param speedEsp TODO: explicación?
- * @param tIns tiempo de inspiracion, en segundos
- * @param tEsp tiempo de espiracion, en segundos
- * @param porcentajeInspiratorio fraccion del ciclo en la que se inspira, tIns/tCiclo*100
- * @param rpm respiraciones por minuto
- */
-void calcularCicloInspiratorio(float* speedIns, float* speedEsp,
-                               short* tIns, short* tEsp, 
-                               uint8_t porcentajeInspiratorio, uint8_t rpm);
-
 
 /**
  * @brief Constrains the value within the limits

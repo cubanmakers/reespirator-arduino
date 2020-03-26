@@ -54,10 +54,7 @@ public:
         FlexyStepper* stepper,
         Sensors* sensors,
         unsigned short mlTidalVolume,
-        short secTimeoutInsufflation,
-        short secTimeoutExsufflation,
-        float speedInsufflation,
-        float speedExsufflation
+        uint8_t rpm
     );
 
     /**
@@ -75,10 +72,7 @@ public:
         FlexyStepper* stepper,
         Sensors* sensors,
         unsigned short mlTidalVolume,
-        short secTimeoutInsufflation,
-        short secTimeoutExsufflation,
-        float speedInsufflation,
-        float speedExsufflation,
+        uint8_t rpm,
         float lpmFluxTriggerValue
     ); 
 
@@ -101,10 +95,11 @@ public:
     /**
      * Get tidal volume. In ml
      */
-    short getTidalVolume(void);
+    unsigned short getTidalVolume(void);
     uint8_t getRPM(void);
     short getExsuflationTime(void);
     short getInsuflationTime(void);
+    void reconfigParameters (unsigned short newTidalVolume, uint8_t newRpm);
 
 private:
     /** Initialization. */
@@ -112,20 +107,18 @@ private:
         FlexyStepper* stepper,
         Sensors* sensors,
         unsigned short mlTidalVolume,
-        short secTimeoutInsufflation,
-        short secTimeoutExsufflation,
-        float speedInsufflation,
-        float speedExsufflation,
+        uint8_t rpm,
         float lpmFluxTriggerValue
     );
     int _calculateInsuflationPosition (void);
 
     /** Set state. */
     void _setState(State state);
-    void MechVentilation::_increaseInsuflationSpeed (byte factor);
-    void MechVentilation::_decreaseInsuflationSpeed (byte factor);
-    void MechVentilation::_increaseInsuflation (byte factor);
-    void MechVentilation::_decreaseInsuflation (byte factor);
+    void _increaseInsuflationSpeed (byte factor);
+    void _decreaseInsuflationSpeed (byte factor);
+    void _increaseInsuflation (byte factor);
+    void _decreaseInsuflation (byte factor);
+    void _setCicloInspiratorio(void);
 
     /* Configuration parameters */
     FlexyStepper* _cfgStepper;
@@ -139,10 +132,6 @@ private:
     short _cfg_msecTimeoutInsufflation;
     /* Exsufflation timeout in seconds. */
     short _cfg_msecTimeoutExsufflation;
-    /** Insufflation speed. @todo Denote units. */
-    float _cfgSpeedInsufflation;
-    /** Exsufflation speed. @todo Denote units. */
-    float _cfgSpeedExsufflation;
     uint8_t _cfgRpm;
 
     /* Internal state */
