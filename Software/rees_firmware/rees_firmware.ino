@@ -18,12 +18,9 @@
 // VARIABLES
 // =========================================================================
 
-
-
-
 #if DEBUG_STATE_MACHINE
-String debugMsg[15];
-byte debugMsgCounter = 0;
+volatile String debugMsg[15];
+volatile byte debugMsgCounter = 0;
 #endif
 
 // pines en pinout.h
@@ -36,20 +33,6 @@ Encoder encoder(
 );
 Display display = Display();
 
-
-Adafruit_BME280 bmp1(
-  BMP_CS1,
-  BMP_MOSI,
-  BMP_MISO,
-  BMP_SCK
-);
-
-Adafruit_BME280 bmp2(
-  BMP_CS2,
-  BMP_MOSI,
-  BMP_MISO,
-  BMP_SCK
-);
 
 Sensors* sensors;
 MechVentilation* ventilation;
@@ -90,7 +73,7 @@ unsigned short volumenTidal;
 
 #ifndef PRUEBAS
   // Sensores de presión
-  sensors = new Sensors(bmp1, bmp2);
+  sensors = new Sensors();
   int check = sensors->begin();
     if (check) {
       display.clear();
@@ -527,9 +510,6 @@ void loop() {
     #endif
 
     processUpdateParameters();
-
-    // TODO: si hay nueva configuración: cambiar parámetros escuchando entrada desde
-    // el encoder
 
     // TODO: chequear trigger si hay trigger, esperar al flujo umbral para actuar,
     // si no, actuar en cada bucle Si está en inspiración: controlar con PID el

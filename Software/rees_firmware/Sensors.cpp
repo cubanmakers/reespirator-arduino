@@ -3,6 +3,7 @@
  */
 #include "src/Adafruit_BME280/Adafruit_BME280.h"
 #include "Sensors.h"
+#include "pinout.h"
 
 unsigned int Sensors::begin(void) {
     // Arrancar sensores de presion 1 y 2
@@ -33,18 +34,29 @@ unsigned int Sensors::begin(void) {
     return 0;
 }
 
-Sensors::Sensors(Adafruit_BME280 pres1, Adafruit_BME280 pres2) {
-    _init(pres1, pres2);
-}
-
 Sensors::Sensors() {
-    //TODO
+    _init();
 }
 
-void Sensors::_init (Adafruit_BME280 pres1, Adafruit_BME280 pres2) {
 
-    _pres1Sensor = pres1;
-    _pres2Sensor = pres2;
+void Sensors::_init () {
+
+    Adafruit_BME280 bmp1(
+    BMP_CS1,
+    BMP_MOSI,
+    BMP_MISO,
+    BMP_SCK
+    );
+
+    Adafruit_BME280 bmp2(
+    BMP_CS2,
+    BMP_MOSI,
+    BMP_MISO,
+    BMP_SCK
+    );
+
+    _pres1Sensor = bmp1;
+    _pres2Sensor = bmp2;
     _errorCounter = 0;
     _state = SensorStateFailed;
 }

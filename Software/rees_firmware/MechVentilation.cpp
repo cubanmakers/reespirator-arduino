@@ -114,8 +114,8 @@ void MechVentilation::update(void) {
     static int flowSetpoint = 0;
 
 #if DEBUG_STATE_MACHINE
-    extern String debugMsg[];
-    extern byte debugMsgCounter;
+    extern volatile String debugMsg[];
+    extern volatile byte debugMsgCounter;
 #endif
 
     SensorPressureValues_t values = _sensors->getPressure();
@@ -199,13 +199,16 @@ void MechVentilation::update(void) {
                     _setState(Init_WaitBeforeExsufflation);
                     currentTime = 0;
                 }  else {
+                    #if ENABLED_SENSOR_VOLUME
                     if (_currentVolume > _cfgmlTidalVolume) {
                         //TODO stop motor
 
                         /* Status update and reset timer, for next time */
                         _setState(Init_WaitBeforeExsufflation);
                         currentTime = 0;
-                    } else {
+                    } else 
+                    #endif
+                    {
                         currentTime++;
                     }
                 }

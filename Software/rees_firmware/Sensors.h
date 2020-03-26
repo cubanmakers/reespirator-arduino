@@ -27,15 +27,14 @@ typedef struct {
 class Sensors
 {
     public:
-    Sensors ();
-    Sensors (Adafruit_BME280 pres1, Adafruit_BME280 pres2);
+    Sensors();
     unsigned int begin(void);
     void readPressure();
     SensorPressureValues_t getPressure(); 
     SensorVolumeValue_t getVolume();
 
     private:
-    void _init(Adafruit_BME280 pres1, Adafruit_BME280 pres2);
+    void _init();
     Adafruit_BME280 _pres1Sensor;
     Adafruit_BME280 _pres2Sensor;
     float _pressure1;

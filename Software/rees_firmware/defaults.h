@@ -6,11 +6,16 @@
 
 #define DEBUG_UPDATE 0 //
 //#define DEBUG_STATE_MACHINE 1
-#define PRUEBAS 1 // testing over arduino without sensors
+//#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE 5 //msec
 
+// Sensores
+#define ENABLED_SENSOR_VOLUME 1
+#if ENABLED_SENSOR_VOLUME
+#define ENABLED_SENSOR_VOLUME_SFM3300 1
+#endif
 
 // Valores motor
 #define STEPPER_MICROSTEPS 4
@@ -67,10 +72,6 @@
 #define K_VOL2POS (STEPS_FOR_TOTALLY_PRESSED_AMBU / VOLUME_FOR_TOTALLY_PRESSED_AMBU)
 #define K_POS2VOL (VOLUME_FOR_TOTALLY_PRESSED_AMBU / STEPS_FOR_TOTALLY_PRESSED_AMBU)
 #define K_FLOW2SPEED (25/12)
-
-// @fm superñapa. parametrizar desde el inicio. se usa en mechVentilation
-//#define ventilationCycle_WaitBeforeInsuflationTime  800 //ms TODO parameter to mechVent
-//#define totalPatientVolume 0.8 // liters
 
 // Solenoid
 #define SOLENOID_CLOSED true
