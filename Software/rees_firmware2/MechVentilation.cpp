@@ -13,12 +13,12 @@ void MechVentilation::update(bool insuflate, int positionInSteps) {
     // Inspiración
 
         if (insuflate) {
-        _sensors -> getPressureInPascals();
+        _sensors -> getRelativePressureInPascals();
 
         // Apply velocity and acceleration depending on the volume tidal
-        _stepper -> setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT * STEPPER_MICROSTEPS);
+        _stepper -> setSpeedInStepsPerSecond(STEPPER_SPEED_INSUFFLATION * STEPPER_MICROSTEPS);
         _stepper -> setAccelerationInStepsPerSecondPerSecond(
-            STEPPER_ACC_DEFAULT * STEPPER_MICROSTEPS
+            STEPPER_ACC_INSUFFLATION * STEPPER_MICROSTEPS
         );
         _stepper -> setTargetPositionInSteps(positionInSteps * STEPPER_MICROSTEPS);
 
@@ -171,10 +171,10 @@ void MechVentilation::update(void) {
     static int flowSetpoint = 0;
 
     // TODO: meter algo como esto en loop ppal (creo que ya está)      Acquire
-    // sensors data     SensorValues_t sensorValues = _sensors.getPressureInPascals();
+    // sensors data     SensorValues_t sensorValues = _sensors.getRelativePressureInPascals();
     Serial.println("Starting update state: " + String(_currentState));
 
-    SensorValues_t values = _sensors - >getPressureInPascals();
+    SensorValues_t values = _sensors - >getRelativePressureInPascals();
     // Serial.println("Sensors state=" + String(values.state) + ",pres1=" +
     // String(values.pressure1) + ",pres2=" + String(values.pressure2));
     if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
@@ -231,7 +231,7 @@ void MechVentilation::update(void) {
                         );
                     }
 
-                    if (currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) { //The start was triggered by patient
+                    if (currentFlow < DEFAULT_TRIGGER_THRESHOLD) { //The start was triggered by patient
                         _startWasTriggeredByPatient = true;
                         Serial.println("!!!! Trigered by patient");
                         /* Status update, for next time */
@@ -341,7 +341,7 @@ void MechVentilation::update(void) {
                 // Serial.println("Motor:Process movement position=" +
                 // String(_cfgstepper->getCurrentPositionInSteps()));
 
-                if (currentTime > WAIT_BEFORE_EXSUFLATION_TIME / TIME_BASE) {
+                if (currentTime > DEFAULT_RETAIN_INSIPIRATION / TIME_BASE) {
 
                     /* Status update, for next time */
                     _setState(Init_Exsufflation);
@@ -390,7 +390,7 @@ void MechVentilation::update(void) {
                     Serial.println("Sensor: FAILED");
                 }
 
-                if (!digitalRead(ENDSTOP_PIN)) { //If not in HOME, do HOMING
+                if (!digitalRead(PIN_ENDSTOP)) { //If not in HOME, do HOMING
 
                     /* Stepper control: HOMING */
                     // bool moveToHomeInMillimeters(long directionTowardHome,  float
@@ -399,7 +399,7 @@ void MechVentilation::update(void) {
                     Serial.println("**********  HOMING  **********");
 
                     while (
-                        !_cfgstepper -> moveToHomeInSteps(1, HOMING_SPEED, (105 * STEPPER_MICROSTEPS), ENDSTOP_PIN)
+                        !_cfgstepper -> moveToHomeInSteps(1, HOMING_SPEED, (105 * STEPPER_MICROSTEPS), PIN_ENDSTOP)
                     ) ;
                     }
                 
@@ -448,9 +448,9 @@ void MechVentilation::_init(
     // connect and configure the stepper motor to its IO pins
     //
     //;
-    _cfgstepper -> connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
-    _cfgstepper -> setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT);
-    _cfgstepper -> setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_DEFAULT);
+    _cfgstepper -> connectToPins(PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
+    _cfgstepper -> setSpeedInStepsPerSecond(STEPPER_SPEED_INSUFFLATION * STEPPER_MICROSTEPS);
+    _cfgstepper -> setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_INSUFFLATION * STEPPER_MICROSTEPS);
     _cfgstepper -> setStepsPerRevolution(
         STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS
     );

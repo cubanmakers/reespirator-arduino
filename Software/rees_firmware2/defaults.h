@@ -4,48 +4,52 @@
 
 #undef I2C // definido = Display i2c, sin definir Display parallel
 
-// Base de tiempos. Periodo de llamada a mechVentilation.update
-#define TIME_BASE 5 //msec
-#define SENSORS_PERIOD_READING 3 //msec
+// Time base. Periodo de llamada a mechVentilation.update
+#define TIME_BASE 5                        // milliseconds
+#define SENSORS_PERIOD_READING 3           // milliseconds
 
-// Valores motor
-#define STEPPER_MICROSTEPS 4
-#define STEPPER_STEPS_PER_REVOLUTION 200
-#define STEPPER_HOMING_DIRECTION -1
-#define STEPPER_HOMING_SPEED 50        // Steps/S
-#define STEPPER_LOWEST_POSITION 77      // Steps
-#define STEPPER_HIGHEST_POSITION -128   // Steps
-#define STEPPER_SPEED_DEFAULT 12000L       // Steps/s
-#define STEPPER_SPEED_INSUFFLATION 12000L  // Steps/s
-#define STEPPER_SPEED_EXSUFFLATION 12000L  // Steps/s
-#define STEPPER_ACC_DEFAULT 900          // Steps/s2
-#define STEPPER_ACC_EXSUFFLATION 900     // Steps/s2
+// Stepper motor
+#define STEPPER_MICROSTEPS 4               // microsteps per step
+#define STEPPER_STEPS_PER_REVOLUTION 200   // steps
+#define STEPPER_HOMING_DIRECTION -1        // +1 or -1
+#define STEPPER_HOMING_SPEED 50            // steps/sec
+#define STEPPER_LOWEST_POSITION 77         // steps
+#define STEPPER_HIGHEST_POSITION -128      // steps
+#define STEPPER_SPEED_INSUFFLATION 12000L  // steps/sec
+#define STEPPER_SPEED_EXSUFFLATION 1000L   // steps/sec
+#define STEPPER_ACC_INSUFFLATION 900       // steps/sec2
+#define STEPPER_ACC_EXSUFFLATION 500       // steps/sec2
 
-// Valores por defecto
-#define DEFAULT_ESTATURA 170 // cm
-#define DEFAULT_SEXO 0 // 0: varón, 1: mujer
-#define DEFAULT_ML_POR_KG_DE_PESO_IDEAL 7
-#define DEFAULT_MAX_VOLUMEN_TIDAL 800
-#define DEFAULT_MIN_VOLUMEN_TIDAL 240
-#define DEFAULT_FLUJO_TRIGGER 3
+// Valores paciente por defecto
+#define DEFAULT_HEIGHT 170                 // cm
+#define DEFAULT_SEX 0                      // 0: male, 1: female
+#define DEFAULT_ML_TO_KG_IDEAL_WEIGHT 7    // ml per kg
+#define DEFAULT_MAX_TIDAL_VOLUME 800       // ml
+#define DEFAULT_MIN_TIDAL_VOLUME 240       // ml
+#define DEFAULT_TRIGGER_THRESHOLD 3.0      // liters per minute
 
 // Control de ciclos
-#define DEFAULT_RPM 15
-#define DEFAULT_MAX_RPM 24
-#define DEFAULT_MIN_RPM 3
-#define DEFAULT_POR_INSPIRATORIO 33.33  // %
-#define DEFAULT_RETAIN_INSIPIRATION 1000 // ms
+#define DEFAULT_RPM 15                     // breaths per minute
+#define DEFAULT_MAX_RPM 28                 // breaths per minute
+#define DEFAULT_MIN_RPM 3                  // breaths per minute
+#define DEFAULT_INSPIRATORY_FRACTION (1/3) // 0-1
+#define DEFAULT_RETAIN_INSIPIRATION 1000   // mseg
 
-// presión
-#define DEFAULT_PA_TO_CM_H20 0.0102
-#define DEFAULT_PRESSURE_V_FLOW_K1 0.719909914 // Constante proporcional que relaciona presión con caudal
-#define DEFAULT_PRESSURE_V_FLOW_0 0.7
-#define DEFAULT_PRESSURE_V_FLOW_K2 (0.5/29) // Segundo ajuste
+// Presión
+#define DEFAULT_PA_TO_CM_H20 0.0102F
+// @dc esta constante no se usará cuando tengamos un tercer
+// sensor de presión que mida la presión absoluta en tiempo real.
+#define DEFAULT_ABSOLUTE_PRESSURE 98290.0F // Pa
+// @dc esta constante ha de revisarse cuando se modele correctamente
+// el flujo en función de la diferencia de presión
+#define DEFAULT_K_PA_TO_LPM 0.9423        // liters per minute
 
-#define FLOW__INSUFLATION_TRIGGER_LEVEL 3.0   //LPM
 
-// Ventilation cycle timing
-#define WAIT_BEFORE_EXSUFLATION_TIME 500    //msec
+// ----------------------------------------------------------------
+// @dc A partir de aquí, estas constantes son de la regulación PID,
+// estas constantes no están implementadas
+// ----------------------------------------------------------------
+
 
 // PID constants
 #define PID_MIN 0
@@ -62,7 +66,7 @@
 
 //Volume to Position and viceversa constants
 #define STEPS_FOR_TOTALLY_PRESSED_AMBU (STEPPER_STEPS_PER_REVOLUTION / 2) //steps
-#define VOLUME_FOR_TOTALLY_PRESSED_AMBU 800 //ml
+#define VOLUME_FOR_TOTALLY_PRESSED_AMBU 800                               //ml
 #define K_VOL2POS (STEPS_FOR_TOTALLY_PRESSED_AMBU / VOLUME_FOR_TOTALLY_PRESSED_AMBU)
 #define K_POS2VOL (VOLUME_FOR_TOTALLY_PRESSED_AMBU / STEPS_FOR_TOTALLY_PRESSED_AMBU)
 #define K_FLOW2SPEED (25/12)

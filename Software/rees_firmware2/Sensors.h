@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include "src/Adafruit_BME280/Adafruit_BME280.h"
+#include "defaults.h"
+#include "calc.h"
 
 #define SENSORS_MAX_ERRORS 5
 
@@ -26,8 +28,12 @@ public:
     Sensors(Adafruit_BME280 pres1, Adafruit_BME280 pres2);
     unsigned int begin(void);
     void readPressure();
-    SensorValues_t getPressureInPascals();
-    SensorValues_t getPressureInCmH20();
+    SensorValues_t getAbsolutePressureInPascals();
+    SensorValues_t getRelativePressureInPascals();
+    SensorValues_t getAbsolutePressureInCmH20();
+    SensorValues_t getRelativePressureInCmH20();
+    float calculateFlow();
+    float calculateFilteredFlow();
     void getOffsetBetweenPressureSensors(int samples = 100);
 
 private:
@@ -38,6 +44,7 @@ private:
     float _pressure2;
     float _sensorsOffset = 0.0;
     SensorState _state;
+    float _lpfFlowArray[100];
     byte _errorCounter;
 };
 

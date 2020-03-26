@@ -8,16 +8,16 @@
 #define CALC_H
 
 #include "defaults.h"
-#include "Arduino.h"
+#include <Arduino.h>
 //#include <math.h>// o <cmath>
 
-int calcularVolumenTidal(int estatura, int sexo);
-void calcularCicloInspiratorio(float *speedIns, float *speedEsp,
-                               float *tIns, float *tEsp, float *tCiclo,
-                               float porcentajeInspiratorio, int rpm);
-float getCurrentFlow(float pressure1, float pressure2);
-float constrainFloat(float value, float lowLimit, float highLimit);
+int calculateTidalVolume(int height, int sex);
+void calculateInspiratoryCycle(float *tIns, float *tEsp, float *tCycle,
+                               float inspiratoryFraction, int rpm);
+float computeLPF(float value, float *lpfArray, int samples);
 
+
+float constrainFloat(float value, float lowLimit, float highLimit);
 float computePID(float setpoint, float feedbackInput);
 void refreshWatchDogTimer();
 float vol2pos(float volume);

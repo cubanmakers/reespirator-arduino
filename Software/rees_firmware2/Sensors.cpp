@@ -1,20 +1,19 @@
 /**
  * Sensors reading module
  */
-#include "src/Adafruit_BME280/Adafruit_BME280.h"
+
 #include "Sensors.h"
-#include "defaults.h"
 
 unsigned int Sensors::begin(void) {
     // Arrancar sensores de presion 1 y 2
     if(!_pres1Sensor.begin()) {
         return 1;
     }
-        
+
     if(!_pres2Sensor.begin()) {
         return 2;
     }
-    
+
 
     /* Default settings from datasheet. */  //TODO: valorar SAMPLING_NONE, lecturas mas rapidas?
     // Ver ejemplos: https://github.com/adafruit/Adafruit_BME280_Library/blob/master/examples/advancedsettings/advancedsettings.ino
@@ -74,11 +73,11 @@ void Sensors::readPressure() {
 }
 
 /**
- * @brief Get pressure in pascals.
+ * @brief Get absolute pressure in pascals.
  *
  * @return SensorValues_t - pressure values
  */
-SensorValues_t Sensors::getPressureInPascals() {
+SensorValues_t Sensors::getAbsolutePressureInPascals() {
     SensorValues_t values;
     values.state = _state;
     values.pressure1 = _pressure1;
@@ -87,12 +86,36 @@ SensorValues_t Sensors::getPressureInPascals() {
 }
 
 /**
- * @brief Get pressure in H20 cm.
+ * @brief Get relative pressure in pascals.
  *
  * @return SensorValues_t - pressure values
  */
-SensorValues_t Sensors::getPressureInCmH20() {
-    SensorValues_t values = getPressureInPascals();
+SensorValues_t Sensors::getRelativePressureInPascals() {
+    SensorValues_t values = getAbsolutePressureInPascals();
+    values.pressure1 = values.pressure1 - DEFAULT_ABSOLUTE_PRESSURE;
+    values.pressure2 = values.pressure2 - DEFAULT_ABSOLUTE_PRESSURE;
+    return values;
+}
+
+/**
+ * @brief Get absolute pressure in H20 cm.
+ *
+ * @return SensorValues_t - pressure values
+ */
+SensorValues_t Sensors::getAbsolutePressureInCmH20() {
+    SensorValues_t values = getAbsolutePressureInPascals();
+    values.pressure1 *= DEFAULT_PA_TO_CM_H20;
+    values.pressure2 *= DEFAULT_PA_TO_CM_H20;
+    return values;
+}
+
+/**
+ * @brief Get relative pressure in H20 cm.
+ *
+ * @return SensorValues_t - pressure values
+ */
+SensorValues_t Sensors::getRelativePressureInCmH20() {
+    SensorValues_t values = getRelativePressureInPascals();
     values.pressure1 *= DEFAULT_PA_TO_CM_H20;
     values.pressure2 *= DEFAULT_PA_TO_CM_H20;
     return values;
@@ -115,10 +138,35 @@ void Sensors::getOffsetBetweenPressureSensors(int samples)
     for (int i = 0; i < samples; i++)
     {
         readPressure();
-        values = getPressureInPascals();
+        values = getAbsolutePressureInPascals();
         deltaPressure = values.pressure1 - values.pressure2;
         cumDelta += deltaPressure;
     }
     deltaAvg = cumDelta / samples;
     _sensorsOffset = deltaAvg;
+}
+
+/**
+ * @brief Calculate estimated flow from delta pressure
+ *
+ * @return float - estimated flow, in liters per minute
+ */
+float Sensors::calculateFlow(void)
+{
+    SensorValues_t values;
+    float flow;
+    values = getAbsolutePressureInPascals();
+    flow = DEFAULT_K_PA_TO_LPM * (values.pressure1 - values.pressure2);
+    // flow *= 5.0/3.0;
+    // flow -= 65.0;
+    return flow;
+}
+
+
+float Sensors::calculateFilteredFlow(void)
+{
+    float flow, filteredFlow;
+    flow = calculateFlow();
+    filteredFlow = computeLPF(flow, _lpfFlowArray, 100);
+    return filteredFlow;
 }

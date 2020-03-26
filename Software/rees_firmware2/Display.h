@@ -21,7 +21,7 @@ private:
 #ifdef I2C
   LiquidCrystal_I2C lcd = LiquidCrystal_I2C(I2C_DIR, 20, 4);
 #else
-  LiquidCrystal lcd = LiquidCrystal(LCD_RS, LCD_E, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
+  LiquidCrystal lcd = LiquidCrystal(PIN_LCD_RS, PIN_LCD_E, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 #endif
 };
 

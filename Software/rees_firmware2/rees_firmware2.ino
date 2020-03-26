@@ -19,19 +19,18 @@
 // VARIABLES
 // =========================================================================
 
-int estatura = DEFAULT_ESTATURA;
-int sexo = DEFAULT_SEXO;
+int height = DEFAULT_HEIGHT;
+int sex = DEFAULT_SEX;
 int rpm = DEFAULT_RPM;
-int porcentajeInspiratorio = DEFAULT_POR_INSPIRATORIO;
+int inspiratoryFraction = DEFAULT_INSPIRATORY_FRACTION;
 int microSteps = STEPPER_MICROSTEPS;
-int pasosPorRevolucion = STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS;
-float flujoTrigger = DEFAULT_FLUJO_TRIGGER;
+float triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
 
-bool tieneTrigger;
+bool hasTrigger;
 int positionInSteps;
 int valveState;
-int volumenTidal;
-float speedIns, speedEsp, tCiclo, tIns, tEsp;
+int tidalVolume;
+float tCycle, tIns, tEsp;
 float flow;
 
 unsigned long static periodCounter,
@@ -40,11 +39,11 @@ unsigned long static periodCounter,
 // pines en pinout.h
 FlexyStepper *stepper = new FlexyStepper(); // direction Digital 6 (CW), pulses Digital 7 (CLK)
 
-Encoder encoder(ENCODER_DT_PIN, ENCODER_CLK_PIN, ENCODER_SW_PIN);
+Encoder encoder(PIN_ENCODER_DT, PIN_ENCODER_CLK, PIN_ENCODER_SW);
 Display display = Display();
 
-Adafruit_BME280 bme1(BME_CS1, BME_MOSI, BME_MISO, BME_SCK);
-Adafruit_BME280 bme2(BME_CS2, BME_MOSI, BME_MISO, BME_SCK);
+Adafruit_BME280 bme1(PIN_BME_CS1, PIN_BME_MOSI, PIN_BME_MISO, PIN_BME_SCK);
+Adafruit_BME280 bme2(PIN_BME_CS2, PIN_BME_MOSI, PIN_BME_MISO, PIN_BME_SCK);
 
 Sensors *sensors;
 MechVentilation *ventilation;
@@ -66,21 +65,21 @@ void setup()
     display.writeLine(0, " REESPIRATOR 23 ");
 
     // Zumbador
-    pinMode(BUZZ_PIN, OUTPUT);
-    digitalWrite(BUZZ_PIN, HIGH); // test zumbador
+    pinMode(PIN_BUZZ, OUTPUT);
+    digitalWrite(PIN_BUZZ, HIGH); // test zumbador
     delay(100);
-    digitalWrite(BUZZ_PIN, LOW);
+    digitalWrite(PIN_BUZZ, LOW);
 
     // FC efecto hall
-    pinMode(ENDSTOP_PIN, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
+    pinMode(PIN_ENDSTOP, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
 
     // Electrovalvula, abierta
-    pinMode(VALVE_PIN, OUTPUT);
-    digitalWrite(VALVE_PIN, HIGH);
+    pinMode(PIN_VALVE, OUTPUT);
+    digitalWrite(PIN_VALVE, HIGH);
 
     // Parte motor
-    pinMode(MOTOR_ENABLE_PIN, OUTPUT);
-    digitalWrite(MOTOR_ENABLE_PIN, HIGH); // high lo inhabilita
+    pinMode(PIN_STEPPER_ENABLE, OUTPUT);
+    digitalWrite(PIN_STEPPER_ENABLE, HIGH); // high lo inhabilita
 
     // Sensores de presión
     sensors = new Sensors(bme1, bme2);
@@ -99,23 +98,20 @@ void setup()
             Serial.println("Could not find sensor BME280 number 2, check wiring!");
         }
         display.writeLine(1, "Check wires!");
-        while (1)
-            ;
+        while (1);
     }
 
 #if PRUEBAS
-    estatura = 170;
-    sexo = 0;
+    height = 170;
+    sex = 0;
     rpm = 14;
-    // volumenTidal = calcularVolumenTidal(estatura, sexo);
-    volumenTidal = 800;
-    calcularCicloInspiratorio(
-        &speedIns,
-        &speedEsp,
+    // tidalVolume = calculateTidalVolume(height, sex);
+    tidalVolume = 800;
+    calculateInspiratoryCycle(
         &tIns,
         &tEsp,
-        &tCiclo,
-        porcentajeInspiratorio,
+        &tCycle,
+        inspiratoryFraction,
         rpm);
 #else
     // deja la display en blanco
@@ -132,13 +128,13 @@ void setup()
     display.writeLine(0, "Introduce altura");
     while (!encoder.readButton())
     {
-        encoder.updateValue(&estatura);
-        display.writeLine(1, "Altura: " + String(estatura) + " cm");
+        encoder.updateValue(&height);
+        display.writeLine(1, "Altura: " + String(height) + " cm");
     }
     display.clear();
     display.writeLine(0, "Valor guardado");
-    display.writeLine(1, "Altura: " + String(estatura) + " cm");
-    Serial.println("Altura (cm): " + String(estatura));
+    display.writeLine(1, "Altura: " + String(height) + " cm");
+    Serial.println("Altura (cm): " + String(height));
     delay(2000);
     display.clear();
 
@@ -147,37 +143,37 @@ void setup()
     display.writeLine(0, "Introduce sexo");
     while (!encoder.readButton())
     {
-        encoder.swapValue(&sexo);
-        if (sexo == 0)
+        encoder.swapValue(&sex);
+        if (sex == 0)
         {
             display.writeLine(1, "Sexo: varon");
         }
-        else if (sexo == 1)
+        else if (sex == 1)
         {
             display.writeLine(1, "Sexo: mujer");
         }
     }
     display.clear();
     display.writeLine(0, "Valor guardado");
-    if (sexo == 0)
+    if (sex == 0)
     {
         display.writeLine(1, "Sexo: varon");
     }
-    else if (sexo == 1)
+    else if (sex == 1)
     {
         display.writeLine(1, "Sexo: mujer");
     }
-    Serial.println("Sexo (0:V, 1:M): " + String(sexo));
+    Serial.println("Sexo (0:V, 1:M): " + String(sex));
     delay(2000);
     display.clear();
 
     // ESTIMACIÓN: VOLUMEN TIDAL
     // =========================================================================
     display.writeLine(0, "Volumen tidal");
-    // TODO: calcular volumen tidal estimado en función de la estatura volumenTidal
-    volumenTidal = calcularVolumenTidal(estatura, sexo);
-    display.writeLine(1, String(volumenTidal) + " ml");
-    Serial.println("Volumen tidal estimado (ml): " + String(volumenTidal));
+    // TODO: calcular volumen tidal estimado en función de la estatura tidalVolume
+    tidalVolume = calculateTidalVolume(height, sex);
+    display.writeLine(1, String(tidalVolume) + " ml");
+    Serial.println("Volumen tidal estimado (ml): " + String(tidalVolume));
     delay(2000);
     display.clear();
 
@@ -186,14 +182,14 @@ void setup()
     display.writeLine(0, "Modifica volumen");
     while (!encoder.readButton())
     {
-        encoder.updateValue(&volumenTidal, 10);
-        volumenTidal = constrain(volumenTidal, DEFAULT_MIN_VOLUMEN_TIDAL, DEFAULT_MAX_VOLUMEN_TIDAL);
-        display.writeLine(1, String(volumenTidal) + " ml");
+        encoder.updateValue(&tidalVolume, 10);
+        tidalVolume = constrain(tidalVolume, DEFAULT_MIN_TIDAL_VOLUME, DEFAULT_MAX_TIDAL_VOLUME);
+        display.writeLine(1, String(tidalVolume) + " ml");
     }
     display.clear();
     display.writeLine(0, "Valor guardado");
-    display.writeLine(1, String(volumenTidal) + " ml");
-    Serial.println("Volumen tidal configurado (ml): " + String(volumenTidal));
+    display.writeLine(1, String(tidalVolume) + " ml");
+    Serial.println("Volumen tidal configurado (ml): " + String(tidalVolume));
     delay(2000);
     display.clear();
 
@@ -202,8 +198,8 @@ void setup()
     display.writeLine(0, "Trigger?");
     while (!encoder.readButton())
     {
-        encoder.swapValue(&tieneTrigger);
-        if (tieneTrigger)
+        encoder.swapValue(&hasTrigger);
+        if (hasTrigger)
         {
             display.writeLine(1, "Si");
         }
@@ -214,7 +210,7 @@ void setup()
     }
     display.clear();
     display.writeLine(0, "Valor guardado");
-    if (tieneTrigger)
+    if (hasTrigger)
     {
         display.writeLine(1, "Trigger: Si");
     }
@@ -222,25 +218,25 @@ void setup()
     {
         display.writeLine(1, "Trigger: No");
     }
-    Serial.println("Trigger (0:No, 1:Si): " + String(tieneTrigger));
+    Serial.println("Trigger (0:No, 1:Si): " + String(hasTrigger));
     delay(2000);
     display.clear();
-    tieneTrigger = false;
+    hasTrigger = false;
 
     // INTERACCIÓN: VALOR DEL TRIGGER
     // =========================================================================
-    if (tieneTrigger)
+    if (hasTrigger)
     {
         display.writeLine(0, "Modifica trigger");
         while (!encoder.readButton())
         {
-            encoder.updateValue(&flujoTrigger, 0.1);
-            display.writeLine(1, "Flujo: " + String(flujoTrigger) + " LPM");
+            encoder.updateValue(&triggerThreshold, 0.1);
+            display.writeLine(1, "Flujo: " + String(triggerThreshold) + " LPM");
         }
         display.clear();
         display.writeLine(0, "Valor guardado");
-        display.writeLine(1, "Flujo: " + String(flujoTrigger) + " LPM");
-        Serial.println("Flujo trigger (LPM): " + String(flujoTrigger));
+        display.writeLine(1, "Flujo: " + String(triggerThreshold) + " LPM");
+        Serial.println("Flujo trigger (LPM): " + String(triggerThreshold));
         delay(2000);
         display.clear();
     }
@@ -264,20 +260,16 @@ void setup()
     // CÁLCULO: CONSTANTES DE TIEMPO INSPIRACION/ESPIRACION
     // =========================================================================
     display.writeLine(0, "Tins   | Tesp");
-    calcularCicloInspiratorio(
-        &speedIns,
-        &speedEsp,
+    calculateInspiratoryCycle(
         &tIns,
         &tEsp,
-        &tCiclo,
-        porcentajeInspiratorio,
+        &tCycle,
+        inspiratoryFraction,
         rpm);
     display.writeLine(1, String(tIns) + " s | " + String(tEsp) + " s");
-    Serial.println("Tiempo del ciclo (seg):" + String(tCiclo));
+    Serial.println("Tiempo del ciclo (seg):" + String(tCycle));
     Serial.println("Tiempo inspiratorio (seg):" + String(tIns));
     Serial.println("Tiempo espiratorio (seg):" + String(tEsp));
-    Serial.println("Velocidad 1 calculada:" + String(speedIns));
-    Serial.println("Velocidad 2 calculada:" + String(speedEsp));
     delay(4000);
     display.clear();
 
@@ -285,10 +277,10 @@ void setup()
     // =========================================================================
     display.writeLine(
         0,
-        "V:" + String(volumenTidal) + " ml F:" + String(rpm) + " rpm");
-    if (tieneTrigger)
+        "V:" + String(tidalVolume) + " ml F:" + String(rpm) + " rpm");
+    if (hasTrigger)
     {
-        display.writeLine(1, "Trigger: " + String(flujoTrigger) + " LPM");
+        display.writeLine(1, "Trigger: " + String(triggerThreshold) + " LPM");
     }
     else
     {
@@ -311,10 +303,10 @@ void setup()
     // =========================================================================
     sensors->getOffsetBetweenPressureSensors();
     display.clear();
-    display.writeLine(0, "Sensores");
-    display.writeLine(0, "calibrados");
+    display.writeLine(0, "    Sensores    ");
+    display.writeLine(1, "   calibrados   ");
+    display.clear();
     delay(1000);
-
 
     // INTERACCIÓN: ARRANQUE
     // =========================================================================
@@ -330,18 +322,18 @@ void setup()
     // OPERACIÓN: HOMING DEL STEPPER
     // =========================================================================
     // Habilita el motor
-    digitalWrite(MOTOR_ENABLE_PIN, LOW);
-    stepper->connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
-    stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT * STEPPER_MICROSTEPS);
+    digitalWrite(PIN_STEPPER_ENABLE, LOW);
+    stepper->connectToPins(PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
+    stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_INSUFFLATION * STEPPER_MICROSTEPS);
     stepper->setAccelerationInStepsPerSecondPerSecond(
-        STEPPER_ACC_DEFAULT * STEPPER_MICROSTEPS);
+        STEPPER_ACC_INSUFFLATION * STEPPER_MICROSTEPS);
     stepper->setStepsPerRevolution(
         STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS);
     if (stepper->moveToHomeInSteps(
             STEPPER_HOMING_DIRECTION,
             STEPPER_HOMING_SPEED,
             STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS,
-            ENDSTOP_PIN) != true)
+            PIN_ENDSTOP) != true)
     {
         display.clear();
         Serial.println("Homing has failed");
@@ -363,7 +355,7 @@ void setup()
 
     // Impose initial target position
     positionInSteps = STEPPER_HIGHEST_POSITION;
-    display.writeLine(0, "Posicion:");
+    display.writeLine(0, "Frecuencia:");
 }
 
 // =========================================================================
@@ -388,7 +380,7 @@ void loop()
     bool static startedExsuflation = false;
     periodCounter = millis() - periodTimeStamp;
 
-    if (periodCounter < int(tCiclo * 1000))
+    if (periodCounter < int(tCycle * 1000))
     {
         if (!startedInsuflation)
         {
@@ -396,7 +388,7 @@ void loop()
             if (!startedInsuflation)
             {
                 valveState = LOW;
-                digitalWrite(VALVE_PIN, valveState);
+                digitalWrite(PIN_VALVE, valveState);
             }
             startedInsuflation = true;
             // Serial.println("Insuflation at " + String(timestamp));
@@ -414,7 +406,7 @@ void loop()
                 if (!startedExsuflation)
                 {
                     valveState = HIGH;
-                    digitalWrite(VALVE_PIN, valveState);
+                    digitalWrite(PIN_VALVE, valveState);
                 }
                 // Serial.println("Exsuflation at " + String(timestamp));
                 ventilation->update(false);
@@ -440,20 +432,28 @@ void loop()
         // Serial.println("tmp=" + String(tmp));
     }
 
-    encoder.updateValue(&positionInSteps);
-    display.writeLine(1, String(positionInSteps) + "  ");
+    int previousRpm = rpm;
+    encoder.updateValue(&rpm);
+    rpm = constrain(rpm, DEFAULT_MIN_RPM, DEFAULT_MAX_RPM);
+    if (rpm != previousRpm) {
+        calculateInspiratoryCycle(
+            &tIns,
+            &tEsp,
+            &tCycle,
+            inspiratoryFraction,
+            rpm);
+    }
+    display.writeLine(1, String(rpm) + " rpm  ");
 
-    int delta = periodCounter - periodTimeStamp;
-    SensorValues_t values = sensors -> getPressureInCmH20();
-    flow = getCurrentFlow(values.pressure1, values.pressure2);
-    Serial.print(delta); Serial.print(F(","));
+    SensorValues_t values = sensors -> getRelativePressureInCmH20();
+    // flow = sensors -> calculateFilteredFlow();
     Serial.print(valveState); Serial.print(F(","));
     Serial.print(values.pressure1); Serial.print(F(","));
-    Serial.print(values.pressure2); Serial.print(F(","));
-    Serial.println(flow);
+    Serial.println(values.pressure2); // Serial.print(F(","));
+    // Serial.println(flow);
 
 
-    // if (sensors -> getPressureInPascals().state == SensorStateFailed) {
+    // if (sensors -> getRelativePressureInPascals().state == SensorStateFailed) {
     // TODO sensor fail. do something   display.clear();   display.writeLine(0,
     // "Valor guardado"); }
 

@@ -3,24 +3,27 @@
 /**
  * @brief estima el volumen tidal en función de estatura y sexo, en ml.
  *
- * @param estatura en cm, del paciente
- * @param sexo 0: varón, 1: mujer, sexo del paciente
- * @return *volumenTidal volumen tidal estimado, en mililitros
+ * @param height - height of the patient, cm
+ * @param sex - 0: male patient, 1: female patient
+ * @return tidalVolume - estimated tidal volume, in ml
  */
-int calcularVolumenTidal(int estatura, int sexo)
+int calculateTidalVolume(int height, int sex)
 {
-  float peso0, pesoIdeal, volumenEstimado;
-  if (sexo == 0)
-  { // Varón
-    peso0 = 50.0;
+  int tidalVolume;
+  float weight0, idealWeight;
+  if (sex == 0)
+  {
+    weight0 = 50.0;
   }
-  else if (sexo == 1)
-  { // Mujer
-    peso0 = 45.5;
+  else if (sex == 1)
+  {
+    weight0 = 45.5;
   }
-  pesoIdeal = peso0 + 0.91 * (estatura - 152.4); // en kg
 
-  return ((int)(round(pesoIdeal * DEFAULT_ML_POR_KG_DE_PESO_IDEAL)));
+  idealWeight = weight0 + 0.91 * (height - 152.4); // en kg
+  tidalVolume = ((int)(round(idealWeight * DEFAULT_ML_TO_KG_IDEAL_WEIGHT)));
+
+  return tidalVolume;
 }
 
 /**
@@ -28,40 +31,48 @@ int calcularVolumenTidal(int estatura, int sexo)
  *
  * Calcula a partir de las respiraciones por minuto, los tiempos de ciclo,
  * inspiratorio y espiratorio, y las velocidades uno y dos.x
- * @param speedIns step/sec
- * @param speedEsp step/sec
  * @param tIns tiempo de inspiracion, en segundos
  * @param tEsp tiempo de espiracion, en segundos
- * @param tCiclo tiempo de ciclo, en segundos
- * @param pasosPorRevolucion pasos en una revolución completa del stepper
- * @param microSteps TODO: explicación?
- * @param porcentajeInspiratorio fraccion del ciclo en la que se inspira, tIns/tCiclo*100
+ * @param tCycle tiempo de ciclo, en segundos
+ * @param inspiratoryFraction fraccion del ciclo en la que se inspira, tIns/tCycle
  * @param rpm respiraciones por minuto
  */
-void calcularCicloInspiratorio(float *speedIns, float *speedEsp,
-                               float *tIns, float *tEsp, float *tCiclo,
-                               float porcentajeInspiratorio, int rpm)
+void calculateInspiratoryCycle(float *tIns, float *tEsp, float *tCycle,
+                               float inspiratoryFraction, int rpm)
 {
-  *tCiclo = float(60) / float(rpm); // Tiempo de ciclo en segundos
-  *tIns = *tCiclo * porcentajeInspiratorio / 100;
-  *tEsp = *tCiclo - *tIns;
-
-  *speedIns = STEPS_FOR_TOTALLY_PRESSED_AMBU / *tIns; // step/sec
-  *speedEsp = STEPS_FOR_TOTALLY_PRESSED_AMBU / *tEsp; // step/sec
+  *tCycle = 60.0 / float(rpm); // Tiempo de ciclo en segundos
+  *tIns = *tCycle * inspiratoryFraction;
+  *tEsp = *tCycle - *tIns;
 }
 
 /**
- * @brief estima el caudal a partir de la diferencia de presión
+ * @brief Filtro de media móvil, de low-pass filter, para la diferencia de presiones
  *
- * @param pressure1 presión a un lado
- * @param pressure2 presión a otro lado
- * @param flow caudal resultante
+ * @param value variable a filtrar
+ * @param lpfArray array con muestras anteriores
+ * @return float filtered value
  */
-float getCurrentFlow(float pressure1, float pressure2)
+float computeLPF(float value, float *lpfArray, int samples)
 {
-  float flow = (pressure1 - pressure2);
-  return flow;
+  int k = samples - 1;        // tamaño de la matriz
+  float cumParameter = value; // el acumulador suma ya el valor
+  lpfArray[0] = value;
+  while (k > 0)
+  {
+    lpfArray[k] = lpfArray[k - 1]; // desplaza el valor una posicion
+    cumParameter += lpfArray[k];   // acumula valor para calcular la media
+    k--;
+  }
+  float result = cumParameter / samples;
+  return result;
 }
+
+
+// ----------------------------------------------------------------
+// @dc A partir de aquí, estas funciones son de la regulación PID,
+// estas funciones no están implementadas
+// ----------------------------------------------------------------
+
 
 /**
  * @brief Constrains the value within the limits
@@ -150,31 +161,6 @@ void integratorFlowToVolume(float *currentVolume, float currentFlow)
   *currentVolume += currentFlow * 60 * TIME_BASE;
   //currentVolume += currentFlow * (1000/1) * (60/1) * (1/1000)   * TIME_BASE;
 } //  [l/m]       [l]/[ml]  [min]/[s]  [s]/[msec]   [msec]
-
-#if 0
-/**
- * @brief Filtro de media móvil, de low-pass filter, para la diferencia de presiones
- *
- * @param parameter variable a filtrar
- * @param lpfArray array con muestras anteriores
- * @return float filtered value
- */
-float computeLPF(int parameter, int lpfArray[])
-{
-  int samples = sizeof(lpfArray);
-  int k = samples - 1;           // tamano de la matriz
-  int cumParameter = parameter; // el acumulador suma ya el param
-  lpfArray[0] = parameter;
-  while (k > 0)
-  {
-    lpfArray[k] = lpfArray[k - 1];   // desplaza el valor una posicion
-    cumParameter += lpfArray[k];     // acumula valor para calcular la media
-    k--;
-  }
-  float result = cumParameter / samples;
-  return result;
-}
-#endif
 
 //float curveInterpolator(int[] curve, float min, float max, float currentProgressFactor);
 //float curveInterpolator(float maxValue, float currentProgressFactor);
