@@ -10,7 +10,7 @@ const int8_t KNOBDIR[] = {
 
 static volatile bool _buttonPressedFlag = false;
 static volatile unsigned long _buttonPressedTimestamp = 0;
-void _buttonPressed(void);
+static void _buttonPressed(void);
 
 Encoder::Encoder(int pin1, int pin2, int pulsador) {
   _pin1 = pin1;

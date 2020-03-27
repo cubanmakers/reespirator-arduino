@@ -325,8 +325,8 @@ enum ChangeConfigurationState {
 ChangeConfigurationState changeConfiguration = Disabled;
 
 void processUpdateParameters (void) {
-  static short menuRpm;
-  static short menuTidalVolume;
+  static int menuRpm;
+  static int menuTidalVolume;
   static bool menuAccept = false;
 
   static ChangeConfigurationState menuSelection = Disabled;
@@ -483,8 +483,8 @@ void loop() {
     if (time > lastReadSensor + 15) {
       #ifndef PRUEBAS
             sensors->readPressure();
-
             SensorPressureValues_t pressure = sensors->getPressure();
+
 
             if (pressure.state == SensorStateFailed) {
               //TODO sensor fail. do something

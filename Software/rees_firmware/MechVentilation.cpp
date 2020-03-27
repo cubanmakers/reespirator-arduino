@@ -99,7 +99,7 @@ void MechVentilation::reconfigParameters (unsigned short newTidalVolume, uint8_t
 }
 
 void MechVentilation::_setCicloInspiratorio(void) {
-  float tCiclo = 60 *1000/ ((float)_cfgRpm); // Tiempo de ciclo en msegundos
+  float tCiclo = ((float)60) * 1000/ ((float)_cfgRpm); // Tiempo de ciclo en msegundos
   _cfg_msecTimeoutInsufflation = tCiclo * DEFAULT_POR_INSPIRATORIO/100;
   _cfg_msecTimeoutExsufflation = (tCiclo) - _cfg_msecTimeoutInsufflation;
 }
