@@ -59,6 +59,8 @@ unsigned short volumenTidal;
   Serial.begin(115200);
   Serial.println("Inicio");
 
+  Serial1.begin(115200);
+
   // Display de inicio
   display.writeLine(0, " REESPIRATOR 23 ");
 
@@ -484,7 +486,15 @@ void loop() {
       #ifndef PRUEBAS
             sensors->readPressure();
             SensorPressureValues_t pressure = sensors->getPressure();
-
+#if ENABLED_SENSOR_VOLUME
+            sensors->readVolume();
+            SensorVolumeValue_t volume = sensors->getVolume();
+            Serial1.println("DT " + String(pressure.pressure1) + " " + 
+              String(pressure.pressure2) + " " + String(volume.volume));
+#else
+Serial1.println("DT " + String(pressure.pressure1) + " " + 
+              String(pressure.pressure2) + " NC";
+#endif
 
             if (pressure.state == SensorStateFailed) {
               //TODO sensor fail. do something
