@@ -118,9 +118,10 @@ void MechVentilation::update(void) {
     extern volatile byte debugMsgCounter;
 #endif
 
-    SensorPressureValues_t values = _sensors->getPressure();
+
   
 #ifndef PRUEBAS
+    SensorPressureValues_t values = _sensors->getPressure();
     if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
         _sensor_error_detected = true; //An error was detected in sensors
         /* Status update, for this time */

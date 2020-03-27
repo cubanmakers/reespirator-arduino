@@ -26,89 +26,83 @@ volatile byte debugMsgCounter = 0;
 // pines en pinout.h
 FlexyStepper * stepper = new FlexyStepper(); // direction Digital 6 (CW), pulses Digital 7 (CLK)
 
-Encoder encoder(
-  DTpin,
-  CLKpin,
-  SWpin
-);
+Encoder encoder(DTpin, CLKpin, SWpin);
 Display display = Display();
 
-
-Sensors* sensors;
-MechVentilation* ventilation;
+Sensors * sensors;
+MechVentilation * ventilation;
 
 // =========================================================================
 // SETUP
 // =========================================================================
 
-void setup()
-{
+void setup() {
 
-uint8_t rpm                    = DEFAULT_RPM;
-short estatura               = DEFAULT_ESTATURA;
-bool sexo                   = DEFAULT_SEXO;
-float flujoTrigger         = DEFAULT_FLUJO_TRIGGER;
-bool tieneTrigger;
-bool modo = true, errorFC = false;
-unsigned short volumenTidal;
+    uint8_t rpm = DEFAULT_RPM;
+    short estatura = DEFAULT_ESTATURA;
+    bool sexo = DEFAULT_SEXO;
+    float flujoTrigger = DEFAULT_FLUJO_TRIGGER;
+    bool tieneTrigger;
+    bool modo = true,
+    errorFC = false;
+    unsigned short volumenTidal;
 
-  // INICIALIZACION
-  // =========================================================================
+    // INICIALIZACION
+    // =========================================================================
+    // Puerto serie
+    Serial.begin(115200);
+    Serial.println("Inicio");
 
-  // Puerto serie
-  Serial.begin(115200);
-  Serial.println("Inicio");
+    Serial1.begin(115200);
 
-  Serial1.begin(115200);
+    // Display de inicio
+    display.writeLine(0, " REESPIRATOR 23 ");
 
-  // Display de inicio
-  display.writeLine(0, " REESPIRATOR 23 ");
+    // Zumbador
+    pinMode(BUZZpin, OUTPUT);
+    digitalWrite(BUZZpin, HIGH); // test zumbador
+    delay(100);
+    digitalWrite(BUZZpin, LOW);
 
-  // Zumbador
-  pinMode(BUZZpin, OUTPUT);
-  digitalWrite(BUZZpin, HIGH); // test zumbador
-  delay(100);
-  digitalWrite(BUZZpin, LOW);
+    // FC efecto hall
+    pinMode(ENDSTOPpin, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
 
-  // FC efecto hall
-  pinMode(ENDSTOPpin, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
-
-#ifndef PRUEBAS
-  // Sensores de presión
-  sensors = new Sensors();
-  int check = sensors->begin();
+    #ifndef PRUEBAS
+    // Sensores de presión
+    sensors = new Sensors();
+    int check = sensors -> begin();
     if (check) {
-      display.clear();
-      if (check == 1) {
-        display.writeLine(0, "bme1 not found");
-        Serial.println("Could not find sensor BME280 number 1, check wiring!");
-      } else if (check == 2) {
-        display.writeLine(0, "bme2 not found");
-        Serial.println("Could not find sensor BME280 number 2, check wiring!");
-      }
-      display.writeLine(1, "Check wires!");
-      while(1);
-    }
-#endif
+        display.clear();
+        if (check == 1) {
+            display.writeLine(0, "bme1 not found");
+            Serial.println("Could not find sensor BME280 number 1, check wiring!");
+        } else if (check == 2) {
+            display.writeLine(0, "bme2 not found");
+            Serial.println("Could not find sensor BME280 number 2, check wiring!");
+        }
+        display.writeLine(1, "Check wires!");
+        while (1) ;
+        }
+    #endif
 
-  // Parte motor
-  pinMode(ENpin, OUTPUT);
-  digitalWrite(ENpin, HIGH);
+    // Parte motor
+    pinMode(ENpin, OUTPUT);
+    digitalWrite(ENpin, HIGH);
 
-  Serial.println("Setup");
-#ifndef PRUEBAS
-  // deja la display en blanco
-  delay(3000);
-  display.clear();
-  display.writeLine(0, "De personas");
-  display.writeLine(1, "   para personas");
-  delay(3000);
-  display.clear();
-  delay(100);
-#endif
-  // INTERACCIÓN: ESTATURA
-  // =========================================================================
-  /*
+    Serial.println("Setup");
+    #ifndef PRUEBAS
+    // deja la display en blanco
+    delay(3000);
+    display.clear();
+    display.writeLine(0, "De personas");
+    display.writeLine(1, "   para personas");
+    delay(3000);
+    display.clear();
+    delay(100);
+    #endif
+    // INTERACCIÓN: ESTATURA
+    // =========================================================================
+    /*
   display.writeLine(0, "Introduce altura");
   while(!encoder.readButton()) {
     encoder.updateValue(&estatura);
@@ -121,11 +115,11 @@ unsigned short volumenTidal;
   delay(2000);
   display.clear();
   */
-  estatura = 170;
+    estatura = 170;
 
-  // INTERACCIÓN: SEXO
-  // =========================================================================
-  /*
+    // INTERACCIÓN: SEXO
+    // =========================================================================
+    /*
   display.writeLine(0, "Introduce sexo");
   while(!encoder.readButton()) {
     encoder.swapValue(&sexo);
@@ -146,22 +140,21 @@ unsigned short volumenTidal;
   delay(2000);
   display.clear();
   */
-  sexo = 0;
+    sexo = 0;
 
-  // ESTIMACIÓN: VOLUMEN TIDAL
-  // =========================================================================
-  display.writeLine(0, "Volumen tidal");
-  // TODO: calcular volumen tidal estimado en función de la estatura
-  volumenTidal = calcularVolumenTidal(estatura, sexo);
-  display.writeLine(1, String(volumenTidal) + " ml");
-  Serial.println("Volumen tidal estimado (ml): " + String(volumenTidal));
-  delay(1000);
-  display.clear();
+    // ESTIMACIÓN: VOLUMEN TIDAL
+    // =========================================================================
+    display.writeLine(0, "Volumen tidal");
+    // TODO: calcular volumen tidal estimado en función de la estatura
+    volumenTidal = calcularVolumenTidal(estatura, sexo);
+    display.writeLine(1, String(volumenTidal) + " ml");
+    Serial.println("Volumen tidal estimado (ml): " + String(volumenTidal));
+    delay(1000);
+    display.clear();
 
-
-  // INTERACCIÓN: VOLUMEN TIDAL
-  // =========================================================================
-  /*
+    // INTERACCIÓN: VOLUMEN TIDAL
+    // =========================================================================
+    /*
   display.writeLine(0, "Modifica volumen");
   while(!encoder.readButton()) {
     encoder.updateValue(&volumenTidal, 10);
@@ -176,10 +169,9 @@ unsigned short volumenTidal;
   display.clear();
   */
 
-
-  // INTERACCIÓN: TRIGGER SI/NO
-  // =========================================================================
-  /*
+    // INTERACCIÓN: TRIGGER SI/NO
+    // =========================================================================
+    /*
   display.writeLine(0, "Trigger?");
   while(!encoder.readButton()) {
     encoder.swapValue(&tieneTrigger);
@@ -200,31 +192,29 @@ unsigned short volumenTidal;
   delay(2000);
   display.clear();
   */
-  tieneTrigger = false;
+    tieneTrigger = false;
 
-
-  // INTERACCIÓN: VALOR DEL TRIGGER
-  // =========================================================================
-  if (tieneTrigger) {
-    #if 0
-    display.writeLine(0, "Modifica trigger");
-    while(!encoder.readButton()) {
-      encoder.updateValue(&flujoTrigger, 0.1);
-      display.writeLine(1, "Flujo: " + String(flujoTrigger) + " LPM");
+    // INTERACCIÓN: VALOR DEL TRIGGER
+    // =========================================================================
+    if (tieneTrigger) {
+        #if 0
+        display.writeLine(0, "Modifica trigger");
+        while (!encoder.readButton()) {
+            encoder.updateValue(& flujoTrigger, 0.1);
+            display.writeLine(1, "Flujo: " + String(flujoTrigger) + " LPM");
+        }
+        display.clear();
+        display.writeLine(0, "Valor guardado");
+        display.writeLine(1, "Flujo: " + String(flujoTrigger) + " LPM");
+        #endif
+        Serial.println("Flujo trigger (LPM): " + String(flujoTrigger));
+        delay(2000);
+        display.clear();
     }
-    display.clear();
-    display.writeLine(0, "Valor guardado");
-    display.writeLine(1, "Flujo: " + String(flujoTrigger) + " LPM");
-    #endif
-    Serial.println("Flujo trigger (LPM): " + String(flujoTrigger));
-    delay(2000);
-    display.clear();
-  }
 
-
-  // INTERACCIÓN: FRECUENCIA RESPIRATORIA
-  // =========================================================================
-  /*
+    // INTERACCIÓN: FRECUENCIA RESPIRATORIA
+    // =========================================================================
+    /*
   display.writeLine(0, "Frecuencia resp.");
   while(!encoder.readButton()) {
     encoder.updateValue(&rpm);
@@ -238,78 +228,93 @@ unsigned short volumenTidal;
   delay(2000);
   display.clear();
   */
-  rpm = 14;
+    rpm = 14;
 
+    // CÁLCULO: CONSTANTES DE TIEMPO INSPIRACION/ESPIRACION
+    // =========================================================================
 
-  // CÁLCULO: CONSTANTES DE TIEMPO INSPIRACION/ESPIRACION
-  // =========================================================================
+    if (tieneTrigger) {
+        ventilation = new MechVentilation(
+            stepper,
+            sensors,
+            volumenTidal,
+            rpm,
+            flujoTrigger
+        );
+    } else {
+        ventilation = new MechVentilation(stepper, sensors, volumenTidal, rpm);
+    }
 
-
-  if (tieneTrigger) {
-    ventilation = new MechVentilation(stepper, sensors, volumenTidal, rpm, flujoTrigger);
-  } else {
-    ventilation = new MechVentilation(stepper, sensors, volumenTidal, rpm);
-  }
-
-  display.writeLine(0, "Tins  | Tesp");
-  display.writeLine(1, String(ventilation->getInsuflationTime()) + "ms | " + String(ventilation->getExsuflationTime()) + "ms");
-  Serial.println("Tiempo del ciclo (seg):" + String(ventilation->getExsuflationTime() + ventilation->getInsuflationTime()));
-  Serial.println("Tiempo inspiratorio (mseg):" + String(ventilation->getInsuflationTime()));
-  Serial.println("Tiempo espiratorio (mseg):" + String(ventilation->getExsuflationTime()));
-  /*
+    display.writeLine(0, "Tins  | Tesp");
+    display.writeLine(
+        1,
+        String(ventilation -> getInsuflationTime()) + "ms | " + String(ventilation -> getExsuflationTime()) +
+                "ms"
+    );
+    Serial.println(
+        "Tiempo del ciclo (seg):" + String(ventilation -> getExsuflationTime() + ventilation -> getInsuflationTime())
+    );
+    Serial.println(
+        "Tiempo inspiratorio (mseg):" + String(ventilation -> getInsuflationTime())
+    );
+    Serial.println(
+        "Tiempo espiratorio (mseg):" + String(ventilation -> getExsuflationTime())
+    );
+    /*
   Serial.println("Velocidad 1 calculada:" + String(speedIns));
   Serial.println("Velocidad 2 calculada:" + String(speedEsp));
   */
-#ifndef PRUEBAS
-  delay(1000);
-  display.clear();
+    #ifndef PRUEBAS
+    delay(1000);
+    display.clear();
 
-  // INFORMACIÓN: PARÁMETROS
-  // =========================================================================
-  display.writeLine(0, "Vol: " + String(volumenTidal) + " ml | " + "Frec: " + String(rpm) + " rpm");
-  if (tieneTrigger) {
-    display.writeLine(1, "Trigger: " + String(flujoTrigger) + " LPM");
-  } else {
-    display.writeLine(1, "No trigger");
-  }
-  delay(1000);
-  display.clear();
+    // INFORMACIÓN: PARÁMETROS
+    // =========================================================================
+    display.writeLine(
+        0,
+        "Vol: " + String(volumenTidal) + " ml | Frec: " + String(rpm) + " rpm"
+    );
+    if (tieneTrigger) {
+        display.writeLine(1, "Trigger: " + String(flujoTrigger) + " LPM");
+    } else {
+        display.writeLine(1, "No trigger");
+    }
+    delay(1000);
+    display.clear();
 
+    // INTERACCIÓN: ARRANQUE
+    // =========================================================================
+    display.writeLine(0, "Pulsa para iniciar");
+    display.writeLine(1, "Esperando...");
+    while (!encoder.readButton()) 
+    ;
+    display.clear();
+    display.writeLine(1, "Iniciando...");
+    #endif
+    // Habilita el motor
+    digitalWrite(ENpin, LOW);
 
-  // INTERACCIÓN: ARRANQUE
-  // =========================================================================
-  display.writeLine(0, "Pulsa para iniciar");
-  display.writeLine(1, "Esperando...");
-  while(!encoder.readButton());
-  display.clear();
-  display.writeLine(1, "Iniciando...");
-#endif
-  // Habilita el motor
-  digitalWrite(ENpin, LOW);
+    // configura la ventilación
 
-  // configura la ventilación
-  
-  
-  ventilation->start();
-  
-  delay(1000);
-  display.clear();
+    ventilation -> start();
 
-#ifndef PRUEBAS
-  sensors->readPressure(); 
+    delay(1000);
+    display.clear();
+
+    #ifndef PRUEBAS
+    sensors -> readPressure();
     Timer1.initialize(TIME_BASE * 1000); // 5 ms
-  Timer1.attachInterrupt(timer1Isr);
-  //TODO: Option: if (Sensores ok) { arranca timer3 }
-  Timer3.initialize(50); //50us
-  Timer3.attachInterrupt(timer3Isr);
-  #else
-  Timer1.initialize(500); // 5 ms
-  Timer1.attachInterrupt(timer1Isr);
-  //TODO: Option: if (Sensores ok) { arranca timer3 }
-  //Timer3.initialize(50); //50us
-  //Timer3.attachInterrupt(timer3Isr);
-#endif
-  encoder.buttonHasBeenPressed();
+    Timer1.attachInterrupt(timer1Isr);
+    //TODO: Option: if (Sensores ok) { arranca timer3 }
+    Timer3.initialize(50); //50us
+    Timer3.attachInterrupt(timer3Isr);
+    #else
+    Timer1.initialize(500); // 5 ms
+    Timer1.attachInterrupt(timer1Isr);
+    // TODO: Option: if (Sensores ok) { arranca timer3 } Timer3.initialize(50); 50us
+    // Timer3.attachInterrupt(timer3Isr);
+    #endif
+    encoder.buttonHasBeenPressed();
 }
 
 // =========================================================================
@@ -317,162 +322,162 @@ unsigned short volumenTidal;
 // =========================================================================
 
 enum ChangeConfigurationState {
-  Disabled = 0,
-  SelectMenu = 1,
-  MenuVolumeTidal = 2,
-  MenuFrecResp = 3,
-  MenuApply = 4
+    Disabled = 0,
+    SelectMenu = 1,
+    MenuVolumeTidal = 2,
+    MenuFrecResp = 3,
+    MenuApply = 4
 };
 
 ChangeConfigurationState changeConfiguration = Disabled;
 
-void processUpdateParameters (void) {
-  static int menuRpm;
-  static int menuTidalVolume;
-  static bool menuAccept = false;
+void processUpdateParameters(void) {
+    static int menuRpm;
+    static int menuTidalVolume;
+    static bool menuAccept = false;
 
-  static ChangeConfigurationState menuSelection = Disabled;
+    static ChangeConfigurationState menuSelection = Disabled;
 
-  switch (changeConfiguration) {
-      case Disabled:
-        if (encoder.buttonHasBeenPressed()) {
-          changeConfiguration = SelectMenu;
-          display.clear();
-          display.writeLine(0,F("Cambiar paramet"));
-          display.writeLine(1, F("Volumen tidal"));
-          #ifdef PRUEBAS
-          Serial.println("Parameter:volumen tidal");
-          #endif
-          menuSelection = MenuVolumeTidal;
-        }
-        break;
-      case SelectMenu:
-        
-        if (encoder.buttonHasBeenPressed()) {
-          changeConfiguration = menuSelection;
-          display.clear();
-          switch (changeConfiguration) {
-            case MenuVolumeTidal:
-              display.writeLine(0, F("Volumen tidal"));
-              display.writeLine(1, String(ventilation->getTidalVolume()) + F("ml"));
-              menuTidalVolume = ventilation->getTidalVolume();
-              #ifdef PRUEBAS
-                Serial.println("volumen tidal"+ String(ventilation->getTidalVolume()));
-              #endif
-              break;
-            case MenuFrecResp:
-              display.writeLine(0, F("Frec resp"));
-              display.writeLine(1, String(ventilation->getRPM()) + F("ml"));
-              menuRpm = ventilation->getRPM();
-              #ifdef PRUEBAS
-                Serial.println("rpm="+ String(ventilation->getRPM()));
-              #endif
-              break;
-            case MenuApply:
-              display.writeLine(0, F("Aplicar config"));
-              display.writeLine(1, F("No"));
-              #ifdef PRUEBAS
-                Serial.println("Apply config");
-              #endif              
-              break;  
-          }
-        } else {
-          int tmp = menuSelection - MenuVolumeTidal;
-          if (encoder.updateValue(&tmp)) {
-            if (tmp == -1) {
-              tmp = 2; // workaround
-            }
-
-            switch (tmp % 3) {
-              case 0:
+    switch (changeConfiguration) {
+        case Disabled:
+            if (encoder.buttonHasBeenPressed()) {
+                changeConfiguration = SelectMenu;
+                display.clear();
+                display.writeLine(0, F("Cambiar paramet"));
                 display.writeLine(1, F("Volumen tidal"));
-                menuSelection = MenuVolumeTidal;
                 #ifdef PRUEBAS
                 Serial.println("Parameter:volumen tidal");
-                #endif                
-                break;
-              case 1:
-                display.writeLine(1, F("Frec resp       "));
-                menuSelection = MenuFrecResp;
-                #ifdef PRUEBAS
-                Serial.println("Parameter:rpm");
-                #endif                
-                break;
-              case 2:
-                // apply
-                display.writeLine(1, F("Aplicar      "));
-                menuSelection = MenuApply;
-                #ifdef PRUEBAS
-                Serial.println("Aplicar");
-                #endif 
-                break;
+                #endif
+                menuSelection = MenuVolumeTidal;
             }
-          }
-        }
-      break;
-      case MenuVolumeTidal:
-      case MenuFrecResp:
-        if (encoder.buttonHasBeenPressed()) {
-          changeConfiguration = SelectMenu;
-          display.clear();
-          display.writeLine(0,F("Cambiar paramet"));
-          display.writeLine(1, F("Volumen tidal"));
-          #ifdef PRUEBAS
-          Serial.println("Parameter:volumen tidal");
-          #endif
-          menuSelection = MenuVolumeTidal;          
-          
-        } else {
-          if (changeConfiguration == MenuVolumeTidal) {
-            if (encoder.updateValue(&menuTidalVolume)) {
-              display.writeLine(1, String(menuTidalVolume) + F("ml"));
-              #ifdef PRUEBAS
-                Serial.println("volumen tidal"+ String(menuTidalVolume));
-              #endif
-            }
-          } else {
-            // rpm
-              if (encoder.updateValue(&menuRpm)) {
-              display.writeLine(1, String(menuRpm) + F("rpm"));
-              #ifdef PRUEBAS
-                Serial.println("rpm="+ String(menuRpm));
-              #endif
-              }
-          }
-        }
+            break;
+        case SelectMenu:
 
-        break;
-      case MenuApply:
-        if (encoder.buttonHasBeenPressed()) {
-          if (menuAccept) {
-            //Aplicar
-              ventilation->reconfigParameters(menuTidalVolume, menuRpm);
-              #ifdef PRUEBAS
-                Serial.println("Aplicado");
-              #endif
-          } else {
-              menuRpm = ventilation->getRPM();
-              menuTidalVolume = ventilation->getTidalVolume();
-              #ifdef PRUEBAS
-                Serial.println("Descartado");
-              #endif
-          }
-          changeConfiguration = Disabled;
-          menuSelection = Disabled;
-          
-        } else {
-          if (encoder.swapValue(&menuAccept)) {
-            if (menuAccept) {
-              display.writeLine(1, F("Sí"));
+            if (encoder.buttonHasBeenPressed()) {
+                changeConfiguration = menuSelection;
+                display.clear();
+                switch (changeConfiguration) {
+                    case MenuVolumeTidal:
+                        display.writeLine(0, F("Volumen tidal"));
+                        display.writeLine(1, String(ventilation -> getTidalVolume()) + F("ml"));
+                        menuTidalVolume = ventilation -> getTidalVolume();
+                        #ifdef PRUEBAS
+                        Serial.println("volumen tidal" + String(ventilation -> getTidalVolume()));
+                        #endif
+                        break;
+                    case MenuFrecResp:
+                        display.writeLine(0, F("Frec resp"));
+                        display.writeLine(1, String(ventilation -> getRPM()) + F("ml"));
+                        menuRpm = ventilation -> getRPM();
+                        #ifdef PRUEBAS
+                        Serial.println("rpm=" + String(ventilation -> getRPM()));
+                        #endif
+                        break;
+                    case MenuApply:
+                        display.writeLine(0, F("Aplicar config"));
+                        display.writeLine(1, F("No"));
+                        #ifdef PRUEBAS
+                        Serial.println("Apply config");
+                        #endif
+                        break;
+                }
             } else {
-              display.writeLine(1, F("No"));
+                int tmp = menuSelection - MenuVolumeTidal;
+                if (encoder.updateValue(& tmp)) {
+                    if (tmp == -1) {
+                        tmp = 2; // workaround
+                    }
+
+                    switch (tmp % 3) {
+                        case 0:
+                            display.writeLine(1, F("Volumen tidal"));
+                            menuSelection = MenuVolumeTidal;
+                            #ifdef PRUEBAS
+                            Serial.println("Parameter:volumen tidal");
+                            #endif
+                            break;
+                        case 1:
+                            display.writeLine(1, F("Frec resp       "));
+                            menuSelection = MenuFrecResp;
+                            #ifdef PRUEBAS
+                            Serial.println("Parameter:rpm");
+                            #endif
+                            break;
+                        case 2:
+                            // apply
+                            display.writeLine(1, F("Aplicar      "));
+                            menuSelection = MenuApply;
+                            #ifdef PRUEBAS
+                            Serial.println("Aplicar");
+                            #endif
+                            break;
+                    }
+                }
             }
-              #ifdef PRUEBAS
-                Serial.println("MenuAceptar="+ String(menuAccept));
-              #endif
-          }
-        }
-      break;
+            break;
+        case MenuVolumeTidal:
+        case MenuFrecResp:
+            if (encoder.buttonHasBeenPressed()) {
+                changeConfiguration = SelectMenu;
+                display.clear();
+                display.writeLine(0, F("Cambiar paramet"));
+                display.writeLine(1, F("Volumen tidal"));
+                #ifdef PRUEBAS
+                Serial.println("Parameter:volumen tidal");
+                #endif
+                menuSelection = MenuVolumeTidal;
+
+            } else {
+                if (changeConfiguration == MenuVolumeTidal) {
+                    if (encoder.updateValue(& menuTidalVolume)) {
+                        display.writeLine(1, String(menuTidalVolume) + F("ml"));
+                        #ifdef PRUEBAS
+                        Serial.println("volumen tidal" + String(menuTidalVolume));
+                        #endif
+                    }
+                } else {
+                    // rpm
+                    if (encoder.updateValue(& menuRpm)) {
+                        display.writeLine(1, String(menuRpm) + F("rpm"));
+                        #ifdef PRUEBAS
+                        Serial.println("rpm=" + String(menuRpm));
+                        #endif
+                    }
+                }
+            }
+
+            break;
+        case MenuApply:
+            if (encoder.buttonHasBeenPressed()) {
+                if (menuAccept) {
+                    //Aplicar
+                    ventilation -> reconfigParameters(menuTidalVolume, menuRpm);
+                    #ifdef PRUEBAS
+                    Serial.println("Aplicado");
+                    #endif
+                } else {
+                    menuRpm = ventilation -> getRPM();
+                    menuTidalVolume = ventilation -> getTidalVolume();
+                    #ifdef PRUEBAS
+                    Serial.println("Descartado");
+                    #endif
+                }
+                changeConfiguration = Disabled;
+                menuSelection = Disabled;
+
+            } else {
+                if (encoder.swapValue(& menuAccept)) {
+                    if (menuAccept) {
+                        display.writeLine(1, F("Sí"));
+                    } else {
+                        display.writeLine(1, F("No"));
+                    }
+                    #ifdef PRUEBAS
+                    Serial.println("MenuAceptar=" + String(menuAccept));
+                    #endif
+                }
+            }
+            break;
     }
 
 }
@@ -483,173 +488,59 @@ void loop() {
     unsigned long static lastReadSensor = 0;
 
     if (time > lastReadSensor + 15) {
-      #ifndef PRUEBAS
-            sensors->readPressure();
-            SensorPressureValues_t pressure = sensors->getPressure();
-#if ENABLED_SENSOR_VOLUME
-            sensors->readVolume();
-            SensorVolumeValue_t volume = sensors->getVolume();
-            Serial1.println("DT " + String(pressure.pressure1) + " " + 
-              String(pressure.pressure2) + " " + String(volume.volume));
-#else
-Serial1.println("DT " + String(pressure.pressure1) + " " + 
-              String(pressure.pressure2) + " NC";
-#endif
+        #ifndef PRUEBAS
+        sensors -> readPressure();
+        SensorPressureValues_t pressure = sensors -> getPressure();
 
-            if (pressure.state == SensorStateFailed) {
-              //TODO sensor fail. do something
-              display.clear();  
-              display.writeLine(0, F("FALLO Sensor"));
-            } else {
-              if (changeConfiguration == Disabled) {
+        #if ENABLED_SENSOR_VOLUME
+        sensors -> readVolume();
+        SensorVolumeValue_t volume = sensors -> getVolume();
+        Serial1.println(
+            "DT " + String(pressure.pressure1) + " " + String(pressure.pressure2) + " " +
+            String(volume.volume)
+        );
+        #else
+        Serial1.println(
+        "DT " + String(pressure.pressure1) + " " + String(pressure.pressure2) + " NC";
+        #endif  // ENABLED_SENSOR_VOLUME
+        
+        if (pressure.state == SensorStateFailed) {
+            //TODO sensor fail. do something
+            display.clear();
+            display.writeLine(0, F("FALLO Sensor"));
+        } else {
+            if (changeConfiguration == Disabled) {
                 display.clear();
-                display.writeLine (0, "Pres=" + String(pressure.pressure2)); 
-              }
+                display.writeLine(0, "Pres=" + String(pressure.pressure2));
             }
-      #endif
-            lastReadSensor = time;
+        }
+        #endif // PRUEBAS
+        lastReadSensor = time;
     }
 
     #if DEBUG_STATE_MACHINE
     if (debugMsgCounter) {
-      for (byte i = 0; i < debugMsgCounter; i++) {
-        Serial.println(debugMsg[i]);
-      }
-      debugMsgCounter = 0;
-    }
+        for (byte i = 0; i < debugMsgCounter; i++) {
+            Serial.println(debugMsg[i]);
+        }
+        debugMsgCounter = 0;
     #endif
 
-    processUpdateParameters();
+        processUpdateParameters();
 
-    // TODO: chequear trigger si hay trigger, esperar al flujo umbral para actuar,
-    // si no, actuar en cada bucle Si está en inspiración: controlar con PID el
-    // volumen tidal (el que se insufla) Si está en espiración: soltar balón (mover
-    // leva hacia arriba sin controlar) y esperar
-}
+        // TODO: chequear trigger si hay trigger, esperar al flujo umbral para actuar,
+        // si no, actuar en cada bucle Si está en inspiración: controlar con PID el
+        // volumen tidal (el que se insufla) Si está en espiración: soltar balón (mover
+        // leva hacia arriba sin controlar) y esperar
+    }
 
-/**
+    /**
  * Timer 1 ISR
  */
-void timer1Isr(void) {
-    ventilation->update();
-}
-
-void timer3Isr(void) {
-    stepper->processMovement();
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    void timer1Isr(void) {
+        ventilation -> update();
+    }
+
+    void timer3Isr(void) {
+        stepper -> processMovement();
+    }
