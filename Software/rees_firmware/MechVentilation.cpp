@@ -319,10 +319,12 @@ void MechVentilation::update(void) {
                     #ifndef PRUEBAS
 
                     while (
-                        _cfgStepper->moveToHomeInSteps(1, STEPPER_HOMING_SPEED, STEPPER_MICROSTEPS_PER_REVOLUTION, ENDSTOPpin)
-                    );
-                    
-
+                        _cfgStepper -> moveToHomeInSteps(
+                            STEPPER_HOMING_DIRECTION,
+                            STEPPER_HOMING_SPEED,
+                            STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS,
+                            ENDSTOPpin
+                        ));
                     #endif
                 }
 
@@ -364,10 +366,8 @@ void MechVentilation::_init(
     // connect and configure the stepper motor to its IO pins
     //
     //;
-    _cfgStepper->connectToPins(MOTOR_STEP_PIN, MOTOR_DIRECTION_PIN);
-    // _cfgStepper->setSpeedInStepsPerSecond(STEPPER_SPEED);
-    // _cfgStepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCELERATION);
-    _cfgStepper->setStepsPerRevolution(STEPPER_STEPS_PER_REVOLUTION);
+    _cfgStepper->connectToPins(PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
+    _cfgStepper->setStepsPerRevolution(STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS);
 
     _sensor_error_detected = false;
 }

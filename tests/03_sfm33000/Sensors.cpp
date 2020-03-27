@@ -62,6 +62,8 @@ void Sensors::_init () {
     _state = SensorStateFailed;
 
 #if ENABLED_SENSOR_VOLUME_SFM3300
+    pinMode(20, INPUT_PULLUP);
+    pinMode(21, INPUT_PULLUP);
     _sfm3000 = new SFM3000wedo(64);
     _sfm3000->init();
 #endif
@@ -115,13 +117,15 @@ void Sensors::readVolume(void) {
             _state = SensorStateFailed;
         }
         float flow = ((float)tmp.value - SFM3300_OFFSET) / SFM3300_SCALE; //lpm
-        //_flux = flow;
-        _flux = tmp.value;
-
+        _flux = flow;
+        //_flux = tmp.value;
+        _volume_ml = tmp.value;
+        #if 0
         unsigned short mseconds = (unsigned short)(millis() - _lastReadFlow);
         float ml = flow * mseconds / 60; // l/min * ms * 1000 (ml) /60000 (ms)
         _volume_ml += ml;
         _lastReadFlow = millis();
+        #endif
     #else
     #error "not implemented"
     #endif

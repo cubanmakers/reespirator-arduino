@@ -27,6 +27,7 @@ void SFM3000wedo::init()
 	
  
 	Wire.begin();
+	Wire.setClock(10000);
 	//Serial.begin(9600);
 	delay(1000);
 	Wire.beginTransmission(byte(mI2cAddress)); // transmit to device with I2C mI2cAddress
@@ -66,7 +67,7 @@ SFM3000_Value_t SFM3000wedo::getvalue()
 	uint16_t a = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
 	uint8_t b = Wire.read(); // second received byte stored here
 	uint8_t crc = Wire.read(); // crc value stored here
-	uint8_t mycrc = 0xFF; // initialize crc variable
+	uint8_t mycrc = 0; // initialize crc variable
 	mycrc = crc8(a, mycrc); // let first byte through CRC calculation
 	mycrc = crc8(b, mycrc); // and the second byte too
 	SFM3000_Value_t value;
@@ -96,9 +97,22 @@ uint8_t SFM3000wedo::crc8(const uint8_t data, uint8_t crc)
 	return crc;
 }
 
-
-
-
+#if 0
+bool SFM3000wedo::_check(uint8_t * data, uint8_t num, uint8_t checksum) {
+    uint8_t crc = 0;
+    for (uint8_t i=0; i<num; i++) {
+        crc ^= data[i];
+        for (uint8_t j=8; j>0; --j) {
+            if (crc & 0x80) {
+                crc = (crc << 1) ^ SFM3000_POLYNOMIAL;
+            } else {
+                crc = (crc << 1);
+            }
+        }
+    }
+    return (crc == checksum);
+}
+#endif
 
 
 // Linear interpolation

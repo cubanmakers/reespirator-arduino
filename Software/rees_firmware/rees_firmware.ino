@@ -489,7 +489,7 @@ void loop() {
 
     if (time > lastReadSensor + 15) {
         #ifndef PRUEBAS
-        sensors -> readPressure();
+        //sensors -> readPressure();
         SensorPressureValues_t pressure = sensors -> getPressure();
 
         #if ENABLED_SENSOR_VOLUME
@@ -499,6 +499,7 @@ void loop() {
             "DT " + String(pressure.pressure1) + " " + String(pressure.pressure2) + " " +
             String(volume.volume)
         );
+        Serial.println("Volumen " + String(volume.volume));
         #else
         Serial1.println(
         "DT " + String(pressure.pressure1) + " " + String(pressure.pressure2) + " NC";

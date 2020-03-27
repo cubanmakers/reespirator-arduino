@@ -33,8 +33,11 @@
 
 #define ENpin 8
 // Stepper driver (FlexyStepper)
-#define MOTOR_STEP_PIN 6
-#define MOTOR_DIRECTION_PIN 7
+#define PIN_STEPPER_STEP 6
+#define MOTOR_STEP_PIN PIN_STEPPER_STEP
+#define PIN_STEPPER_DIRECTION 7
+#define MOTOR_DIRECTION_PIN PIN_STEPPER_DIRECTION
+
 
 // Buzzer
 #define BUZZpin 11
