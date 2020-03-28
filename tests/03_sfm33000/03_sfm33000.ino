@@ -14,7 +14,7 @@ void setup() {
 void loop() {
     static unsigned long lastRead = millis();
     if (millis() > lastRead + 200) {
-        Serial.println("Reading");
+        //Serial.println("Reading");
         sensors->readVolume();
         SensorVolumeValue_t value = sensors->getVolume();
         if (value.state != SensorStateOK) {
@@ -23,6 +23,6 @@ void loop() {
         Serial.println("Volume " + String(value.volume));
         Serial.println("Flux=" + String(sensors->getFlux()));
         lastRead = millis();
-        sensors->resetVolumeIntegrator();
+        //sensors->resetVolumeIntegrator();
     }
 }

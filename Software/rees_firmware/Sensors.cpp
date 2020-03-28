@@ -62,6 +62,8 @@ void Sensors::_init () {
     _state = SensorStateFailed;
 
 #if ENABLED_SENSOR_VOLUME_SFM3300
+    pinMode(20, INPUT_PULLUP);
+    pinMode(21, INPUT_PULLUP);
     _sfm3000 = new SFM3000wedo(64);
     _sfm3000->init();
 #endif
@@ -102,15 +104,26 @@ SensorPressureValues_t Sensors::getPressure() {
 }
 
 #if ENABLED_SENSOR_VOLUME
+float Sensors::getFlux(void) {
+    return _flux;
+}
 
 void Sensors::readVolume(void) {
     #if ENABLED_SENSOR_VOLUME_SFM3300
-        float tmp = _sfm3000->getvalue(); //TODO crc
-        float flow = (tmp - SFM3300_OFFSET) / SFM3300_SCALE; //lpm
+        SFM3000_Value_t tmp = _sfm3000->getvalue(); //TODO crc
+        if (tmp.crcOK) {
+            _state = SensorStateOK;
+        } else {
+            _state = SensorStateFailed;
+        }
+        float flow = ((float)tmp.value - SFM3300_OFFSET) / SFM3300_SCALE; //lpm
+        _flux = flow;
+        
         unsigned short mseconds = (unsigned short)(millis() - _lastReadFlow);
         float ml = flow * mseconds / 60; // l/min * ms * 1000 (ml) /60000 (ms)
         _volume_ml += ml;
         _lastReadFlow = millis();
+        
     #else
     #error "not implemented"
     #endif
@@ -118,6 +131,7 @@ void Sensors::readVolume(void) {
 
 void Sensors::resetVolumeIntegrator(void) {
     _volume_ml = 0;
+    _flux = 0;
     _lastReadFlow = millis();
 }
 #endif
@@ -126,7 +140,12 @@ SensorVolumeValue_t Sensors::getVolume() {
     SensorVolumeValue_t values;
 
 #if ENABLED_SENSOR_VOLUME_SFM3300
-    values.state = SensorStateOK;
+    
+    if (_state == SensorStateOK) {
+        values.state = SensorStateOK;
+    } else {
+        values.state = SensorStateFailed;
+    }
     values.volume = _volume_ml;
 #else
     float flow = (_pressure1 - _pressure2) * DEFAULT_PRESSURE_V_FLOW_K1;

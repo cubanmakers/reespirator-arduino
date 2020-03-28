@@ -11,8 +11,8 @@
 #define SENSORS_MAX_ERRORS 5
 
 #if ENABLED_SENSOR_VOLUME_SFM3300
-#define SFM3300_OFFSET 32000
-#define SFM3300_SCALE   140
+#define SFM3300_OFFSET 32768
+#define SFM3300_SCALE   120
 #endif
 
 enum SensorState {
@@ -42,6 +42,7 @@ class Sensors
 #if ENABLED_SENSOR_VOLUME
     void readVolume(void);
     void resetVolumeIntegrator(void);
+    float getFlux(void);
 #endif
     private:
     void _init(void);
@@ -56,6 +57,7 @@ class Sensors
     byte _errorCounter;
 #if ENABLED_SENSOR_VOLUME
     float _volume_ml;
+    float _flux;
     unsigned long _lastReadFlow;
 #endif
 

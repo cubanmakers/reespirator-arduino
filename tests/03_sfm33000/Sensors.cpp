@@ -118,14 +118,12 @@ void Sensors::readVolume(void) {
         }
         float flow = ((float)tmp.value - SFM3300_OFFSET) / SFM3300_SCALE; //lpm
         _flux = flow;
-        //_flux = tmp.value;
-        _volume_ml = tmp.value;
-        #if 0
+        
         unsigned short mseconds = (unsigned short)(millis() - _lastReadFlow);
         float ml = flow * mseconds / 60; // l/min * ms * 1000 (ml) /60000 (ms)
         _volume_ml += ml;
         _lastReadFlow = millis();
-        #endif
+        
     #else
     #error "not implemented"
     #endif

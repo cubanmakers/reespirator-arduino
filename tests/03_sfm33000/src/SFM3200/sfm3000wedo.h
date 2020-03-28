@@ -25,7 +25,7 @@
 #endif
  
 typedef struct { 
-  int value;
+  unsigned int value;
   bool crcOK;
 } SFM3000_Value_t;
 
