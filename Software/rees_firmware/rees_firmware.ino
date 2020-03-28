@@ -92,7 +92,7 @@ void setup() {
 
     // PID
     pid = new PID(PID_OUTPUT_MIN, PID_OUTPUT_MAX, PID_KP, PID_KI, PID_KD);
-    // if temperature is more than PID_BANGBANG below or above setpoint,
+    // if pressure is more than PID_BANGBANG below or above setpoint,
     // output will be set to min or max respectively
     myPID.setBangBang(PID_BANGBANG);
     // set PID update interval
@@ -514,6 +514,9 @@ void loop() {
         #if ENABLED_SENSOR_VOLUME
         sensors -> readVolume();
         SensorVolumeValue_t volume = sensors -> getVolume();
+        // currentFlow = _sensors->getVolume().volume;
+        // //but the pressure reading must be done as non blocking in the main loop
+        // integratorFlowToVolume(&_currentVolume, currentFlow);
         Serial1.println(
             "DT " + String(pressure.pressure1) + " " + String(pressure.pressure2) + " " +
             String(volume.volume)
@@ -528,6 +531,7 @@ void loop() {
             //TODO sensor fail. do something
             display.clear();
             display.writeLine(0, F("FALLO Sensor"));
+            // TODO: BUZZ ALARMS LIKE HELL
         } else {
             if (changeConfiguration == Disabled) {
                 display.clear();

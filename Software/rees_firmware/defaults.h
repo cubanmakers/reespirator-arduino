@@ -57,51 +57,20 @@
 // PID settings and gains
 #define PID_MIN -10000 // TODO: check direction implementation
 #define PID_MAX 10000
-#define PID_KP .1
-#define PID_KI 0.01
+#define PID_KP 1
+#define PID_KI 0
 #define PID_KD 0
 #define PID_TS 100
-#define PID_TM 10
 #define PID_BANGBANG 4
+
+// Solenoid
+#define SOLENOID_CLOSED true
+#define SOLENOID_OPEN (!SOLENOID_CLOSED)
 
 typedef struct {
     short respiratory_rate;
     short peak_inspiratory_pressure;
     short peak_espiratory_pressure;
 } VentilationOptions_t;
-
-
-
-
-
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-
-#define PID_P 1.0
-#define PID_I 0.1 //TODO To be adjusted
-#define PID_D 0.0 //TODO To be adjusted
-#define PID_dt TIME_BASE //msec. It has to match the MechVentilation.update() refresh period.
-
-#define PID_KP PID_P
-#define PID_KI (PID_I * PID_dt)
-#define PID_KD (PID_D / PID_dt)
-
-//Volume to Position and viceversa constants
-#define STEPS_FOR_TOTALLY_PRESSED_AMBU (STEPPER_MICROSTEPS_PER_REVOLUTION / 2) //steps
-#define VOLUME_FOR_TOTALLY_PRESSED_AMBU 800 //ml
-#define K_VOL2POS (STEPS_FOR_TOTALLY_PRESSED_AMBU / VOLUME_FOR_TOTALLY_PRESSED_AMBU)
-#define K_POS2VOL (VOLUME_FOR_TOTALLY_PRESSED_AMBU / STEPS_FOR_TOTALLY_PRESSED_AMBU)
-#define K_FLOW2SPEED (25/12)
-
-// Solenoid
-#define SOLENOID_CLOSED true
-#define SOLENOID_OPEN (!SOLENOID_CLOSED)
-
-
-
 
 #endif // DEFAULTS_H
