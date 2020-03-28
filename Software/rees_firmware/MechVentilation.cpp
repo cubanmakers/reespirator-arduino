@@ -24,12 +24,14 @@ float currentFlow = 0;
 MechVentilation::MechVentilation(
     FlexyStepper * stepper,
     Sensors * sensors,
+    AutoPID * pid,
     unsigned short mlTidalVolume,
     uint8_t rpm) {
 
     _init(
         stepper,
         sensors,
+        pid,
         mlTidalVolume,
         rpm,
         LPM_FLUX_TRIGGER_VALUE_NONE
@@ -40,6 +42,7 @@ MechVentilation::MechVentilation(
 MechVentilation::MechVentilation(
     FlexyStepper * stepper,
     Sensors * sensors,
+    AutoPID * pid,
     unsigned short mlTidalVolume,
     uint8_t rpm,
     float lpmFluxTriggerValue
@@ -47,6 +50,7 @@ MechVentilation::MechVentilation(
     _init(
         stepper,
         sensors,
+        pid,
         mlTidalVolume,
         rpm,
         lpmFluxTriggerValue
@@ -121,7 +125,7 @@ void MechVentilation::update(void) {
 
   
 #ifndef PRUEBAS
-    SensorPressureValues_t values = _sensors->getPressure();
+    SensorPressureValues_t values = _sensors->getRelativePressureInCmH20();
     if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
         _sensor_error_detected = true; //An error was detected in sensors
         /* Status update, for this time */
@@ -345,6 +349,7 @@ void MechVentilation::update(void) {
 void MechVentilation::_init(
     FlexyStepper * stepper,
     Sensors * sensors,
+    AutoPID * pid,
     unsigned short mlTidalVolume,
     uint8_t rpm,
     float lpmFluxTriggerValue
@@ -352,6 +357,7 @@ void MechVentilation::_init(
     /* Set configuration parameters */
     _cfgStepper = stepper;
     _sensors = sensors;
+    _pid = pid;
     _cfgmlTidalVolume = mlTidalVolume;
     _cfgRpm = rpm,
     reconfigParameters(mlTidalVolume, rpm);

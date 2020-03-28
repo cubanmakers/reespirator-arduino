@@ -9,6 +9,7 @@
 #define INC_MECHANICAL_VENTILATION_H
 
 #include <inttypes.h>
+#include "src/AutoPID/AutoPID.h"
 #include "src/FlexyStepper/FlexyStepper.h"
 #include "Sensors.h"
 #include "pinout.h"
@@ -53,6 +54,7 @@ public:
 	MechVentilation(
         FlexyStepper* stepper,
         Sensors* sensors,
+        AutoPID* pid,
         unsigned short mlTidalVolume,
         uint8_t rpm
     );
@@ -71,6 +73,7 @@ public:
 	MechVentilation(
         FlexyStepper* stepper,
         Sensors* sensors,
+        AutoPID* pid,
         unsigned short mlTidalVolume,
         uint8_t rpm,
         float lpmFluxTriggerValue
@@ -106,6 +109,7 @@ private:
     void _init(
         FlexyStepper* stepper,
         Sensors* sensors,
+        AutoPID* pid,
         unsigned short mlTidalVolume,
         uint8_t rpm,
         float lpmFluxTriggerValue
@@ -123,6 +127,7 @@ private:
     /* Configuration parameters */
     FlexyStepper* _cfgStepper;
     Sensors* _sensors;
+    AutoPID* _pid;
 
     /** Tidal volume in millilitres. */
     unsigned short _cfgmlTidalVolume;

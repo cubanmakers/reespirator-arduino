@@ -8,6 +8,7 @@
 #include "Display.h"
 #include "Encoder.h"
 #include "MechVentilation.h"
+#include "src/AutoPID/AutoPID.h"
 #include "src/FlexyStepper/FlexyStepper.h"
 #include "src/TimerOne/TimerOne.h"
 #include "src/TimerThree/TimerThree.h"
@@ -25,6 +26,8 @@ volatile byte debugMsgCounter = 0;
 
 // pines en pinout.h
 FlexyStepper * stepper = new FlexyStepper(); // direction Digital 6 (CW), pulses Digital 7 (CLK)
+
+AutoPID *pid;
 
 Encoder encoder(DTpin, CLKpin, SWpin);
 Display display = Display();
@@ -82,7 +85,15 @@ void setup() {
         }
         display.writeLine(1, "Check wires!");
         while (1) ;
-        }
+    }
+
+    // PID
+    pid = new PID(PID_OUTPUT_MIN, PID_OUTPUT_MAX, PID_KP, PID_KI, PID_KD);
+    // if temperature is more than PID_BANGBANG below or above setpoint,
+    // output will be set to min or max respectively
+    myPID.setBangBang(PID_BANGBANG);
+    // set PID update interval
+    myPID.setTimeStep(PID_TS);
     #endif
 
     // Parte motor
@@ -237,12 +248,13 @@ void setup() {
         ventilation = new MechVentilation(
             stepper,
             sensors,
+            pid,
             volumenTidal,
             rpm,
             flujoTrigger
         );
     } else {
-        ventilation = new MechVentilation(stepper, sensors, volumenTidal, rpm);
+        ventilation = new MechVentilation(stepper, sensors, pid, volumenTidal, rpm);
     }
 
     display.writeLine(0, "Tins  | Tesp");
@@ -490,7 +502,7 @@ void loop() {
     if (time > lastReadSensor + 15) {
         #ifndef PRUEBAS
         //sensors -> readPressure();
-        SensorPressureValues_t pressure = sensors -> getPressure();
+        SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
 
         #if ENABLED_SENSOR_VOLUME
         sensors -> readVolume();
@@ -536,8 +548,8 @@ void loop() {
     }
 
     /**
- * Timer 1 ISR
- */
+     * Timer 1 ISR
+     */
     void timer1Isr(void) {
         ventilation -> update();
     }

@@ -46,21 +46,30 @@
 #define DEFAULT_MIN_RPM 3
 #define DEFAULT_POR_INSPIRATORIO 33  // %
 
-#define DEFAULT_PRESSURE_V_FLOW_K1 0.1   //Constante proporcional que relaciona presión con caudal
-
 #define FLOW__INSUFLATION_TRIGGER_LEVEL 3.0   //LPM
 
 // Ventilation cycle timing
 #define WAIT_BEFORE_EXSUFLATION_TIME 500    //msec
 
 // PID constants
-#define PID_MIN 0
-#define PID_MAX 100
+// PID settings and gains
+#define PID_MIN -10000 // TODO: check direction implementation
+#define PID_MAX 10000
+#define PID_KP .1
+#define PID_KI 0.01
+#define PID_KD 0
+#define PID_TS 100
+#define PID_TM 10
+#define PID_BANGBANG 4
+
+
+
+
 
 #define PID_P 1.0
 #define PID_I 0.1 //TODO To be adjusted
 #define PID_D 0.0 //TODO To be adjusted
-#define PID_dt TIME_BASE //msec. I hast to match the MechVentilation.update() refresh period.
+#define PID_dt TIME_BASE //msec. It has to match the MechVentilation.update() refresh period.
 
 #define PID_KP PID_P
 #define PID_KI (PID_I * PID_dt)
