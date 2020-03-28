@@ -32,7 +32,7 @@ enum State {
     State_WaitBeforeExsufflation = 4,   /**< Wait for timer. */
     Init_Exsufflation = 5,
     State_Exsufflation = 6,              /**< Return to position 0 and wait for the patient to exsufflate. */
-    State_Homming = 0,
+    State_Homing = 0,
     State_Error = -1
 };
 
@@ -91,11 +91,10 @@ public:
     /**
      * Get tidal volume. In ml
      */
-    unsigned short getTidalVolume(void);
     uint8_t getRPM(void);
     short getExsuflationTime(void);
     short getInsuflationTime(void);
-    void reconfigParameters (unsigned short newTidalVolume, uint8_t newRpm);
+    void reconfigParameters (uint8_t newRpm);
 
 private:
     /** Initialization. */
@@ -106,14 +105,18 @@ private:
         VentilationOptions_t options,
         float lpmFluxTriggerValue
     );
+    #if 0
     int _calculateInsuflationPosition (void);
+    #endif
 
     /** Set state. */
     void _setState(State state);
+    #if 0
     void _increaseInsuflationSpeed (byte factor);
     void _decreaseInsuflationSpeed (byte factor);
     void _increaseInsuflation (byte factor);
     void _decreaseInsuflation (byte factor);
+    #endif
     void _setInspiratoryCycle(void);
 
     /* Configuration parameters */
@@ -122,33 +125,32 @@ private:
     AutoPID* _pid;
 
     /** Flux trigger value in litres per minute. */
-    float _cfgLpmFluxTriggerValue;
+    float _trigger_threshold;
     /**  Insufflation timeout in seconds. */
-    short _cfg_msecTimeoutInsufflation;
+    short _timeout_ins;
     /** Exsufflation timeout in seconds. */
-    short _cfg_msecTimeoutExsufflation;
+    short _timeout_esp;
     /** Breaths per minute */
     uint8_t _rpm;
     /** Peak inspiratory pressure */
-    short _pip;
+    float _pip;
     /** Peak espiratory pressure */
-    short _pep;
+    float _pep;
 
     /* Internal state */
     /** Current state. */
     State _currentState;
 
-    /** Insufflation speed. @todo Denote units. */
-    float _speedInsufflation;
-    /** Exsufflation speed. @todo Denote units. */
-    float _speedExsufflation;
+
+    /** Stepper speed. @todo Denote units. */
+    float _stepperSpeed;
     /** stepper insuflation position */
     short _positionInsufflated;
 
     bool _running = false;
     bool _sensor_error_detected;
     bool _startWasTriggeredByPatient = false;
-    float _currentVolume = 0;
+    float _currentPressure = 0.0;
 
     /** Estimated flux accross the bmes. @todo Denote units. */
     //float _flux;

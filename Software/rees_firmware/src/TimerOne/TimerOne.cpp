@@ -166,7 +166,7 @@ void TimerOne::stop()
 
 unsigned long TimerOne::read()		//returns the value of the timer in microseconds
 {									//rember! phase and freq correct mode counts up to then down again
-  	unsigned long tmp;				// AR amended to hold more than 65536 (could be nearly double this)
+  	unsigned long tmp;				// AR amended to hold more than 65536 (could be nearly float this)
   	unsigned int tcnt1;				// AR added
 
 	oldSREG= SREG;

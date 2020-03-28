@@ -27,12 +27,12 @@ volatile byte debugMsgCounter = 0;
 // pines en pinout.h
 FlexyStepper * stepper = new FlexyStepper(); // direction Digital 6 (CW), pulses Digital 7 (CLK)
 
-AutoPID *pid;
 
 Encoder encoder(DTpin, CLKpin, SWpin);
 Display display = Display();
 
 Sensors * sensors;
+AutoPID * pid;
 MechVentilation * ventilation;
 
 VentilationOptions_t options;
@@ -73,7 +73,6 @@ void setup() {
     // FC efecto hall
     pinMode(ENDSTOPpin, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
 
-    #ifndef PRUEBAS
     // Sensores de presión
     sensors = new Sensors();
     int check = sensors -> begin();
@@ -91,13 +90,12 @@ void setup() {
     }
 
     // PID
-    pid = new PID(PID_OUTPUT_MIN, PID_OUTPUT_MAX, PID_KP, PID_KI, PID_KD);
+    pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
     // if pressure is more than PID_BANGBANG below or above setpoint,
     // output will be set to min or max respectively
-    myPID.setBangBang(PID_BANGBANG);
+    pid -> setBangBang(PID_BANGBANG);
     // set PID update interval
-    myPID.setTimeStep(PID_TS);
-    #endif
+    pid -> setTimeStep(PID_TS);
 
     // Parte motor
     pinMode(ENpin, OUTPUT);
@@ -334,7 +332,7 @@ void setup() {
     encoder.buttonHasBeenPressed();
 }
 
-
+#if 0
 enum ChangeConfigurationState {
     Disabled = 0,
     SelectMenu = 1,
@@ -495,7 +493,7 @@ void processUpdateParameters(void) {
     }
 
 }
-
+#endif
 
 // =========================================================================
 // LOOP
@@ -533,10 +531,12 @@ void loop() {
             display.writeLine(0, F("FALLO Sensor"));
             // TODO: BUZZ ALARMS LIKE HELL
         } else {
+    #if 0
             if (changeConfiguration == Disabled) {
                 display.clear();
                 display.writeLine(0, "Pres=" + String(pressure.pressure2));
             }
+    #endif // if0
         }
         #endif // PRUEBAS
         lastReadSensor = time;
@@ -550,12 +550,9 @@ void loop() {
         debugMsgCounter = 0;
     #endif
 
+    #if 0
         processUpdateParameters();
-
-        // TODO: chequear trigger si hay trigger, esperar al flujo umbral para actuar,
-        // si no, actuar en cada bucle Si está en inspiración: controlar con PID el
-        // volumen tidal (el que se insufla) Si está en espiración: soltar balón (mover
-        // leva hacia arriba sin controlar) y esperar
+    #endif
     }
 
     /**

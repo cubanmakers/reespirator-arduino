@@ -50,6 +50,9 @@
 
 #define FLOW__INSUFLATION_TRIGGER_LEVEL 3.0   //LPM
 
+// Presión
+#define DEFAULT_PA_TO_CM_H20 0.0102F
+
 // Ventilation cycle timing
 #define WAIT_BEFORE_EXSUFLATION_TIME 500    //msec
 

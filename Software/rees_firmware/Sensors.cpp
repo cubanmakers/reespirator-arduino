@@ -154,7 +154,7 @@ SensorPressureValues_t Sensors::getRelativePressureInCmH20() {
  */
 void Sensors::getOffsetBetweenPressureSensors(int samples)
 {
-    SensorValues_t values;
+    SensorPressureValues_t values;
     float deltaPressure, deltaAvg;
     float cumDelta = 0.0;
     for (int i = 0; i < samples; i++)
