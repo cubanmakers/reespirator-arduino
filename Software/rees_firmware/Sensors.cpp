@@ -75,8 +75,8 @@ void Sensors::_init () {
 void Sensors::readPressure() {
     float pres1, pres2;
     // Acquire sensors data
-    pres1 = _pres1Sensor.readPressure() / 100.0F; // hPa
-    pres2 = _pres2Sensor.readPressure() / 100.0F; // hPa
+    pres1 = _pres1Sensor.readPressure(); // Pa
+    pres2 = _pres2Sensor.readPressure(); // Pa
 
     if (pres1 == 0.0 || pres2 == 0.0) {
 
@@ -95,12 +95,77 @@ void Sensors::readPressure() {
     }
 }
 
-SensorPressureValues_t Sensors::getPressure() {
+/**
+ * @brief Get absolute pressure in pascals.
+ *
+ * @return SensorValues_t - pressure values
+ */
+SensorPressureValues_t Sensors::getAbsolutePressureInPascals() {
     SensorPressureValues_t values;
     values.state = _state;
     values.pressure1 = _pressure1;
-    values.pressure2 = _pressure2;
+    values.pressure2 = _pressure2 + _pressureSensorsOffset;
     return values;
+}
+
+/**
+ * @brief Get relative pressure in pascals.
+ *
+ * @return SensorValues_t - pressure values
+ */
+SensorPressureValues_t Sensors::getRelativePressureInPascals() {
+    SensorPressureValues_t values = getAbsolutePressureInPascals();
+    values.pressure1 = 0;
+    values.pressure2 = values.pressure2 - values.pressure1;
+    return values;
+}
+
+/**
+ * @brief Get absolute pressure in H20 cm.
+ *
+ * @return SensorValues_t - pressure values
+ */
+SensorPressureValues_t Sensors::getAbsolutePressureInCmH20() {
+    SensorPressureValues_t values = getAbsolutePressureInPascals();
+    values.pressure1 *= DEFAULT_PA_TO_CM_H20;
+    values.pressure2 *= DEFAULT_PA_TO_CM_H20;
+    return values;
+}
+
+/**
+ * @brief Get relative pressure in H20 cm.
+ *
+ * @return SensorValues_t - pressure values
+ */
+SensorPressureValues_t Sensors::getRelativePressureInCmH20() {
+    SensorPressureValues_t values = getRelativePressureInPascals();
+    values.pressure2 *= DEFAULT_PA_TO_CM_H20;
+    return values;
+}
+
+/**
+ * @brief Get the Offset Between Pressure Sensors object
+ *
+ * This function must be called when flux is 0.
+ *
+ * @param sensors - pressure sensors that derive flux
+ * @param samples - number of samples to compute offset
+ * @return float - averaged offset bewteen pressure readings
+ */
+void Sensors::getOffsetBetweenPressureSensors(int samples)
+{
+    SensorValues_t values;
+    float deltaPressure, deltaAvg;
+    float cumDelta = 0.0;
+    for (int i = 0; i < samples; i++)
+    {
+        readPressure();
+        values = getAbsolutePressureInPascals();
+        deltaPressure = values.pressure1 - values.pressure2;
+        cumDelta += deltaPressure;
+    }
+    deltaAvg = cumDelta / samples;
+    _pressureSensorsOffset = deltaAvg;
 }
 
 #if ENABLED_SENSOR_VOLUME

@@ -37,8 +37,12 @@ class Sensors
     Sensors();
     unsigned int begin(void);
     void readPressure();
-    SensorPressureValues_t getPressure(); 
+    SensorPressureValues_t getRelativePressureInPascals();
+    SensorPressureValues_t getAbsolutePressureInPascals();
+    SensorPressureValues_t getAbsolutePressureInCmH20();
+    SensorPressureValues_t getRelativePressureInCmH20();
     SensorVolumeValue_t getVolume();
+    void getOffsetBetweenPressureSensors(int samples = 100);
 #if ENABLED_SENSOR_VOLUME
     void readVolume(void);
     void resetVolumeIntegrator(void);
@@ -53,6 +57,7 @@ class Sensors
 #endif
     float _pressure1;
     float _pressure2;
+    float _pressureSensorsOffset = 0.0;
     SensorState _state;
     byte _errorCounter;
 #if ENABLED_SENSOR_VOLUME
