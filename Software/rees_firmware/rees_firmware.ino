@@ -35,6 +35,9 @@ Display display = Display();
 Sensors * sensors;
 MechVentilation * ventilation;
 
+VentilationOptions_t options;
+
+
 // =========================================================================
 // SETUP
 // =========================================================================
@@ -244,17 +247,19 @@ void setup() {
     // CÁLCULO: CONSTANTES DE TIEMPO INSPIRACION/ESPIRACION
     // =========================================================================
 
+    options.respiratory_rate = rpm;
+    options.peak_inspiratory_pressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
+    options.peak_espiratory_pressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
     if (tieneTrigger) {
         ventilation = new MechVentilation(
             stepper,
             sensors,
             pid,
-            volumenTidal,
-            rpm,
+            options,
             flujoTrigger
         );
     } else {
-        ventilation = new MechVentilation(stepper, sensors, pid, volumenTidal, rpm);
+        ventilation = new MechVentilation(stepper, sensors, pid, options);
     }
 
     display.writeLine(0, "Tins  | Tesp");
@@ -329,9 +334,6 @@ void setup() {
     encoder.buttonHasBeenPressed();
 }
 
-// =========================================================================
-// LOOP
-// =========================================================================
 
 enum ChangeConfigurationState {
     Disabled = 0,
@@ -493,6 +495,11 @@ void processUpdateParameters(void) {
     }
 
 }
+
+
+// =========================================================================
+// LOOP
+// =========================================================================
 
 void loop() {
     unsigned long time;

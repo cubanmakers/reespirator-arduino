@@ -42,40 +42,33 @@ enum State {
 class MechVentilation {
 public:
 	/**
-	 * Constructor (no trigger).
-	 *
-     * @param[in]   mlTidalVolume             Tidal volume in millilitres.
-	 * @param[in]   secTimeoutInsufflation    Insufflation timeout in seconds.
-	 * @param[in]   secTimeoutExsufflation    Exsufflation timeout in seconds.
-     * @param[in]   speedInsufflation         Insufflation speed. @todo Denote units.
-     * @param[in]   speedExsufflation         Exsufflation speed. @todo Denote units.
-     *
+	 * @brief Construct a new Mech Ventilation object
+	 * 
+	 * @param stepper 
+	 * @param sensors 
+	 * @param pid 
+	 * @param rpm 
 	 */
 	MechVentilation(
         FlexyStepper* stepper,
         Sensors* sensors,
         AutoPID* pid,
-        unsigned short mlTidalVolume,
-        uint8_t rpm
+        VentilationOptions_t options
     );
 
     /**
-	 * Constructor (triggered mechanical ventilation).
-	 *
-     * @param[in]   mlTidalVolume             Tidal volume in millilitres.
-	 * @param[in]   secTimeoutInsufflation    Insufflation timeout in seconds.
-	 * @param[in]   secTimeoutExsufflation    Exsufflation timeout in seconds.
-     * @param[in]   speedInsufflation         Insufflation speed. @todo Denote units.
-     * @param[in]   speedExsufflation         Exsufflation speed. @todo Denote units.
-     * @param[in]   lpmFluxTriggerValue       Flux trigger value in Litres Per Minute.
-     *
+	 * @brief Construct a new Mech Ventilation object
+	 * 
+	 * @param stepper 
+	 * @param sensors 
+	 * @param pid 
+	 * @param rpm 
 	 */
 	MechVentilation(
         FlexyStepper* stepper,
         Sensors* sensors,
         AutoPID* pid,
-        unsigned short mlTidalVolume,
-        uint8_t rpm,
+        VentilationOptions_t options,
         float lpmFluxTriggerValue
     ); 
 
@@ -94,7 +87,7 @@ public:
      * @note This method must be called on the main loop.
      */
     void update(void);
-    bool getSensorErrorDetecte();
+    bool getSensorErrorDetected();
     /**
      * Get tidal volume. In ml
      */
@@ -110,8 +103,7 @@ private:
         FlexyStepper* stepper,
         Sensors* sensors,
         AutoPID* pid,
-        unsigned short mlTidalVolume,
-        uint8_t rpm,
+        VentilationOptions_t options,
         float lpmFluxTriggerValue
     );
     int _calculateInsuflationPosition (void);
@@ -122,22 +114,25 @@ private:
     void _decreaseInsuflationSpeed (byte factor);
     void _increaseInsuflation (byte factor);
     void _decreaseInsuflation (byte factor);
-    void _setCicloInspiratorio(void);
+    void _setInspiratoryCycle(void);
 
     /* Configuration parameters */
-    FlexyStepper* _cfgStepper;
+    FlexyStepper* _stepper;
     Sensors* _sensors;
     AutoPID* _pid;
 
-    /** Tidal volume in millilitres. */
-    unsigned short _cfgmlTidalVolume;
     /** Flux trigger value in litres per minute. */
     float _cfgLpmFluxTriggerValue;
     /**  Insufflation timeout in seconds. */
     short _cfg_msecTimeoutInsufflation;
-    /* Exsufflation timeout in seconds. */
+    /** Exsufflation timeout in seconds. */
     short _cfg_msecTimeoutExsufflation;
-    uint8_t _cfgRpm;
+    /** Breaths per minute */
+    uint8_t _rpm;
+    /** Peak inspiratory pressure */
+    short _pip;
+    /** Peak espiratory pressure */
+    short _pep;
 
     /* Internal state */
     /** Current state. */

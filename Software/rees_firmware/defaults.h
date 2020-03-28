@@ -45,6 +45,8 @@
 #define DEFAULT_MAX_RPM 24
 #define DEFAULT_MIN_RPM 3
 #define DEFAULT_POR_INSPIRATORIO 33  // %
+#define DEFAULT_PEAK_INSPIRATORY_PRESSURE 20
+#define DEFAULT_PEAK_ESPIRATORY_PRESSURE 6
 
 #define FLOW__INSUFLATION_TRIGGER_LEVEL 3.0   //LPM
 
@@ -62,9 +64,22 @@
 #define PID_TM 10
 #define PID_BANGBANG 4
 
+typedef struct {
+    short respiratory_rate;
+    short peak_inspiratory_pressure;
+    short peak_espiratory_pressure;
+} VentilationOptions_t;
 
 
 
+
+
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
 #define PID_P 1.0
 #define PID_I 0.1 //TODO To be adjusted
@@ -85,5 +100,8 @@
 // Solenoid
 #define SOLENOID_CLOSED true
 #define SOLENOID_OPEN (!SOLENOID_CLOSED)
+
+
+
 
 #endif // DEFAULTS_H

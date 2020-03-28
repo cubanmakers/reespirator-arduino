@@ -25,15 +25,13 @@ MechVentilation::MechVentilation(
     FlexyStepper * stepper,
     Sensors * sensors,
     AutoPID * pid,
-    unsigned short mlTidalVolume,
-    uint8_t rpm) {
+    VentilationOptions_t options) {
 
     _init(
         stepper,
         sensors,
         pid,
-        mlTidalVolume,
-        rpm,
+        options,
         LPM_FLUX_TRIGGER_VALUE_NONE
     );
 
@@ -43,16 +41,14 @@ MechVentilation::MechVentilation(
     FlexyStepper * stepper,
     Sensors * sensors,
     AutoPID * pid,
-    unsigned short mlTidalVolume,
-    uint8_t rpm,
+    VentilationOptions_t options,
     float lpmFluxTriggerValue
 ) {
     _init(
         stepper,
         sensors,
         pid,
-        mlTidalVolume,
-        rpm,
+        options,
         lpmFluxTriggerValue
     );
 }
@@ -67,7 +63,7 @@ boolean MechVentilation::getStartWasTriggeredByPatient() { //returns true if las
 }
 
 //TODO: use this method to play a beep in main loop, 2 second long for example.
-boolean MechVentilation::getSensorErrorDetecte() { //returns true if there was an sensor error detected. It is cleared when read.
+boolean MechVentilation::getSensorErrorDetected() { //returns true if there was an sensor error detected. It is cleared when read.
     if (_sensor_error_detected) {
         return true;
     } else {
@@ -83,11 +79,8 @@ void MechVentilation::stop(void) {
     _running = false;
 }
 
-unsigned short MechVentilation::getTidalVolume(void) {
-    return _cfgmlTidalVolume;
-}
 uint8_t MechVentilation::getRPM(void) {
-    return _cfgRpm;
+    return _rpm;
 }
 short MechVentilation::getExsuflationTime(void) {
     return _cfg_msecTimeoutExsufflation;
@@ -95,15 +88,14 @@ short MechVentilation::getExsuflationTime(void) {
 short MechVentilation::getInsuflationTime(void) {
     return _cfg_msecTimeoutInsufflation;
 }
-void MechVentilation::reconfigParameters (unsigned short newTidalVolume, uint8_t newRpm) {
-    _cfgRpm = newRpm;
-    _cfgmlTidalVolume = newTidalVolume;
-    _setCicloInspiratorio();
+void MechVentilation::reconfigParameters (uint8_t newRpm) {
+    _rpm = newRpm;
+    _setInspiratoryCycle();
     _positionInsufflated = _calculateInsuflationPosition();
 }
 
-void MechVentilation::_setCicloInspiratorio(void) {
-  float tCiclo = ((float)60) * 1000/ ((float)_cfgRpm); // Tiempo de ciclo en msegundos
+void MechVentilation::_setInspiratoryCycle(void) {
+  float tCiclo = ((float)60) * 1000/ ((float)_rpm); // Tiempo de ciclo en msegundos
   _cfg_msecTimeoutInsufflation = tCiclo * DEFAULT_POR_INSPIRATORIO/100;
   _cfg_msecTimeoutExsufflation = (tCiclo) - _cfg_msecTimeoutInsufflation;
 }
@@ -117,23 +109,23 @@ void MechVentilation::update(void) {
     static int currentTime = 0;
     static int flowSetpoint = 0;
 
-#if DEBUG_STATE_MACHINE
-    extern volatile String debugMsg[];
-    extern volatile byte debugMsgCounter;
-#endif
+    #if DEBUG_STATE_MACHINE
+        extern volatile String debugMsg[];
+        extern volatile byte debugMsgCounter;
+    #endif
 
 
-  
-#ifndef PRUEBAS
-    SensorPressureValues_t values = _sensors->getRelativePressureInCmH20();
-    if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
-        _sensor_error_detected = true; //An error was detected in sensors
-        /* Status update, for this time */
-        _setState(State_Exsufflation);
-    } else {
-        _sensor_error_detected = false; //clear flag
-    }
-#endif
+    
+    #ifndef PRUEBAS
+        SensorPressureValues_t values = _sensors->getRelativePressureInCmH20();
+        if (values.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
+            _sensor_error_detected = true; //An error was detected in sensors
+            /* Status update, for this time */
+            _setState(State_Exsufflation);
+        } else {
+            _sensor_error_detected = false; //clear flag
+        }
+    #endif
     currentFlow = _sensors->getVolume().volume;
     //but the pressure reading must be done as non blocking in the main loop
     integratorFlowToVolume(&_currentVolume, currentFlow);
@@ -148,11 +140,11 @@ void MechVentilation::update(void) {
                 totalCyclesInThisState = (_cfg_msecTimeoutInsufflation - WAIT_BEFORE_EXSUFLATION_TIME)/ TIME_BASE;
 
                 /* Stepper control: set acceleration and end-position */
-                _cfgStepper->setSpeedInStepsPerSecond(_speedInsufflation);
-                _cfgStepper->setAccelerationInStepsPerSecondPerSecond(
+                _stepper->setSpeedInStepsPerSecond(_speedInsufflation);
+                _stepper->setAccelerationInStepsPerSecondPerSecond(
                     STEPPER_ACC_INSUFFLATION
                 );
-                _cfgStepper->setTargetPositionInSteps( _positionInsufflated);
+                _stepper->setTargetPositionInSteps( _positionInsufflated);
 
                 #if DEBUG_STATE_MACHINE
                 debugMsg[debugMsgCounter++] = "State: InitInsuflation at " + String(millis());
@@ -192,11 +184,11 @@ void MechVentilation::update(void) {
                 #if DEBUG_UPDATE
                 Serial.println("Motor:speed=" + String(stepperSpeed));
                 #endif
-                _cfgStepper->setSpeedInStepsPerSecond(stepperSpeed);
+                _stepper->setSpeedInStepsPerSecond(stepperSpeed);
                 #endif
                 if (currentTime > totalCyclesInThisState) {
                     // time expired
-                    if (!_cfgStepper->motionComplete()) {
+                    if (!_stepper->motionComplete()) {
                         // motor not finished
                         _increaseInsuflationSpeed(1);
                     }
@@ -254,11 +246,11 @@ void MechVentilation::update(void) {
                 debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(totalCyclesInThisState);
                 #endif
                 /* Stepper control*/
-                _cfgStepper->setSpeedInStepsPerSecond(_speedExsufflation);
-                _cfgStepper->setAccelerationInStepsPerSecondPerSecond(
+                _stepper->setSpeedInStepsPerSecond(_speedExsufflation);
+                _stepper->setAccelerationInStepsPerSecondPerSecond(
                     STEPPER_ACC_EXSUFFLATION
                 );
-                _cfgStepper->setTargetPositionInSteps(
+                _stepper->setTargetPositionInSteps(
                     STEPPER_DIR * (STEPPER_LOWEST_POSITION + 0)
                 );
                 #if DEBUG_STATE_MACHINE
@@ -273,7 +265,7 @@ void MechVentilation::update(void) {
         case State_Exsufflation:
             {
 
-                if (_cfgStepper->motionComplete()) {
+                if (_stepper->motionComplete()) {
                     if (currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) { //The start was triggered by patient
                         _startWasTriggeredByPatient = true;
 
@@ -323,7 +315,7 @@ void MechVentilation::update(void) {
                     #ifndef PRUEBAS
 
                     while (
-                        _cfgStepper -> moveToHomeInSteps(
+                        _stepper -> moveToHomeInSteps(
                             STEPPER_HOMING_DIRECTION,
                             STEPPER_HOMING_SPEED,
                             STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS,
@@ -350,16 +342,16 @@ void MechVentilation::_init(
     FlexyStepper * stepper,
     Sensors * sensors,
     AutoPID * pid,
-    unsigned short mlTidalVolume,
-    uint8_t rpm,
+    VentilationOptions_t options,
     float lpmFluxTriggerValue
 ) {
     /* Set configuration parameters */
-    _cfgStepper = stepper;
+    _stepper = stepper;
     _sensors = sensors;
     _pid = pid;
-    _cfgmlTidalVolume = mlTidalVolume;
-    _cfgRpm = rpm,
+    _rpm = options.respiratory_rate;
+    _pip = options.peak_inspiratory_pressure;
+    _pep = options.peak_espiratory_pressure;
     reconfigParameters(mlTidalVolume, rpm);
     _cfgLpmFluxTriggerValue = lpmFluxTriggerValue;
 
@@ -372,8 +364,8 @@ void MechVentilation::_init(
     // connect and configure the stepper motor to its IO pins
     //
     //;
-    _cfgStepper->connectToPins(PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
-    _cfgStepper->setStepsPerRevolution(STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS);
+    _stepper->connectToPins(PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
+    _stepper->setStepsPerRevolution(STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS);
 
     _sensor_error_detected = false;
 }
