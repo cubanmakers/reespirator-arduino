@@ -5,17 +5,8 @@
  * This is the mechanical ventilation software module.
  * It handles the mechanical ventilation control loop.
  */
-#include <float.h> 
-#include "calc.h"
-#include "MechVentilation.h"
-#include "Sensors.h"
-//#include "src/AccelStepper/AccelStepper.h"
-#include "src/FlexyStepper/FlexyStepper.h"
-#include "pinout.h"
-#include "defaults.h"
 
-/** No trigger. */
-#define LPM_FLUX_TRIGGER_VALUE_NONE FLT_MAX
+#include "MechVentilation.h"
 
 int currentWaitTriggerTime = 0;
 int currentStopInsufflationTime = 0;
@@ -32,7 +23,7 @@ MechVentilation::MechVentilation(
         sensors,
         pid,
         options,
-        LPM_FLUX_TRIGGER_VALUE_NONE
+        LPM_FLOW_TRIGGER_VALUE_NONE
     );
 
 }
@@ -42,14 +33,14 @@ MechVentilation::MechVentilation(
     Sensors * sensors,
     AutoPID * pid,
     VentilationOptions_t options,
-    float lpmFluxTriggerValue
+    float lpmFlowTriggerValue
 ) {
     _init(
         stepper,
         sensors,
         pid,
         options,
-        lpmFluxTriggerValue
+        lpmFlowTriggerValue
     );
 }
 
@@ -132,7 +123,7 @@ void MechVentilation::update(void) {
         case Init_Insufflation:
             {
                 // Close Solenoid Valve
-                digitalWrite(SOLENOIDpin, SOLENOID_CLOSED);
+                digitalWrite(PIN_SOLENOID, SOLENOID_CLOSED);
 
                 totalCyclesInThisState = (_timeout_ins) / TIME_BASE;
 
@@ -188,7 +179,7 @@ void MechVentilation::update(void) {
         case Init_Exsufflation:
             {
                 // Open Solenoid Valve
-                digitalWrite(SOLENOIDpin, SOLENOID_OPEN);
+                digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
 
                 totalCyclesInThisState = _timeout_esp / TIME_BASE;
 
@@ -254,7 +245,7 @@ void MechVentilation::update(void) {
         case State_Homing:
             {
                 // Open Solenoid Valve
-                digitalWrite(SOLENOIDpin, SOLENOID_OPEN);
+                digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
 
                 if (_sensor_error_detected) {
                     // error sensor reading
@@ -264,7 +255,7 @@ void MechVentilation::update(void) {
                     #endif
                 }
 
-                if (!digitalRead(ENDSTOPpin)) { // If not in HOME, do Homing
+                if (!digitalRead(PIN_ENDSTOP)) { // If not in HOME, do Homing
 
                     /* Stepper control: homming */
                     // bool moveToHomeInMillimeters(long directionTowardHome, float
@@ -276,7 +267,7 @@ void MechVentilation::update(void) {
                             STEPPER_HOMING_DIRECTION,
                             STEPPER_HOMING_SPEED,
                             STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS,
-                            ENDSTOPpin
+                            PIN_ENDSTOP
                         ));
                 }
 
@@ -298,18 +289,21 @@ void MechVentilation::_init(
     FlexyStepper * stepper,
     Sensors * sensors,
     AutoPID * pid,
-    VentilationOptions_t options,
-    float lpmFluxTriggerValue
+    VentilationOptions_t options
 ) {
     /* Set configuration parameters */
     _stepper = stepper;
     _sensors = sensors;
     _pid = pid;
-    _rpm = options.respiratory_rate;
-    _pip = options.peak_inspiratory_pressure;
-    _pep = options.peak_espiratory_pressure;
+    _rpm = options.respiratoryRate;
+    _pip = options.peakInspiratoryPressure;
+    _pep = options.peakEspiratoryPressure;
     reconfigParameters(_rpm);
-    _trigger_threshold = lpmFluxTriggerValue;
+    if (options.hasTrigger) {
+        _trigger_threshold = lpmFlowTriggerValue;
+    } else {
+        _trigger_threshold = FLT_MAX;
+    }
 
     /* Initialize internal state */
     _currentState = State_Homing;

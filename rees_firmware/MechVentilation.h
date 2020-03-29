@@ -8,20 +8,14 @@
 #ifndef INC_MECHANICAL_VENTILATION_H
 #define INC_MECHANICAL_VENTILATION_H
 
+#include <float.h> 
 #include <inttypes.h>
-#include "src/AutoPID/AutoPID.h"
-#include "src/FlexyStepper/FlexyStepper.h"
-#include "Sensors.h"
 #include "pinout.h"
 #include "defaults.h"
-
-
-typedef struct {
-    short mlVolume;
-    short stepperPos;
-} CalibrationVolume_t;
-
-const CalibrationVolume_t volumeCalibration[] = {{500,100}, {600, 200}, {700, 300}, {800, 400}};
+#include "calc.h"
+#include "Sensors.h"
+#include "src/AutoPID/AutoPID.h"
+#include "src/FlexyStepper/FlexyStepper.h"
 
 /** States of the mechanical ventilation. */
 enum State {
@@ -47,7 +41,7 @@ public:
 	 * @param stepper 
 	 * @param sensors 
 	 * @param pid 
-	 * @param rpm 
+	 * @param options 
 	 */
 	MechVentilation(
         FlexyStepper* stepper,
@@ -55,22 +49,6 @@ public:
         AutoPID* pid,
         VentilationOptions_t options
     );
-
-    /**
-	 * @brief Construct a new Mech Ventilation object
-	 * 
-	 * @param stepper 
-	 * @param sensors 
-	 * @param pid 
-	 * @param rpm 
-	 */
-	MechVentilation(
-        FlexyStepper* stepper,
-        Sensors* sensors,
-        AutoPID* pid,
-        VentilationOptions_t options,
-        float lpmFluxTriggerValue
-    ); 
 
     boolean getStartWasTriggeredByPatient();
     void setVentilationCyle_WaitTime(float speedExsufflation);
@@ -102,8 +80,7 @@ private:
         FlexyStepper* stepper,
         Sensors* sensors,
         AutoPID* pid,
-        VentilationOptions_t options,
-        float lpmFluxTriggerValue
+        VentilationOptions_t options
     );
     #if 0
     int _calculateInsuflationPosition (void);
@@ -124,7 +101,7 @@ private:
     Sensors* _sensors;
     AutoPID* _pid;
 
-    /** Flux trigger value in litres per minute. */
+    /** Flow trigger value in litres per minute. */
     float _trigger_threshold;
     /**  Insufflation timeout in seconds. */
     short _timeout_ins;
@@ -152,8 +129,8 @@ private:
     bool _startWasTriggeredByPatient = false;
     float _currentPressure = 0.0;
 
-    /** Estimated flux accross the bmes. @todo Denote units. */
-    //float _flux;
+    /** Estimated flow accross the bmes. @todo Denote units. */
+    //float _flow;
 
     /* @todo PID stuff */
 

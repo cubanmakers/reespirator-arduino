@@ -43,17 +43,17 @@ Sensors::Sensors(void) {
 void Sensors::_init () {
 
     Adafruit_BME280 bmp1(
-    BMP_CS1,
-    BMP_MOSI,
-    BMP_MISO,
-    BMP_SCK
+    PIN_BME_CS1,
+    PIN_BME_MOSI,
+    PIN_BME_MISO,
+    PIN_BME_SCK
     );
 
     Adafruit_BME280 bmp2(
-    BMP_CS2,
-    BMP_MOSI,
-    BMP_MISO,
-    BMP_SCK
+    PIN_BME_CS2,
+    PIN_BME_MOSI,
+    PIN_BME_MISO,
+    PIN_BME_SCK
     );
 
     _pres1Sensor = bmp1;
@@ -146,9 +146,9 @@ SensorPressureValues_t Sensors::getRelativePressureInCmH20() {
 /**
  * @brief Get the Offset Between Pressure Sensors object
  *
- * This function must be called when flux is 0.
+ * This function must be called when flow is 0.
  *
- * @param sensors - pressure sensors that derive flux
+ * @param sensors - pressure sensors that derive flow
  * @param samples - number of samples to compute offset
  * @return float - averaged offset bewteen pressure readings
  */
@@ -169,8 +169,8 @@ void Sensors::getOffsetBetweenPressureSensors(int samples)
 }
 
 #if ENABLED_SENSOR_VOLUME
-float Sensors::getFlux(void) {
-    return _flux;
+float Sensors::getFlow(void) {
+    return _flow;
 }
 
 void Sensors::readVolume(void) {
@@ -182,7 +182,7 @@ void Sensors::readVolume(void) {
             _state = SensorStateFailed;
         }
         float flow = ((float)tmp.value - SFM3300_OFFSET) / SFM3300_SCALE; //lpm
-        _flux = flow;
+        _flow = flow;
         
         unsigned short mseconds = (unsigned short)(millis() - _lastReadFlow);
         float ml = flow * mseconds / 60; // l/min * ms * 1000 (ml) /60000 (ms)
@@ -196,7 +196,7 @@ void Sensors::readVolume(void) {
 
 void Sensors::resetVolumeIntegrator(void) {
     _volume_ml = 0;
-    _flux = 0;
+    _flow = 0;
     _lastReadFlow = millis();
 }
 #endif

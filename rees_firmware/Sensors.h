@@ -46,7 +46,7 @@ class Sensors
 #if ENABLED_SENSOR_VOLUME
     void readVolume(void);
     void resetVolumeIntegrator(void);
-    float getFlux(void);
+    float getFlow(void);
 #endif
     private:
     void _init(void);
@@ -62,7 +62,7 @@ class Sensors
     byte _errorCounter;
 #if ENABLED_SENSOR_VOLUME
     float _volume_ml;
-    float _flux;
+    float _flow;
     unsigned long _lastReadFlow;
 #endif
 

@@ -7,7 +7,7 @@
  * @param sexo 0: varón, 1: mujer, sexo del paciente
  * @return *volumenTidal volumen tidal estimado, en mililitros
  */
-int calcularVolumenTidal(int estatura, int sexo) {
+int estimateTidalVolume(int estatura, int sexo) {
   float peso0, pesoIdeal, volumenEstimado;
   if (sexo == 0) { // Varón
     peso0 = 50.0;
