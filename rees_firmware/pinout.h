@@ -1,12 +1,6 @@
 #ifndef PINOUT_H
 #define PINOUT_H
 
-// Rotary encoder
-#define PIN_CLK 9
-#define PIN_DT 3
-#define PIN_SW 2
-
-
 // Stepper driver (FlexyStepper)
 #define PIN_STEPPER_STEP 6
 #define PIN_STEPPER_DIRECTION 7
@@ -16,7 +10,7 @@
 #define PIN_BUZZ 11
 
 // Stepper homing
-#define PIN_ENDSTOP 21
+#define PIN_ENDSTOP 2
 
 // Solenoid pine
 #define PIN_SOLENOID 39
