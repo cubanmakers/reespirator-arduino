@@ -22,26 +22,9 @@ MechVentilation::MechVentilation(
         stepper,
         sensors,
         pid,
-        options,
-        LPM_FLOW_TRIGGER_VALUE_NONE
+        options
     );
 
-}
-
-MechVentilation::MechVentilation(
-    FlexyStepper * stepper,
-    Sensors * sensors,
-    AutoPID * pid,
-    VentilationOptions_t options,
-    float lpmFlowTriggerValue
-) {
-    _init(
-        stepper,
-        sensors,
-        pid,
-        options,
-        lpmFlowTriggerValue
-    );
 }
 
 //TODO: use this method to play a beep in main loop, 1 second long for example.
@@ -300,7 +283,7 @@ void MechVentilation::_init(
     _pep = options.peakEspiratoryPressure;
     reconfigParameters(_rpm);
     if (options.hasTrigger) {
-        _trigger_threshold = lpmFlowTriggerValue;
+        _trigger_threshold = options.flowTrigger;
     } else {
         _trigger_threshold = FLT_MAX;
     }

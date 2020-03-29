@@ -84,6 +84,8 @@ void setup() {
     pinMode(PIN_EN, OUTPUT);
     digitalWrite(PIN_EN, HIGH);
 
+    // TODO: Añadir aquí la configuarcion inicial desde puerto serie
+
     options.height = DEFAULT_HEIGHT;
     options.sex = DEFAULT_SEX;
     options.respiratoryRate = DEFAULT_RPM;
@@ -103,13 +105,8 @@ void setup() {
     Serial.println("Tiempo inspiratorio (mseg):" + String(ventilation -> getInsuflationTime()));
     Serial.println("Tiempo espiratorio (mseg):" + String(ventilation -> getExsuflationTime()));
 
-    #ifndef PRUEBAS
+    // TODO: Esperar aqui a iniciar el arranque desde el serial
 
-    display.writeLine(0, "Pulsa para iniciar");
-    display.writeLine(1, "Esperando...");
-    while (!encoder.readButton());
-    display.writeLine(1, "Iniciando...");
-    #endif
     // Habilita el motor
     digitalWrite(PIN_EN, LOW);
 
@@ -131,7 +128,6 @@ void setup() {
     // TODO: Option: if (Sensores ok) { arranca timer3 } Timer3.initialize(50); 50us
     // Timer3.attachInterrupt(timer3Isr);
     #endif
-    encoder.buttonHasBeenPressed();
 }
 
 /**
@@ -166,8 +162,7 @@ void loop() {
         
         if (pressure.state == SensorStateFailed) {
             //TODO sensor fail. do something
-            display.clear();
-            display.writeLine(0, F("FALLO Sensor"));
+            Serial.println(F("FALLO Sensor"));
             // TODO: BUZZ ALARMS LIKE HELL
         }
         #endif // PRUEBAS
