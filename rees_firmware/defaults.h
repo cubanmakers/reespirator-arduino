@@ -2,8 +2,6 @@
 #ifndef _DEFAULTS_H
 #define _DEFAULTS_H
 
-#undef I2C // definido = Display i2c, sin definir Display parallel
-
 #define DEBUG_UPDATE 0 //
 //#define DEBUG_STATE_MACHINE 1
 //#define PRUEBAS 1 // testing over arduino without sensors
@@ -37,7 +35,7 @@
 #define DEFAULT_ML_POR_KG_DE_PESO_IDEAL 7
 #define DEFAULT_MAX_VOLUMEN_TIDAL 800
 #define DEFAULT_MIN_VOLUMEN_TIDAL 240
-#define DEFAULT_FLOW_TRIGGER 3
+#define DEFAULT_TRIGGER_THRESHOLD 3.0
 #define DEFAULT_RPM 15
 #define DEFAULT_MAX_RPM 24
 #define DEFAULT_MIN_RPM 3
@@ -45,13 +43,8 @@
 #define DEFAULT_PEAK_INSPIRATORY_PRESSURE 20
 #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 6
 
-#define FLOW__INSUFLATION_TRIGGER_LEVEL 3.0   //LPM
-
 // Presión
 #define DEFAULT_PA_TO_CM_H20 0.0102F
-
-// Ventilation cycle timing
-#define WAIT_BEFORE_EXSUFLATION_TIME 500    //msec
 
 // PID constants
 // PID settings and gains
@@ -73,7 +66,7 @@ typedef struct {
     short respiratoryRate;
     short peakInspiratoryPressure;
     short peakEspiratoryPressure;
-    float flowTrigger;
+    float triggerThreshold;
     bool hasTrigger;
 } VentilationOptions_t;
 

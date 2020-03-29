@@ -212,11 +212,6 @@ SensorVolumeValue_t Sensors::getVolume() {
         values.state = SensorStateFailed;
     }
     values.volume = _volume_ml;
-#else
-    float flow = (_pressure1 - _pressure2) * DEFAULT_PRESSURE_V_FLOW_K1;
-
-    values.state = _state;
-    values.volume = flow;
 #endif
     return values;
 }

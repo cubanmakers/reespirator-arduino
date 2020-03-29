@@ -57,25 +57,33 @@ uint8_t MechVentilation::getRPM(void) {
     return _rpm;
 }
 short MechVentilation::getExsuflationTime(void) {
-    return _timeout_esp;
+    return _timeoutEsp;
 }
 short MechVentilation::getInsuflationTime(void) {
-    return _timeout_ins;
+    return _timeoutIns;
 }
-void MechVentilation::reconfigParameters (uint8_t newRpm) {
-    _rpm = newRpm;
+
+void MechVentilation::setRPM(uint8_t rpm) {
+    _rpm = rpm;
     _setInspiratoryCycle();
-    // _positionInsufflated = _calculateInsuflationPosition();
+}
+
+void MechVentilation::setPeakInspiratoryPressure(float pip) {
+    _pip = pip;
+}
+
+void MechVentilation::setPeakEspiratoryPressure(float pep) {
+    _pep = pep;
 }
 
 void MechVentilation::_setInspiratoryCycle(void) {
-  float tCiclo = ((float)60) * 1000/ ((float)_rpm); // Tiempo de ciclo en msegundos
-  _timeout_ins = tCiclo * DEFAULT_POR_INSPIRATORIO/100;
-  _timeout_esp = (tCiclo) - _timeout_ins;
+  float timeoutCycle = ((float)60) * 1000 / ((float)_rpm); // Tiempo de ciclo en msegundos
+  _timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO/100;
+  _timeoutEsp = (timeoutCycle) - _timeoutIns;
 }
 
 /**
- * I's called from timer1Isr
+ * It's called from timer1Isr
  */
 void MechVentilation::update(void) {
 
@@ -91,6 +99,8 @@ void MechVentilation::update(void) {
 
     
     SensorPressureValues_t pressures = _sensors -> getRelativePressureInCmH20();
+    _currentVolume = _sensors->getVolume().volume;
+    _currentFlow = _sensors->getFlow();
     if (pressures.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
         _sensor_error_detected = true; //An error was detected in sensors
         /* Status update, for this time */
@@ -108,7 +118,7 @@ void MechVentilation::update(void) {
                 // Close Solenoid Valve
                 digitalWrite(PIN_SOLENOID, SOLENOID_CLOSED);
 
-                totalCyclesInThisState = (_timeout_ins) / TIME_BASE;
+                totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
 
                 /* Stepper control: set acceleration and end-position */
                 _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
@@ -119,7 +129,6 @@ void MechVentilation::update(void) {
 
                 #if DEBUG_STATE_MACHINE
                 debugMsg[debugMsgCounter++] = "State: InitInsuflation at " + String(millis());
-                debugMsg[debugMsgCounter++] = "Motor to " + String(_positionInsufflated);
                 #endif
 
                 /* Status update, reset timer, for next time, and reset PID integrator to zero */
@@ -164,7 +173,7 @@ void MechVentilation::update(void) {
                 // Open Solenoid Valve
                 digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
 
-                totalCyclesInThisState = _timeout_esp / TIME_BASE;
+                totalCyclesInThisState = _timeoutEsp / TIME_BASE;
 
                 #if DEBUG_STATE_MACHINE
                 debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(totalCyclesInThisState);
@@ -192,7 +201,7 @@ void MechVentilation::update(void) {
                 _pid->run(&_currentPressure, &_pep, &_stepperSpeed);
 
                 if (_stepper->motionComplete()) {
-                    if (currentFlow < FLOW__INSUFLATION_TRIGGER_LEVEL) { //The start was triggered by patient
+                    if (currentFlow < _triggerThreshold && _hasTrigger) { // The start was triggered by patient
                         _startWasTriggeredByPatient = true;
 
                         #if DEBUG_STATE_MACHINE
@@ -205,9 +214,12 @@ void MechVentilation::update(void) {
                     }
                 }
 
-                // Time has expired             
+                // Time has expired
                 if (currentTime > totalCyclesInThisState) {
-
+                    if (!_stepper->motionComplete()) {
+                        // motor not finished, force motor to stop in current position
+                        _stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
+                    }
                     /* Status update and reset timer, for next time */
                     _setState(Init_Insufflation);
                     _startWasTriggeredByPatient = false;
@@ -281,11 +293,12 @@ void MechVentilation::_init(
     _rpm = options.respiratoryRate;
     _pip = options.peakInspiratoryPressure;
     _pep = options.peakEspiratoryPressure;
-    reconfigParameters(_rpm);
-    if (options.hasTrigger) {
-        _trigger_threshold = options.flowTrigger;
+    setRPM(_rpm);
+    _hasTrigger = options.hasTrigger;
+    if (_hasTrigger) {
+        _triggerThreshold = options.triggerThreshold;
     } else {
-        _trigger_threshold = FLT_MAX;
+        _triggerThreshold = FLT_MAX;
     }
 
     /* Initialize internal state */
@@ -301,38 +314,6 @@ void MechVentilation::_init(
 
     _sensor_error_detected = false;
 }
-
-#if 0
-int MechVentilation::_calculateInsuflationPosition (void) {
-    short volumeTarget = (short) _cfgmlTidalVolume;
-    short lastPosition = volumeCalibration[0].stepperPos;
-    for (byte i = 1; i < sizeof(CalibrationVolume_t); i++) {
-        if (volumeTarget > volumeCalibration[i].mlVolume) {
-            lastPosition = volumeCalibration[i].stepperPos;
-        } else {
-            break;
-        }
-    }
-    return lastPosition;
-}
-
-void MechVentilation::_increaseInsuflationSpeed (byte factor)
-{
-    _stepperSpeed += factor;
-}
-void MechVentilation::_decreaseInsuflationSpeed (byte factor) 
-{
-    _stepperSpeed -= factor;
-}
-void MechVentilation::_increaseInsuflation (byte factor) 
-{
-    _positionInsufflated -= factor;
-}
-void MechVentilation::_decreaseInsuflation (byte factor) 
-{
-    _positionInsufflated += factor;
-}
-#endif
 
 void MechVentilation::_setState(State state) {
     //_previousState = _currentState;

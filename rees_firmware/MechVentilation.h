@@ -19,13 +19,10 @@
 
 /** States of the mechanical ventilation. */
 enum State {
-
     Init_Insufflation = 1,
     State_Insufflation = 2,             /**< Insufflating (PID control). */
-    Init_WaitBeforeExsufflation = 3,
-    State_WaitBeforeExsufflation = 4,   /**< Wait for timer. */
-    Init_Exsufflation = 5,
-    State_Exsufflation = 6,              /**< Return to position 0 and wait for the patient to exsufflate. */
+    Init_Exsufflation = 3,
+    State_Exsufflation = 4,              /**< Return to position 0 and wait for the patient to exsufflate. */
     State_Homing = 0,
     State_Error = -1
 };
@@ -62,17 +59,23 @@ public:
      * would be applied at the beginning of the next ventilation
      * cycle.
      *
-     * @note This method must be called on the main loop.
+     * @note This method must be called on a timer loop.
      */
     void update(void);
-    bool getSensorErrorDetected();
+
     /**
-     * Get tidal volume. In ml
+     * getters
      */
+    bool getSensorErrorDetected();
     uint8_t getRPM(void);
     short getExsuflationTime(void);
     short getInsuflationTime(void);
-    void reconfigParameters (uint8_t newRpm);
+    /**
+     * setters
+     */
+    void setRPM(uint8_t rpm);
+    void setPeakInspiratoryPressure(float pip);
+    void setPeakEspiratoryPressure(float pep);
 
 private:
     /** Initialization. */
@@ -101,12 +104,14 @@ private:
     Sensors* _sensors;
     AutoPID* _pid;
 
+    /** Flow trigger activation. */
+    bool _hasTrigger;
     /** Flow trigger value in litres per minute. */
-    float _trigger_threshold;
+    float _triggerThreshold;
     /**  Insufflation timeout in seconds. */
-    short _timeout_ins;
+    short _timeoutIns;
     /** Exsufflation timeout in seconds. */
-    short _timeout_esp;
+    short _timeoutEsp;
     /** Breaths per minute */
     uint8_t _rpm;
     /** Peak inspiratory pressure */
@@ -121,19 +126,11 @@ private:
 
     /** Stepper speed. @todo Denote units. */
     float _stepperSpeed;
-    /** stepper insuflation position */
-    short _positionInsufflated;
-
     bool _running = false;
     bool _sensor_error_detected;
     bool _startWasTriggeredByPatient = false;
     float _currentPressure = 0.0;
-
-    /** Estimated flow accross the bmes. @todo Denote units. */
-    //float _flow;
-
-    /* @todo PID stuff */
-
+    float _currentFlow = 0.0;
 };
 
 #endif /* INC_MECHANICAL_VENTILATION_H */

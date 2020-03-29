@@ -91,7 +91,7 @@ void setup() {
     options.respiratoryRate = DEFAULT_RPM;
     options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
     options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
-    options.flowTrigger = DEFAULT_FLOW_TRIGGER;
+    options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
     options.hasTrigger = false;
 
     ventilation = new MechVentilation(
