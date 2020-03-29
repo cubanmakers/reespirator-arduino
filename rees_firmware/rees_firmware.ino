@@ -58,7 +58,7 @@ void setup() {
     digitalWrite(PIN_BUZZ, LOW);
 
     // FC efecto hall
-    pinMode(PIN_ENDSTOP, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
+    pinMode(PIN_ENDSTOP, INPUT); // el sensor de efecto hall da un 1 cuando detecta
 
     // Sensores de presión
     sensors = new Sensors();

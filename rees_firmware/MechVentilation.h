@@ -131,6 +131,7 @@ private:
     bool _startWasTriggeredByPatient = false;
     float _currentPressure = 0.0;
     float _currentFlow = 0.0;
+    float _currentVolume = 0.0;
 };
 
 #endif /* INC_MECHANICAL_VENTILATION_H */

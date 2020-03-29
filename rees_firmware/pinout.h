@@ -21,6 +21,20 @@
 // Solenoid pine
 #define PIN_SOLENOID 39
 
+// Display
+/*
+#ifdef I2C
+#define I2C_DIR 0x3F
+#else
+#define PIN_LCD_RS A0
+#define PIN_LCD_RW A1
+#define PIN_LCD_E  A2
+#define PIN_LCD_D4 A3
+#define PIN_LCD_D5 A4
+#define PIN_LCD_D6 A5
+#define PIN_LCD_D7 A6
+#endif*/
+
 // BME280 SPI for Arduino Nano or Mega 128
 // #define PIN_BME_SCK  13
 // #define PIN_BME_MISO 12
