@@ -1,4 +1,0 @@
-{
-    "board": "arduino:avr:megaADK",
-    "sketch": "rees_firmware2.ino"
-}
