@@ -58,7 +58,7 @@ void setup() {
     digitalWrite(PIN_BUZZ, LOW);
 
     // FC efecto hall
-    pinMode(PIN_ENDSTOP, INPUT); // el sensor de efecto hall da un 1 cuando detecta
+    pinMode(PIN_ENDSTOP, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
 
     // Sensores de presión
     sensors = new Sensors();
@@ -111,25 +111,21 @@ void setup() {
 
     // Habilita el motor
     digitalWrite(PIN_EN, LOW);
+    
 
     // configura la ventilación
     ventilation -> start();
+    ventilation -> update();
 
-    delay(1000);
+    delay(2000);
 
-    #ifndef PRUEBAS
     sensors -> readPressure();
     Timer1.initialize(TIME_BASE * 1000); // 5 ms
     Timer1.attachInterrupt(timer1Isr);
     //TODO: Option: if (Sensores ok) { arranca timer3 }
     Timer3.initialize(50); //50us
     Timer3.attachInterrupt(timer3Isr);
-    #else
-    Timer1.initialize(500); // 5 ms
-    Timer1.attachInterrupt(timer1Isr);
-    // TODO: Option: if (Sensores ok) { arranca timer3 } Timer3.initialize(50); 50us
-    // Timer3.attachInterrupt(timer3Isr);
-    #endif
+    
 }
 
 /**
@@ -156,7 +152,7 @@ void loop() {
             "DT " + String(pressure.pressure1) + " " + String(pressure.pressure2) + " " +
             String(volume.volume)
         );
-        Serial.println("Volumen " + String(volume.volume));
+        //Serial.println("Volumen " + String(volume.volume));
         #else
         Serial1.println(
         "DT " + String(pressure.pressure1) + " " + String(pressure.pressure2) + " NC";

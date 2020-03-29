@@ -90,7 +90,7 @@ void MechVentilation::update(void) {
     static int totalCyclesInThisState = 0;
     static int currentTime = 0;
     static int flowSetpoint = 0;
-
+    
     #if DEBUG_STATE_MACHINE
         extern volatile String debugMsg[];
         extern volatile byte debugMsgCounter;
@@ -110,8 +110,9 @@ void MechVentilation::update(void) {
         _sensor_error_detected = false; //clear flag
     }
 
-
+    
     refreshWatchDogTimer();
+    
     switch (_currentState) {
         case Init_Insufflation:
             {
@@ -136,7 +137,7 @@ void MechVentilation::update(void) {
                 
                 currentTime = 0;
             }
-            //break;  MUST BE COMMENTED
+            break;
         case State_Insufflation:
             {
                 _currentPressure = pressures.pressure1;
@@ -194,7 +195,7 @@ void MechVentilation::update(void) {
                 _setState(State_Exsufflation);
                 currentTime = 0;
             }
-            //break;  MUST BE COMMENTED
+            break;
         case State_Exsufflation:
             {
                 _currentPressure = pressures.pressure1;
@@ -249,21 +250,29 @@ void MechVentilation::update(void) {
                     Serial.println("Sensor: FAILED");
                     #endif
                 }
-
-                if (!digitalRead(PIN_ENDSTOP)) { // If not in HOME, do Homing
+                
+                /*
+                 * If not in home, do Homing.
+                 * 0: stepper is in home
+                 * 1: stepper is not in home
+                 */
+                
+                if (digitalRead(PIN_ENDSTOP)) { 
 
                     /* Stepper control: homming */
                     // bool moveToHomeInMillimeters(long directionTowardHome, float
                     // speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters, int
                     // homeLimitSwitchPin)
-
-                    while (
-                        _stepper -> moveToHomeInSteps(
+                    Serial.println("Homing attempt!!");
+                    if (_stepper -> moveToHomeInSteps(
                             STEPPER_HOMING_DIRECTION,
                             STEPPER_HOMING_SPEED,
                             STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS,
                             PIN_ENDSTOP
-                        ));
+                        ) != true)
+                    {
+                        Serial.println("Homing has failed");
+                    }
                 }
 
                 /* Status update and reset timer, for next time */
@@ -273,6 +282,7 @@ void MechVentilation::update(void) {
             break;
 
         case State_Error:
+            break;
         default:
             //TODO
             break;

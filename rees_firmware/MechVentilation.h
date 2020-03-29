@@ -121,7 +121,7 @@ private:
 
     /* Internal state */
     /** Current state. */
-    State _currentState;
+    State _currentState = 0;
 
 
     /** Stepper speed. @todo Denote units. */
