@@ -63,6 +63,7 @@ void setup() {
     // Sensores de presión
     sensors = new Sensors();
     int check = sensors -> begin();
+    #if 0
     if (check) {
         if (check == 1) {
             Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
@@ -71,6 +72,7 @@ void setup() {
         }
         while (1);
     }
+    #endif
 
     // PID
     pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
@@ -141,7 +143,7 @@ void loop() {
 
     if (time > lastReadSensor + 15) {
         #ifndef PRUEBAS
-        //sensors -> readPressure();
+        sensors -> readPressure();
         SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
 
         #if ENABLED_SENSOR_VOLUME

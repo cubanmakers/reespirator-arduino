@@ -16,11 +16,11 @@
 
 unsigned int Sensors::begin(void) {
     // Arrancar sensores de presion 1 y 2
+#if 0        
 
     if(!_pres1Sensor.begin()) {
         return 1;
     }
-#if 0        
     if(!_pres2Sensor.begin()) {
         return 2;
     }
@@ -155,8 +155,9 @@ SensorPressureValues_t Sensors::getAbsolutePressureInCmH20() {
  * @return SensorValues_t - pressure values
  */
 SensorPressureValues_t Sensors::getRelativePressureInCmH20() {
-    SensorPressureValues_t values = getRelativePressureInPascals();
-    values.pressure2 *= DEFAULT_PA_TO_CM_H20;
+    SensorPressureValues_t values; 
+    values.pressure1 = _pressure1;
+    values.state = SensorStateOK;
     return values;
 }
 
