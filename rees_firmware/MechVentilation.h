@@ -75,7 +75,7 @@ public:
      */
     void setRPM(uint8_t rpm);
     void setPeakInspiratoryPressure(float pip);
-    void setPeakEspiratoryPressure(float pep);
+    void setPeakEspiratoryPressure(float peep);
 
 private:
     /** Initialization. */
@@ -117,7 +117,7 @@ private:
     /** Peak inspiratory pressure */
     float _pip;
     /** Peak espiratory pressure */
-    float _pep;
+    float _peep;
 
     /* Internal state */
     /** Current state. */
