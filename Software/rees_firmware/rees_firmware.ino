@@ -53,7 +53,7 @@ void setup() {
     Serial.begin(115200);
     Serial.println("Inicio");
 
-    Serial1.begin(115200);
+    Serial1.begin(9600);
 
     // Display de inicio
     display.writeLine(0, " REESPIRATOR 23 ");
@@ -284,6 +284,7 @@ void setup() {
 
     // INTERACCIÓN: ARRANQUE
     // =========================================================================
+    #if 0
     display.writeLine(0, "Pulsa para iniciar");
     display.writeLine(1, "Esperando...");
     while (!encoder.readButton()) 
@@ -291,6 +292,7 @@ void setup() {
     display.clear();
     display.writeLine(1, "Iniciando...");
     #endif
+    #endif // PRUEBAS
     // Habilita el motor
     digitalWrite(ENpin, LOW);
 
@@ -302,6 +304,8 @@ void setup() {
     display.clear();
 
     #ifndef PRUEBAS
+        Serial.println("Reading Pressure");
+
     sensors -> readPressure();
     Timer1.initialize(TIME_BASE * 1000); // 5 ms
     Timer1.attachInterrupt(timer1Isr);
@@ -315,6 +319,7 @@ void setup() {
     // Timer3.attachInterrupt(timer3Isr);
     #endif
     encoder.buttonHasBeenPressed();
+    Serial.println("Starting");
 }
 
 // =========================================================================
@@ -487,19 +492,24 @@ void loop() {
     time = millis();
     unsigned long static lastReadSensor = 0;
 
-    if (time > lastReadSensor + 15) {
+    if (time > lastReadSensor + 150) {
         #ifndef PRUEBAS
-        //sensors -> readPressure();
+        sensors -> readPressure();
         SensorPressureValues_t pressure = sensors -> getPressure();
 
         #if ENABLED_SENSOR_VOLUME
         sensors -> readVolume();
         SensorVolumeValue_t volume = sensors -> getVolume();
-        Serial1.println(
-            "DT " + String(pressure.pressure1) + " " + String(pressure.pressure2) + " " +
-            String(volume.volume)
-        );
-        Serial.println("Volumen " + String(volume.volume));
+        char* string = malloc(100);
+        Serial.println("Pres1" + String(pressure.pressure1));
+                Serial.println("Pre2" + String(pressure.pressure2));
+
+        sprintf(string, "DT %05d %05d %05d %06d", ((int)pressure.pressure1), ((int)pressure.pressure2), volume.volume, ((int)(sensors->getFlux() * 1000)));
+        Serial.println("Flow " + String(sensors->getFlux()));
+        Serial1.println(string);
+        Serial.println(string);
+        free(string);
+        
         #else
         Serial1.println(
         "DT " + String(pressure.pressure1) + " " + String(pressure.pressure2) + " NC";
