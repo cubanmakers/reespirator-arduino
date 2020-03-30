@@ -42,6 +42,8 @@ Sensors::Sensors(void) {
 
 void Sensors::_init () {
 
+    pinMode(BMP_MOSI, OUTPUT);
+
     Adafruit_BME280 bmp1(
     BMP_CS1,
     BMP_MOSI,
