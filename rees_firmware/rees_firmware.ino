@@ -48,7 +48,7 @@ VentilationOptions_t options;
 void setup() {
     // Puertos serie
     Serial.begin(115200);
-    Serial1.begin(115200);
+    Serial2.begin(115200);
     Serial.println(F("Setup"));
 
     // Zumbador
@@ -130,7 +130,7 @@ void setup() {
 
 void readIncomingMsg (void) {
     char* msg = malloc(100);
-    Serial1.readStringUntil('\n').toCharArray(msg, 100);
+    Serial2.readStringUntil('\n').toCharArray(msg, 100);
     int pip, peep, fr;
     int rc = sscanf(msg, "CONFIG PIP %d", &pip);
     if (rc == 1) {
@@ -158,10 +158,6 @@ void loop() {
     time = millis();
     unsigned long static lastReadSensor = 0;
 
-
-
-
-
     if (time > lastReadSensor + TIME_SENSOR)
     {
         sensors -> readPressure();
@@ -172,7 +168,7 @@ void loop() {
 
         char* string = (char*)malloc(100);
         sprintf(string, "DT %05d %05d %05d %06d", ((int)pressure.pressure1), ((int)pressure.pressure2), volume.volume, ((int)(sensors->getFlow() * 1000)));
-        Serial1.println(string);
+        Serial2.println(string);
         Serial.println(string);
         free(string);
 
@@ -184,8 +180,8 @@ void loop() {
         lastReadSensor = time;
     }
 
-    if (Serial1.available()) {
-
+    if (Serial2.available()) {
+        readIncomingMsg();
     }
 
     #if DEBUG_STATE_MACHINE

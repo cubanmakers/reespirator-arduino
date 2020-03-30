@@ -2,13 +2,13 @@
 #ifndef _DEFAULTS_H
 #define _DEFAULTS_H
 
-#define DEBUG_UPDATE 0 //
+#define DEBUG_UPDATE 1 //
 //#define DEBUG_STATE_MACHINE 1
 //#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
-#define TIME_BASE 10 //msec
-#define TIME_SENSOR 10
+#define TIME_BASE 50 //msec
+#define TIME_SENSOR 50
 
 // Sensores
 #define ENABLED_SENSOR_VOLUME 1
