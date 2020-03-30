@@ -7,7 +7,8 @@
 //#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
-#define TIME_BASE 5 //msec
+#define TIME_BASE 10 //msec
+#define TIME_SENSOR 10
 
 // Sensores
 #define ENABLED_SENSOR_VOLUME 1

@@ -72,8 +72,8 @@ void MechVentilation::setPeakInspiratoryPressure(float pip) {
     _pip = pip;
 }
 
-void MechVentilation::setPeakEspiratoryPressure(float pep) {
-    _pep = pep;
+void MechVentilation::setPeakEspiratoryPressure(float peep) {
+    _peep = peep;
 }
 
 void MechVentilation::_setInspiratoryCycle(void) {
@@ -199,7 +199,7 @@ void MechVentilation::update(void) {
         case State_Exsufflation:
             {
                 _currentPressure = pressures.pressure1;
-                _pid->run(&_currentPressure, &_pep, &_stepperSpeed);
+                _pid->run(&_currentPressure, &_peep, &_stepperSpeed);
 
                 if (_stepper->motionComplete()) {
                     if (currentFlow < _triggerThreshold && _hasTrigger) { // The start was triggered by patient
@@ -302,7 +302,7 @@ void MechVentilation::_init(
     _pid = pid;
     _rpm = options.respiratoryRate;
     _pip = options.peakInspiratoryPressure;
-    _pep = options.peakEspiratoryPressure;
+    _peep = options.peakEspiratoryPressure;
     setRPM(_rpm);
     _hasTrigger = options.hasTrigger;
     if (_hasTrigger) {

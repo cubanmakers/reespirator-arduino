@@ -128,6 +128,25 @@ void setup() {
     
 }
 
+void readIncomingMsg (void) {
+    String msg = Serial1.readStringUntil('\n');
+    int pip, peep, fr;
+    int rc = sscanf(msg, "CONFIG PIP %d", &pip);
+    if (rc == 1) {
+        ventilation->setPeakInspiratoryPressure(pip);
+    } else {
+        int rc = sscanf(msg, "CONFIG PEEP %d", &peep);
+        if (rc == 1) {
+            ventilation->setPeakEspiratoryPressure(peep);
+        } else {
+            int rc = sscanf(msg, "CONFIG BPM %d", &fr);
+            if (rc == 1) {
+                ventilation->setRPM(fr);
+            }
+        }
+    }
+}
+
 /**
  * Loop
  */
@@ -137,34 +156,34 @@ void loop() {
     time = millis();
     unsigned long static lastReadSensor = 0;
 
-    if (time > lastReadSensor + 15) {
-        #ifndef PRUEBAS
+
+
+
+
+    if (time > lastReadSensor + TIME_SENSOR)
+    {
         sensors -> readPressure();
         SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
 
-        #if ENABLED_SENSOR_VOLUME
         sensors -> readVolume();
         SensorVolumeValue_t volume = sensors -> getVolume();
-        // currentFlow = _sensors->getVolume().volume;
-        // //but the pressure reading must be done as non blocking in the main loop
-        // integratorFlowToVolume(&_currentVolume, currentFlow);
-        Serial1.println(
-            "DT " + String(pressure.pressure1) + " " + String(pressure.pressure2) + " " +
-            String(volume.volume)
-        );
-        //Serial.println("Volumen " + String(volume.volume));
-        #else
-        Serial1.println(
-        "DT " + String(pressure.pressure1) + " " + String(pressure.pressure2) + " NC";
-        #endif  // ENABLED_SENSOR_VOLUME
-        
+
+        char* string = (char*)malloc(100);
+        sprintf(string, "DT %05d %05d %05d %06d", ((int)pressure.pressure1), ((int)pressure.pressure2), volume.volume, ((int)(sensors->getFlow() * 1000)));
+        Serial1.println(string);
+        Serial.println(string);
+        free(string);
+
         if (pressure.state == SensorStateFailed) {
             //TODO sensor fail. do something
             Serial.println(F("FALLO Sensor"));
             // TODO: BUZZ ALARMS LIKE HELL
         }
-        #endif // PRUEBAS
         lastReadSensor = time;
+    }
+
+    if (Serial1.available()) {
+
     }
 
     #if DEBUG_STATE_MACHINE
