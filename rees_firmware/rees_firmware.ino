@@ -60,6 +60,9 @@ void setup() {
     // FC efecto hall
     pinMode(PIN_ENDSTOP, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
 
+    // Solenoid
+    pinMode(PIN_SOLENOID, OUTPUT);
+
     // Sensores de presión
     sensors = new Sensors();
     int check = sensors -> begin();
@@ -111,7 +114,6 @@ void setup() {
 
     // Habilita el motor
     digitalWrite(PIN_EN, LOW);
-    
 
     // configura la ventilación
     ventilation -> start();
@@ -120,12 +122,15 @@ void setup() {
     delay(2000);
 
     sensors -> readPressure();
-    Timer1.initialize(TIME_BASE * 1000); // 5 ms
+    // TODO: Make this period dependant of TIME_BASE
+    // TIME_BASE * 1000 does not work!!
+    Timer1.initialize(50000); // 50 ms
+
     Timer1.attachInterrupt(timer1Isr);
     //TODO: Option: if (Sensores ok) { arranca timer3 }
     Timer3.initialize(50); //50us
     Timer3.attachInterrupt(timer3Isr);
-    
+
 }
 
 void readIncomingMsg (void) {
@@ -169,7 +174,7 @@ void loop() {
         char* string = (char*)malloc(100);
         sprintf(string, "DT %05d %05d %05d %06d", ((int)pressure.pressure1), ((int)pressure.pressure2), volume.volume, ((int)(sensors->getFlow() * 1000)));
         Serial2.println(string);
-        Serial.println(string);
+        //Serial.println(string);
         free(string);
 
         if (pressure.state == SensorStateFailed) {

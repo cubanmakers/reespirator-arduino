@@ -90,14 +90,13 @@ void MechVentilation::update(void) {
     static int totalCyclesInThisState = 0;
     static int currentTime = 0;
     static int flowSetpoint = 0;
-    
+
     #if DEBUG_STATE_MACHINE
         extern volatile String debugMsg[];
         extern volatile byte debugMsgCounter;
     #endif
-
-
     
+
     SensorPressureValues_t pressures = _sensors -> getRelativePressureInCmH20();
     _currentVolume = _sensors->getVolume().volume;
     _currentFlow = _sensors->getFlow();
@@ -105,187 +104,209 @@ void MechVentilation::update(void) {
         _sensor_error_detected = true; //An error was detected in sensors
         /* Status update, for this time */
         // TODO: SAVE PREVIOUS CYCLE IN MEMORY AND RERUN IT
+        Serial.println("fail sensor");
         _setState(State_Exsufflation);
     } else {
         _sensor_error_detected = false; //clear flag
     }
 
-    
+
     refreshWatchDogTimer();
-    
+
     switch (_currentState) {
         case Init_Insufflation:
             {
-                // Close Solenoid Valve
-                digitalWrite(PIN_SOLENOID, SOLENOID_CLOSED);
+#if DEBUG_UPDATE
+Serial.println("Starting insuflation");
+#endif
+        // Close Solenoid Valve
+        digitalWrite(PIN_SOLENOID, SOLENOID_CLOSED);
 
-                totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
+        totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
 
-                /* Stepper control: set acceleration and end-position */
-                _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
-                _stepper->setAccelerationInStepsPerSecondPerSecond(
-                    STEPPER_ACC_INSUFFLATION
-                );
+        /* Stepper control: set acceleration and end-position */
+        _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
+        _stepper->setAccelerationInStepsPerSecondPerSecond(
+            STEPPER_ACC_INSUFFLATION);
+        _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+
+#if DEBUG_STATE_MACHINE
+        debugMsg[debugMsgCounter++] = "State: InitInsuflation at " + String(millis());
+#endif
+
+        /* Status update, reset timer, for next time, and reset PID integrator to zero */
+        _setState(State_Insufflation);
+
+        currentTime = 0;
+    }
+    break;
+    case State_Insufflation:
+    {
+
+        /* Stepper control: set end position */
+
+#if DEBUG_UPDATE
+//Serial.println("Motor:speed=" + String(_stepperSpeed));
+#endif
+
+        // time expired
+        if (currentTime > totalCyclesInThisState)
+        {
+            if (!_stepper->motionComplete())
+            {
+                // motor not finished, force motor to stop in current position
+                _stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
+            }
+            _setState(Init_Exsufflation);
+            currentTime = 0;
+        }
+        else
+        {
+            _currentPressure = pressures.pressure1;
+            _pid->run(&_currentPressure, &_pip, &_stepperSpeed);
+
+            // TODO: if _currentPressure > _pip + 5, trigger alarm
+            _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
+            if (_stepperSpeed >= 0)
+            {
                 _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-
-                #if DEBUG_STATE_MACHINE
-                debugMsg[debugMsgCounter++] = "State: InitInsuflation at " + String(millis());
-                #endif
-
-                /* Status update, reset timer, for next time, and reset PID integrator to zero */
-                _setState(State_Insufflation);
-                
-                currentTime = 0;
             }
-            break;
-        case State_Insufflation:
+            else
             {
-                _currentPressure = pressures.pressure1;
-                _pid->run(&_currentPressure, &_pip, &_stepperSpeed);
-
-                /* Stepper control: set end position */
-
-                #if DEBUG_UPDATE
-                Serial.println("Motor:speed=" + String(_stepperSpeed));
-                #endif
-
-                // time expired
-                if (currentTime > totalCyclesInThisState) {
-                    if (!_stepper->motionComplete()) {
-                        // motor not finished, force motor to stop in current position
-                        _stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
-                    }
-                    _setState(Init_Exsufflation);
-                    currentTime = 0;
-                }  else {
-                    // TODO: if _currentPressure > _pip + 5, trigger alarm
-                    _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-                    if (_stepperSpeed >= 0) {
-                        _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-                    } else {
-                        _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-                    }
-                    currentTime++;
-                }
+                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
             }
-            break;
-        case Init_Exsufflation:
-            {
-                // Open Solenoid Valve
-                digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
+            currentTime++;
+        }
+    }
+    break;
+    case Init_Exsufflation:
+    {
+#if DEBUG_UPDATE
+        Serial.println("Starting exsuflation");
+#endif
+        // Open Solenoid Valve
+        digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
 
-                totalCyclesInThisState = _timeoutEsp / TIME_BASE;
+        totalCyclesInThisState = _timeoutEsp / TIME_BASE;
 
-                #if DEBUG_STATE_MACHINE
-                debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(totalCyclesInThisState);
-                #endif
-                /* Stepper control*/
-                _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
-                _stepper->setAccelerationInStepsPerSecondPerSecond(
-                    STEPPER_ACC_EXSUFFLATION
-                );
-                _stepper->setTargetPositionInSteps(
-                    STEPPER_DIR * (STEPPER_LOWEST_POSITION)
-                );
-                #if DEBUG_STATE_MACHINE
-                debugMsg[debugMsgCounter++] = "Motor: to exsuflation at " + String(millis());
-                #endif
+#if DEBUG_STATE_MACHINE
+        debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(totalCyclesInThisState);
+#endif
+        /* Stepper control*/
+        _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
+        _stepper->setAccelerationInStepsPerSecondPerSecond(
+            STEPPER_ACC_EXSUFFLATION);
+        _stepper->setTargetPositionInSteps(
+            STEPPER_DIR * (STEPPER_LOWEST_POSITION));
+#if DEBUG_STATE_MACHINE
+        debugMsg[debugMsgCounter++] = "Motor: to exsuflation at " + String(millis());
+#endif
 
-                /* Status update and reset timer, for next time */
-                _setState(State_Exsufflation);
-                currentTime = 0;
+        /* Status update and reset timer, for next time */
+        _setState(State_Exsufflation);
+        currentTime = 0;
+    }
+    break;
+    case State_Exsufflation:
+    {
+#if 0
+        if (_stepper->motionComplete())
+        {
+            if (currentFlow < _triggerThreshold && _hasTrigger)
+            { // The start was triggered by patient
+                _startWasTriggeredByPatient = true;
+
+#if DEBUG_STATE_MACHINE
+                debugMsg[debugMsgCounter++] = "!!!! Trigered by patient";
+#endif
+
+                /* Status update, for next time */
+                _setState(Init_Insufflation);
             }
-            break;
-        case State_Exsufflation:
+        }
+#endif
+        // Time has expired
+        if (currentTime > totalCyclesInThisState)
+        {
+            if (!_stepper->motionComplete())
             {
-                _currentPressure = pressures.pressure1;
-                _pid->run(&_currentPressure, &_peep, &_stepperSpeed);
-
-                if (_stepper->motionComplete()) {
-                    if (currentFlow < _triggerThreshold && _hasTrigger) { // The start was triggered by patient
-                        _startWasTriggeredByPatient = true;
-
-                        #if DEBUG_STATE_MACHINE
-                            debugMsg[debugMsgCounter++] = "!!!! Trigered by patient";
-                        #endif
-
-                        /* Status update, for next time */
-                        _setState(Init_Insufflation);
-
-                    }
-                }
-
-                // Time has expired
-                if (currentTime > totalCyclesInThisState) {
-                    if (!_stepper->motionComplete()) {
-                        // motor not finished, force motor to stop in current position
-                        _stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
-                    }
-                    /* Status update and reset timer, for next time */
-                    _setState(Init_Insufflation);
-                    _startWasTriggeredByPatient = false;
-
-                    currentTime = 0;
-                } else {
-                    _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-                    if (_stepperSpeed >= 0) {
-                        _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-                    } else {
-                        _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-                    }
-                    currentTime++;
-                }
+                // motor not finished, force motor to stop in current position
+                _stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
             }
-            break;
+            /* Status update and reset timer, for next time */
+            _setState(Init_Insufflation);
+            _startWasTriggeredByPatient = false;
 
-        case State_Homing:
+            currentTime = 0;
+        }
+        else
+        {
+            _currentPressure = pressures.pressure1;
+            _pid->run(&_currentPressure, &_peep, &_stepperSpeed);
+
+            _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
+            if (_stepperSpeed >= 0)
             {
-                // Open Solenoid Valve
-                digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
+                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+            }
+            else
+            {
+                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+            }
+            currentTime++;
+        }
+    }
+    break;
 
-                if (_sensor_error_detected) {
-                    // error sensor reading
-                    _running = false;
-                    #if DEBUG_UPDATE
-                    Serial.println("Sensor: FAILED");
-                    #endif
-                }
-                
-                /*
+    case State_Homing:
+    {
+        // Open Solenoid Valve
+        digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
+
+        if (_sensor_error_detected)
+        {
+            // error sensor reading
+            _running = false;
+#if DEBUG_UPDATE
+            Serial.println("Sensor: FAILED");
+#endif
+        }
+
+        /*
                  * If not in home, do Homing.
                  * 0: stepper is in home
                  * 1: stepper is not in home
                  */
-                
-                if (digitalRead(PIN_ENDSTOP)) { 
 
-                    /* Stepper control: homming */
-                    // bool moveToHomeInMillimeters(long directionTowardHome, float
-                    // speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters, int
-                    // homeLimitSwitchPin)
-                    Serial.println("Homing attempt!!");
-                    if (_stepper -> moveToHomeInSteps(
-                            STEPPER_HOMING_DIRECTION,
-                            STEPPER_HOMING_SPEED,
-                            STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS,
-                            PIN_ENDSTOP
-                        ) != true)
-                    {
-                        Serial.println("Homing has failed");
-                    }
-                }
+        if (digitalRead(PIN_ENDSTOP))
+        {
 
-                /* Status update and reset timer, for next time */
-                currentTime = 0;
-                _setState(Init_Exsufflation);
+            /* Stepper control: homming */
+            // bool moveToHomeInMillimeters(long directionTowardHome, float
+            // speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters, int
+            // homeLimitSwitchPin)
+            Serial.println("Homing attempt!!");
+            if (_stepper->moveToHomeInSteps(
+                    STEPPER_HOMING_DIRECTION,
+                    STEPPER_HOMING_SPEED,
+                    STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS,
+                    PIN_ENDSTOP) != true)
+            {
+                Serial.println("Homing has failed");
             }
-            break;
+        }
 
-        case State_Error:
-            break;
-        default:
-            //TODO
-            break;
+        /* Status update and reset timer, for next time */
+        currentTime = 0;
+        _setState(Init_Exsufflation);
+    }
+    break;
+
+    case State_Error:
+        break;
+    default:
+        //TODO
+        break;
     }
 
 }
@@ -326,6 +347,5 @@ void MechVentilation::_init(
 }
 
 void MechVentilation::_setState(State state) {
-    //_previousState = _currentState;
     _currentState = state;
 }
