@@ -8,7 +8,7 @@ nuestro tiempo sea productivo.
 Antes de nada debes saber cuales son los **objetivos del proyecto**:
 
 - Desarrollar un firmware de control para el [Reespirator][REESP01].
-- Arduino para su fácil replicación
+- Implementarlo con Arduino para su fácil replicación.
 
 [REESP01]: https://gitlab.com/coronavirusmakers/reespirator-doc/
 
