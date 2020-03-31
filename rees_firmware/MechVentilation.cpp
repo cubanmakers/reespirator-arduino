@@ -63,6 +63,14 @@ short MechVentilation::getInsuflationTime(void) {
     return _timeoutIns;
 }
 
+float MechVentilation::getPeakInspiratoryPressure(void) {
+    return _pip;
+}
+
+float MechVentilation::getPeakEspiratoryPressure(void) {
+    return _peep;
+}
+
 void MechVentilation::setRPM(uint8_t rpm) {
     _rpm = rpm;
     _setInspiratoryCycle();

@@ -55,7 +55,7 @@
 #define PID_MIN -10000 // TODO: check direction implementation
 #define PID_MAX 10000
 #define PID_KP 1000
-#define PID_KI 10
+#define PID_KI 40
 #define PID_KD 0
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 4
