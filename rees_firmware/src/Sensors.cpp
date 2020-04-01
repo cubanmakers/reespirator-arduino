@@ -2,10 +2,7 @@
  * Sensors reading module
  */
 #include "Sensors.h"
-#include "defaults.h"
-//#include "src/Adafruit_BME280/Adafruit_BME280.h"
-#include "src/Honeywell_ABP/Honeywell_ABP.h"
-#include "pinout.h"
+
 
     static Honeywell_ABP abp(
   0x28,   // I2C address

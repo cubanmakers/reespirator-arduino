@@ -1,5 +1,4 @@
 #include "Encoder.h"
-#include "Arduino.h"
 
 const int8_t KNOBDIR[] = {
      0, -1,  1,  0,

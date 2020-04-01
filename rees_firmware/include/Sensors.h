@@ -2,10 +2,14 @@
 #define _SENSORS_H_
 
 #include <stdint.h>
-#include "src/Adafruit_BME280/Adafruit_BME280.h"
+#include <Adafruit_BME280.h>
 #include "defaults.h"
+
+#include <Honeywell_ABP.h>
+#include "pinout.h"
+
 #ifdef ENABLED_SENSOR_VOLUME_SFM3300
-#include "src/SFM3200/sfm3000wedo.h"
+#include <sfm3000wedo.h>
 #endif
 
 #define SENSORS_MAX_ERRORS 5

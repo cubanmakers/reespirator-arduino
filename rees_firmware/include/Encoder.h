@@ -1,6 +1,9 @@
 #ifndef ENCODER_H
 #define ENCODER_H
 
+#include <Arduino.h>
+
+
 #define LATCHSTATE 3
 
 class Encoder

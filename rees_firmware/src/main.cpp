@@ -12,17 +12,8 @@
 /**
  * Dependencies
  */
+#include "main.h"
 
-#include "defaults.h"
-#include "pinout.h"
-#include "calc.h"
-#include "Sensors.h"
-#include "MechVentilation.h"
-
-#include "src/AutoPID/AutoPID.h"
-#include "src/FlexyStepper/FlexyStepper.h"
-#include "src/TimerOne/TimerOne.h"
-#include "src/TimerThree/TimerThree.h"
 
 /**
  * Variables
@@ -39,6 +30,17 @@ AutoPID * pid;
 MechVentilation * ventilation;
 
 VentilationOptions_t options;
+
+/**
+ * Timer 1 ISR
+ */
+void timer1Isr(void) {
+    ventilation -> update();
+}
+
+void timer3Isr(void) {
+    stepper -> processMovement();
+}
 
 
 /**
@@ -198,13 +200,3 @@ void loop() {
     }
     #endif
 }
-    /**
-     * Timer 1 ISR
-     */
-    void timer1Isr(void) {
-        ventilation -> update();
-    }
-
-    void timer3Isr(void) {
-        stepper -> processMovement();
-    }
