@@ -1,7 +1,7 @@
 
 # Frequently Asked Questions
 
-Preguntas asiduamente formuladas con su repuesta corta.
+Preguntas asiduamente formuladas con su respuesta corta.
 
 - Si alguien pregunta algo ya formulado aquí haga el favor de pegarle el 
   [enlace de este FAQ][FAQ01]. 
