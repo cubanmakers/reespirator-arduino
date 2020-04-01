@@ -59,6 +59,8 @@ En esta página encontrarás un índice: ...
 
 Pico es la presión máxima de inspiración (evita forzar el inflado de los 
 pulmones). Peep es la presión final de expiración (mantiene alveolos abiertos).
+Para una descripción del ciclo respiratorio y parámetros en ventilación mecánica
+ver https://drive.google.com/drive/u/2/folders/1Xs2iBqquvJuw8tJy0wC-WHz6-jSv2Oha
 
 ### ¿Tiene que ser un motor paso a paso?
 
