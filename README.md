@@ -3,7 +3,7 @@
 
 * [Organización de grupo](ORGANIZACION.md) (subequipos y tareas asignadas/pendientes)
 * Manejo del repositorio git (issues, ramas, etiquetas, merges)
-* FAQ (preguntas variadas con respuestas)
+* [FAQ](FAQ.md) (preguntas asiduamente formuladas y sus respuestas)
 
 ## Resources
 
