@@ -1,4 +1,3 @@
-
 # Organización de grupo
 
 En el grupo gitlab _reespirator-arduino_ hay variedad de perfiles y cabe todo
@@ -21,8 +20,13 @@ comunicación para una mejor coordinación y uso de los canales:
 
 ## Herramientas que usamos
 
-- Mensajería: Telegram (...grupo link? invitación?
-- Zoom: (...Cómo entrar? operadora?)
+- Mensajería: Telegram https://t.me/joinchat/CqmXpxfXAKhDAnUKXJwOhg
+- Zoom:
+    - 2 reunión de seguimiento al día (a las 9:00 y a las 16:00) en zoom
+    - Pedid al operador que os lleve a la sala de ARDUINO
+    - El enlace de zoom se renueva diariamente y se ancla en chat Telegram
+    - La misma sesión de zoom dispone de salas pequeñas que están 24h a
+      disposición para las reuniones técnicas necesarias
 - Gitlab: grupo [reespirator-arduino][GITLA01]
 
 [GITLA01]: https://gitlab.com/reespirator-arduino/
