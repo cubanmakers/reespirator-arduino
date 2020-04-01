@@ -1,4 +1,3 @@
-
 # Frequently Asked Questions
 
 Preguntas asiduamente formuladas con su respuesta corta.
@@ -17,7 +16,7 @@ Preguntas asiduamente formuladas con su respuesta corta.
 
 ### ¿Qué es Reespirator?
 
-Es un sistema hardware y software para respiración asistida.
+Es un sistema hardware y software para respiración asistida de código abierto.
 
 ### ¿En qué aspectos de la respiración asistida actúa?
 
