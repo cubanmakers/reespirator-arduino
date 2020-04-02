@@ -11,4 +11,4 @@
 * [Arduino Reference](https://www.arduino.cc/reference/en/)
 * [Arduino Best Practices and Gotchas](https://www.theatreofnoise.com/2017/05/arduino-ide-best-practices-and-gotchas.html)
 * [C++ Best Practices (Gitbook)](https://lefticus.gitbooks.io/cpp-best-practices/content/)
-
+* [Notas básicas sobre uso de PlatformIO](https://docs.google.com/document/d/1kwAkf1QT0JX9wEM3eoz8DvTOIxe7He3aKWrSH5j_k6A/edit?usp=sharing)
