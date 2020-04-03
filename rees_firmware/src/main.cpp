@@ -136,7 +136,7 @@ void setup() {
 }
 
 void readIncomingMsg (void) {
-    char* msg = malloc(100);
+    char msg[100];
     Serial2.readStringUntil('\n').toCharArray(msg, 100);
     int pip, peep, fr;
     int rc = sscanf(msg, "CONFIG PIP %d", &pip);
@@ -153,7 +153,6 @@ void readIncomingMsg (void) {
             }
         }
     }
-    free(msg);
 }
 
 /**
