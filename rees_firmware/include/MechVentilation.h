@@ -35,15 +35,11 @@ public:
 	/**
 	 * @brief Construct a new Mech Ventilation object
 	 * 
-	 * @param stepper 
 	 * @param sensors 
-	 * @param pid 
 	 * @param options 
 	 */
 	MechVentilation(
-        FlexyStepper* stepper,
         Sensors* sensors,
-        AutoPID* pid,
         VentilationOptions_t options
     );
 
@@ -72,6 +68,7 @@ public:
     short getInsuflationTime(void);
     float getPeakInspiratoryPressure(void);
     float getPeakEspiratoryPressure(void);
+    FlexyStepper *getStepper(void);
     /**
      * setters
      */
@@ -82,9 +79,7 @@ public:
 private:
     /** Initialization. */
     void _init(
-        FlexyStepper* stepper,
         Sensors* sensors,
-        AutoPID* pid,
         VentilationOptions_t options
     );
     #if 0
@@ -102,9 +97,9 @@ private:
     void _setInspiratoryCycle(void);
 
     /* Configuration parameters */
-    FlexyStepper* _stepper;
     Sensors* _sensors;
     AutoPID* _pid;
+    FlexyStepper *_stepper;
 
     /** Flow trigger activation. */
     bool _hasTrigger;

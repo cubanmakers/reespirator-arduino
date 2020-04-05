@@ -13,15 +13,11 @@ int currentStopInsufflationTime = 0;
 float currentFlow = 0;
 
 MechVentilation::MechVentilation(
-    FlexyStepper * stepper,
     Sensors * sensors,
-    AutoPID * pid,
     VentilationOptions_t options) {
 
     _init(
-        stepper,
         sensors,
-        pid,
         options
     );
 
@@ -51,6 +47,10 @@ void MechVentilation::start(void) {
 
 void MechVentilation::stop(void) {
     _running = false;
+}
+
+FlexyStepper * MechVentilation::getStepper(void) {
+    return _stepper;
 }
 
 uint8_t MechVentilation::getRPM(void) {
@@ -171,7 +171,7 @@ Serial.println("Starting insuflation");
         else
         {
             _currentPressure = pressures.pressure1;
-            _pid->run(&_currentPressure, &_pip, &_stepperSpeed);
+            _pid->run();
 
             // TODO: if _currentPressure > _pip + 5, trigger alarm
             _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
@@ -251,7 +251,7 @@ Serial.println("Starting insuflation");
         else
         {
             _currentPressure = pressures.pressure1;
-            _pid->run(&_currentPressure, &_peep, &_stepperSpeed);
+            _pid->run();
 
             _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
             if (_stepperSpeed >= 0)
@@ -321,15 +321,19 @@ Serial.println("Starting insuflation");
 }
 
 void MechVentilation::_init(
-    FlexyStepper * stepper,
     Sensors * sensors,
-    AutoPID * pid,
     VentilationOptions_t options
 ) {
     /* Set configuration parameters */
-    _stepper = stepper;
+    _stepper = new FlexyStepper();
     _sensors = sensors;
-    _pid = pid;
+    _pid = new AutoPID(&_currentPressure, 
+                &_peep, &_stepperSpeed,PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
+    // if pressure is more than PID_BANGBANG below or above setpoint,
+    // output will be set to min or max respectively
+    _pid -> setBangBang(PID_BANGBANG);
+    // set PID update interval
+    _pid -> setTimeStep(PID_TS);;
     _rpm = options.respiratoryRate;
     _pip = options.peakInspiratoryPressure;
     _peep = options.peakEspiratoryPressure;

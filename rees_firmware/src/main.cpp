@@ -24,11 +24,8 @@ volatile String debugMsg[15];
 volatile byte debugMsgCounter = 0;
 #endif
 
-FlexyStepper * stepper = new FlexyStepper();
 Sensors * sensors;
-AutoPID * pid;
 MechVentilation * ventilation;
-
 VentilationOptions_t options;
 
 /**
@@ -39,7 +36,7 @@ void timer1Isr(void) {
 }
 
 void timer3Isr(void) {
-    stepper -> processMovement();
+    ventilation->getStepper()-> processMovement();
 }
 
 
@@ -79,14 +76,6 @@ void setup() {
     }
     #endif
 
-    // PID
-    pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
-    // if pressure is more than PID_BANGBANG below or above setpoint,
-    // output will be set to min or max respectively
-    pid -> setBangBang(PID_BANGBANG);
-    // set PID update interval
-    pid -> setTimeStep(PID_TS);
-
     // Parte motor
     pinMode(PIN_EN, OUTPUT);
     digitalWrite(PIN_EN, HIGH);
@@ -102,9 +91,7 @@ void setup() {
     options.hasTrigger = false;
 
     ventilation = new MechVentilation(
-        stepper,
         sensors,
-        pid,
         options
     );
 
