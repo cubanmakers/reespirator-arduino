@@ -21,12 +21,13 @@ comunicación para una mejor coordinación y uso de los canales:
 ## Herramientas que usamos
 
 - Mensajería: Telegram https://t.me/joinchat/CqmXpxfXAKhDAnUKXJwOhg
+- Jitsi
+    - Daily: Reunión diaria 16h en jitsi. Enlace cada día en grupo Telegram.  
 - Zoom:
-    - 2 reunión de seguimiento al día (a las 9:00 y a las 16:00) en zoom
-    - Pedid al operador que os lleve a la sala de ARDUINO
-    - El enlace de zoom se renueva diariamente y se ancla en chat Telegram
-    - La misma sesión de zoom dispone de salas pequeñas que están 24h a
-      disposición para las reuniones técnicas necesarias
+    - Ya no lo usamos para las Daily, pero sigue 24h a disposición
+      para cualquier otra reunión que lo requiera.
+    - Podéis pedir al operador que os lleve a una sala pequeña si es necesario.
+    - El enlace de zoom se renueva diariamente
 - Gitlab: grupo [reespirator-arduino][GITLA01]
 
 [GITLA01]: https://gitlab.com/reespirator-arduino/
