@@ -113,12 +113,13 @@ void setup() {
     sensors -> readPressure();
     // TODO: Make this period dependant of TIME_BASE
     // TIME_BASE * 1000 does not work!!
-    Timer1.initialize(50000); // 50 ms
-
-    Timer1.attachInterrupt(timer1Isr);
     //TODO: Option: if (Sensores ok) { arranca timer3 }
     Timer3.initialize(50); //50us
     Timer3.attachInterrupt(timer3Isr);
+    
+    
+    Timer1.initialize(50000); // 50 ms
+    Timer1.attachInterrupt(timer1Isr);
 
 }
 
