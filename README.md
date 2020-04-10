@@ -11,11 +11,11 @@ Grupo de desarrollo firmware REESpirator. Más info: http://bit.ly/reespirator
 
 ## Recursos
 
-* Documentación y hardware Reespirator:
+Documentación y hardware Reespirator:
 * [Repositorio inicial del Reespirator23, por CoronavirusMakers (gitlab.com/coronavirusmakers/reespirator-doc)](https://gitlab.com/coronavirusmakers/reespirator-doc)
 * [Repositorio del Reespirator23, por Reesistencia (gitlab.com/reesistencia)](https://gitlab.com/reesistencia)
 * [Repositorio principal de este proyecto, Reespirator2020 (gitlab.com/reespirator)](https://gitlab.com/reespirator)
-* [Repositorio temporal de desarrollo del software de Arduino de este proyecto, Reespirator2020 (gitlab.com/reespirator-arduino)](https://gitlab.com/reespirator) (este repositorio que estás leyendo)
+* [Repositorio temporal de desarrollo del software de Arduino de este proyecto, Reespirator2020 (gitlab.com/reespirator-arduino)](https://gitlab.com/reespirator-arduino) (este repositorio que estás leyendo)
 * [Propuesta protocolo para monitor](https://docs.google.com/document/d/1lItbWZhYFjCUJKEzwG3V0N3ZbFNCW4r7WvXlSnQcjlk/edit#heading=h.xgx60y6l5inf) (Descripción Comunicaciones Serie Externas Arduino Reespirator)
 
 ## Otros recursos útiles
